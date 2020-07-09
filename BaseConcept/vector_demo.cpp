@@ -72,7 +72,8 @@ namespace vec_demo
 int main(int argc, char* argv[])
 {
 	//vec_demo::stu_test();
-	vec_demo::ts_test();
+	//vec_demo::ts_test();
+
 }
 
 ///
