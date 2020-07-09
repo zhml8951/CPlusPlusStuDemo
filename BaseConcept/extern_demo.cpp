@@ -14,7 +14,7 @@ std::string int_to_string(const int num)
 	return value;
 }
 
-#define DECLARE_HANDLE(name) struct name##__{int unused;}; typedef struct name##__ *name
+#define DECLARE_HANDLE(name) struct get_name##__{int unused;}; typedef struct get_name##__ *get_name
 
 int main(int argc, char* argv[])
 {
@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
 	Dfine01 struct02;
 #define FUNC(a) #a
 #define LINK(a,b) a##\ b
-#define INT_NUM(name) (int #name)
+#define INT_NUM(name) (int #get_name)
 #define MAX(x,y) (x)>(y)?(x):(y)
 	printf_s("func(a): %s", FUNC(a));
 	printf("max(x,y): %d", MAX(88, 99));

@@ -37,7 +37,7 @@ void __stdcall func_05() { printf("func_05"); }
 #endif
 
 
-#define DECLARE_HANDLE(name) struct name##__{int unused;}; typedef struct name##__ *name
+#define DECLARE_HANDLE(name) struct get_name##__{int unused;}; typedef struct get_name##__ *get_name
 
 
 //void demo_main()

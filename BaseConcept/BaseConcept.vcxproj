@@ -42,12 +42,12 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
-    <QtInstall>Qt5.12_msvc2017_64</QtInstall>
+    <QtInstall>Qt5.14_msvc2017_64</QtInstall>
     <QtModules>core</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
-    <QtInstall>Qt5.12_msvc2017_64</QtInstall>
+    <QtInstall>Qt5.14_msvc2017_64</QtInstall>
     <QtModules>core</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>

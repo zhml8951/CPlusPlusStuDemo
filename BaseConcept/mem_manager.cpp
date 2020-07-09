@@ -146,17 +146,17 @@ namespace mem_operator
 			int age;
 		} person, person_cpy;
 
-		char first_name[] = "First String name. [first_name].";
+		char first_name[] = "First String Name. [first_name].";
 		memcpy(person.name, first_name, strlen(first_name) + 1);
 		person.age = 88;
 
-		printf("person.name: %s, person.age: %d\n", person.name, person.age);
+		printf("person.Name: %s, person.age: %d\n", person.name, person.age);
 
 		// memcpy 将指定&src， 复制到&dst, 大小 sizeof(src);
 		// memcpy C语言POD操作，只要知道内存地址和大小，可复制比较等任何数据。
 
 		memcpy(&person_cpy, &person, sizeof(person));
-		printf("person_cpy.name: %s, person_cpy.age: %d\n", person_cpy.name, person_cpy.age);
+		printf("person_cpy.Name: %s, person_cpy.age: %d\n", person_cpy.name, person_cpy.age);
 	}
 
 	void demo04()

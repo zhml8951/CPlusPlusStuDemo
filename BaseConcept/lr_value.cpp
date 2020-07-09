@@ -171,7 +171,7 @@ namespace lvalue_rvalue
 		std::cout << "counter: " << CustomString::counter_ << std::endl;
 
 		for(auto it = vec_str.begin(); it!=vec_str.end(); ++it) {
-			//std::cout << "vec:  " << typeid(it->get_c_str()).name() << "\n";
+			//std::cout << "vec:  " << typeid(it->get_c_str()).get_name() << "\n";
 			printf("it.get_c_str:  %s", it->get_c_str());
 		}
 	}
