@@ -1,0 +1,10 @@
+﻿// mfcApp.idl: mfcApp.dll 的类型库源
+// 此文件将由 MIDL 编译器处理以产生
+// 类型库(mfcApp.tlb)。
+
+[ uuid(0330c435-9a64-4e56-8330-a9ea2b54e4bf), version(1.0) ]
+library mfcApp
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+};
