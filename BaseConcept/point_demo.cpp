@@ -1,6 +1,6 @@
-#include <iostream>
+ï»¿#include <iostream>
 
-//Ö¸ÕëÏà¹Ø²Ù×÷¼ÇÂ¼
+//æŒ‡é’ˆç›¸å…³æ“ä½œè®°å½•
 
 double func01(const int num)
 {
@@ -8,28 +8,28 @@ double func01(const int num)
 	return static_cast<double>(num);
 }
 
-// º¯ÊıÖ¸ÕëÓëÖ¸Õëº¯ÊıµÄÇø±ğ ==>
+// å‡½æ•°æŒ‡é’ˆä¸æŒ‡é’ˆå‡½æ•°çš„åŒºåˆ« ==>
 double* func02(int) = delete;
-double (*func03)(int); // double* fun(int)  ·µ»ØÖ¸ÕëÀàĞÍµÄº¯Êı¼´<Ö¸Õëº¯Êı>¡£ double (*func)(int) Ö¸Ïòº¯ÊıµÄÖ¸Õë¼´<º¯ÊıÖ¸Õë>
+double (*func03)(int); // double* fun(int)  è¿”å›æŒ‡é’ˆç±»å‹çš„å‡½æ•°å³<æŒ‡é’ˆå‡½æ•°>ã€‚ double (*func)(int) æŒ‡å‘å‡½æ•°çš„æŒ‡é’ˆå³<å‡½æ•°æŒ‡é’ˆ>
 
 void test_function_pointer()
 {
-	// ¶¨Òåº¯ÊıÖ¸Õë£¬²ÎÊıÎªint, ·µ»ØÖµdouble.
+	// å®šä¹‰å‡½æ•°æŒ‡é’ˆï¼Œå‚æ•°ä¸ºint, è¿”å›å€¼double.
 	// ReSharper disable CppJoinDeclarationAndAssignment
 	double (*p_func01)(int);
 	p_func01 = func01;
 
 	printf_s("p_func01 output: %.2lf\n", (*p_func01)(8));
 
-	// ÉÏÃæµÄdouble (*p_func01)(int) =  func01; ¿ÉÖ±½Óauto p_func01 = func01, ¼´¿É¡£
-	// µ÷ÓÃ·½Ê½ £¨*p_func01)(8) Ò²¿ÉÒÔÖ±½Ó p_func011(8). µ«ÎªÁËÓëÆÕÍ¨º¯ÊıÇø±ğ£¬²ÉÓÃ(*p_func01)(8)±È½ÏÃ÷ÁË
+	// ä¸Šé¢çš„double (*p_func01)(int) =  func01; å¯ç›´æ¥auto p_func01 = func01, å³å¯ã€‚
+	// è°ƒç”¨æ–¹å¼ ï¼ˆ*p_func01)(8) ä¹Ÿå¯ä»¥ç›´æ¥ p_func011(8). ä½†ä¸ºäº†ä¸æ™®é€šå‡½æ•°åŒºåˆ«ï¼Œé‡‡ç”¨(*p_func01)(8)æ¯”è¾ƒæ˜äº†
 
 	const auto p_func011 = func01;
 	printf_s("p_func011 output: %.2lf\n", p_func011(8));
 }
 
 namespace csdn_demo01
-// º¯ÊıÖ¸ÕëÖ±½ÓÊ¹ÓÃÊÇ¿´²»³ö±¾À´ÓÃÍ¾µÄ£¬Ö»ÓĞµ±¶¨Òåº¯ÊıÖ¸Õë×÷ĞÎ²Î£¬´«µİº¯Êı×÷Êµ²ÎÊ±¿ÉÊµÏÖ»Øµ÷Ğ§¹û£¬¸Ğ¾õ±Èjs»Øµ÷»¹Òª×ÔÈ»¡£Õâ²ÅÊÇº¯ÊıÖ¸ÕëµÄÖ±ÕıÓÃÍ¾¡£
+// å‡½æ•°æŒ‡é’ˆç›´æ¥ä½¿ç”¨æ˜¯çœ‹ä¸å‡ºæœ¬æ¥ç”¨é€”çš„ï¼Œåªæœ‰å½“å®šä¹‰å‡½æ•°æŒ‡é’ˆä½œå½¢å‚ï¼Œä¼ é€’å‡½æ•°ä½œå®å‚æ—¶å¯å®ç°å›è°ƒæ•ˆæœï¼Œæ„Ÿè§‰æ¯”jså›è°ƒè¿˜è¦è‡ªç„¶ã€‚è¿™æ‰æ˜¯å‡½æ•°æŒ‡é’ˆçš„ç›´æ­£ç”¨é€”ã€‚
 {
 	// Begin demo01
 
@@ -54,7 +54,7 @@ namespace csdn_demo01
 	void test()
 	{
 		auto lines = 10;
-		// º¯ÊıÖ¸Õë×öĞÎ²Î£¬ Í¨¹ı´«²»Í¬º¯Êı£¬ÊµÏÖ²»Í¬½á¹û£¬ Ò²¾ÍÊÇÊµÏÖº¯Êı»Øµ÷¹¦ÄÜ¡£
+		// å‡½æ•°æŒ‡é’ˆåšå½¢å‚ï¼Œ é€šè¿‡ä¼ ä¸åŒå‡½æ•°ï¼Œå®ç°ä¸åŒç»“æœï¼Œ ä¹Ÿå°±æ˜¯å®ç°å‡½æ•°å›è°ƒåŠŸèƒ½ã€‚
 		estimate(lines, cal_m1);
 		estimate(lines, cal_m2);
 	}
@@ -70,13 +70,13 @@ namespace csdn_demo01
 
 	void demo02_test()
 	{
-		// ²ÉÓÃtypedef ×Ô¶¨ÒåÀàĞÍ£¬ C ºê¶¨ÒåÀàËÆ²Ù×÷¡£
-		// ÕâÀï½«º¯ÊıÖ¸ÕëºÍÖ¸Õëº¯Êı½áºÏÔÚÒ»Æğ¡£
+		// é‡‡ç”¨typedef è‡ªå®šä¹‰ç±»å‹ï¼Œ C å®å®šä¹‰ç±»ä¼¼æ“ä½œã€‚
+		// è¿™é‡Œå°†å‡½æ•°æŒ‡é’ˆå’ŒæŒ‡é’ˆå‡½æ•°ç»“åˆåœ¨ä¸€èµ·ã€‚
 
 		typedef const double* (*Pf)(const double*, int);
 		// ReSharper disable CppUseAuto
 		const double* (*func01_p)(const double*, int) = func01;
-		// Á½ÖÖ¶¨Òå·½Ê½Ò»Ñù£¬auto¿É¾«¼ò´úÂë£¬Êµ¼Ê±àÒëÊ±»á×Ô¶¯×ª»»Îª const double* (*func02_p)(const double*, int);
+		// ä¸¤ç§å®šä¹‰æ–¹å¼ä¸€æ ·ï¼Œautoå¯ç²¾ç®€ä»£ç ï¼Œå®é™…ç¼–è¯‘æ—¶ä¼šè‡ªåŠ¨è½¬æ¢ä¸º const double* (*func02_p)(const double*, int);
 		auto func02_p = func02;
 		Pf func03_p = func03;
 		// ReSharper restore CppUseAuto
@@ -95,7 +95,7 @@ namespace csdn_demo01
 
 		std::cout << "func_p1[1]: " << func_array_p1[1](arr, 2) << "\n";
 		std::cout << "*(func_p2[1]): " << *(func_array_p2[1](arr, 2)) << "\n";
-		// C++ º¯ÊıÕâÃ´Ğ´Ò»¶Ñ£¬¿´×Å¶ñĞÄ....
+		// C++ å‡½æ•°è¿™ä¹ˆå†™ä¸€å †ï¼Œçœ‹ç€æ¶å¿ƒ....
 	}
 
 	const double* func01(const double arr[], int n)

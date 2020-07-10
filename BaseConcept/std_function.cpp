@@ -1,11 +1,11 @@
-#include <iostream>
+ï»¿#include <iostream>
 #include <functional>
 #include <string>
 #include <vector>
 #include <algorithm>
 
 // std::bind
-// std::function ÊÇÒ»ÖÖ¶àÌ¬£¬Í¨ÓÃµÄº¯Êı·â×°¡£
+// std::function æ˜¯ä¸€ç§å¤šæ€ï¼Œé€šç”¨çš„å‡½æ•°å°è£…ã€‚
 
 namespace simple_demo
 {
@@ -14,7 +14,7 @@ namespace simple_demo
 
 	void demo01()
 	{
-		const struct // C++ º¯ÊıÄÚ²¿²»ÄÜÔÙÇ¶Ì×º¯Êı£¬ ÕâÀï²ÉÓÃ½á¹¹ÌåÖØÔØ()ÊµÏÖº¯Êı¹¦ÄÜ
+		const struct // C++ å‡½æ•°å†…éƒ¨ä¸èƒ½å†åµŒå¥—å‡½æ•°ï¼Œ è¿™é‡Œé‡‡ç”¨ç»“æ„ä½“é‡è½½()å®ç°å‡½æ•°åŠŸèƒ½
 		{
 			bool operator()(const int a, const int b) const
 			{
@@ -22,7 +22,7 @@ namespace simple_demo
 			}
 		} compare_struct;
 
-		class // C++ º¯ÊıÄÚ²¿Ç¶Ì×class, ÖØÔØoperator()ÊµÏÖclass function. ¼´<·Âº¯Êı>
+		class // C++ å‡½æ•°å†…éƒ¨åµŒå¥—class, é‡è½½operator()å®ç°class function. å³<ä»¿å‡½æ•°>
 		{
 		public:
 			bool operator()(const int a, const int b) const
@@ -63,14 +63,14 @@ namespace simple_demo
 		rst = func(88, 99);
 		std::cout << "func(88,99): " << std::boolalpha << rst << "\n";
 
-		/*  ÕâÀï²»ÄÜÖ±½ÓÊ¹ÓÃclass ³ÉÔ±º¯Êı£¬ ĞèÒªÏÂÃæµÄbindÀ´°ó¶¨¡£
+		/*  è¿™é‡Œä¸èƒ½ç›´æ¥ä½¿ç”¨class æˆå‘˜å‡½æ•°ï¼Œ éœ€è¦ä¸‹é¢çš„bindæ¥ç»‘å®šã€‚
 				const CompareClass temp;
 				func = temp.compare_member;
 				rst = func(88, 99);
 				std::cout << "func(88,99): " << std::boolalpha << rst << "\n";
 		*/
 
-		// Ö±½ÓÊ¹ÓÃstd::function<>Ò²¿ÉÒÔÊµÏÖ³ÉÔ±º¯Êı°ü×°£¬ĞèÒª´«Èë²ÎÊı¶ÔÏó
+		// ç›´æ¥ä½¿ç”¨std::function<>ä¹Ÿå¯ä»¥å®ç°æˆå‘˜å‡½æ•°åŒ…è£…ï¼Œéœ€è¦ä¼ å…¥å‚æ•°å¯¹è±¡
 		CompareClass temp;
 		const std::function<bool(CompareClass&, int, int)> func_obj = &CompareClass::compare_member;
 		rst = func_obj(temp, 88, 99);
@@ -97,7 +97,7 @@ namespace simple_demo
 				return (person.name.find(key) != std::string::npos);
 			}
 		};
-		// std::bind1st, std::bind2nd ½«¶şÔªº¯Êı×ª»»ÎªÒ»Ôªº¯Êı£¬ ÓĞºÜ¶à¿âĞèÒªÒ»Ôªº¯Êı
+		// std::bind1st, std::bind2nd å°†äºŒå…ƒå‡½æ•°è½¬æ¢ä¸ºä¸€å…ƒå‡½æ•°ï¼Œ æœ‰å¾ˆå¤šåº“éœ€è¦ä¸€å…ƒå‡½æ•°
 		const auto display = [](const int val)-> void { std::cout << val << "  "; };
 		auto display_v = [](const Person& p) -> void { std::cout << p.age << ", " << p.name << std::endl; };
 
@@ -117,12 +117,12 @@ namespace simple_demo
 		printf("\n");
 		for_each(begin(arr), end(arr), display);
 
-		// ÕâÀï²âÊÔÁËÄÚ½¨·Âº¯Êı£¬ greater, less, Ê¹ÓÃ¹ı³ÌÖĞÊµ¼ÊÉÏ´´½¨ÁËÄäÃû¶ÔÏó£¬µ÷ÓÃoperator() À´½øĞĞ±È½Ï¡£
+		// è¿™é‡Œæµ‹è¯•äº†å†…å»ºä»¿å‡½æ•°ï¼Œ greater, less, ä½¿ç”¨è¿‡ç¨‹ä¸­å®é™…ä¸Šåˆ›å»ºäº†åŒ¿åå¯¹è±¡ï¼Œè°ƒç”¨operator() æ¥è¿›è¡Œæ¯”è¾ƒã€‚
 		auto g = std::greater<int>();
 		std::cout << std::boolalpha << g(101, 99) << "\n";
 		std::cout << std::boolalpha << less<int>()(202, 203) << "\n";
 
-		// ÄÚ½¨·Âº¯Êı£¬ ¸ù¾İ²ÎÊı¸öÊı²»Í¬£¬ ³£¼ûÁ½ÖÖ unary_function£¬ binary_function;
+		// å†…å»ºä»¿å‡½æ•°ï¼Œ æ ¹æ®å‚æ•°ä¸ªæ•°ä¸åŒï¼Œ å¸¸è§ä¸¤ç§ unary_functionï¼Œ binary_function;
 		//std::unary_function<class Arg, class Result>
 		//std::binary_function<class arg1, class arg2, class result>;
 		std::vector<Person> vec_person;
@@ -137,7 +137,7 @@ namespace simple_demo
 		std::for_each(vec_ret.begin(), vec_ret.end(), display_v);
 	}
 
-	// ×Ô¶¨Òå·Âº¯Êı£¬ ±È½ÏÁ½¸öÊı´óĞ¡¡£Õâ¸öÍ¬±ê×¼¿âstd::greaterÏàËÆµÄ¡£ 
+	// è‡ªå®šä¹‰ä»¿å‡½æ•°ï¼Œ æ¯”è¾ƒä¸¤ä¸ªæ•°å¤§å°ã€‚è¿™ä¸ªåŒæ ‡å‡†åº“std::greaterç›¸ä¼¼çš„ã€‚ 
 	template <typename T>
 	struct Comp
 	{
@@ -155,7 +155,7 @@ namespace simple_demo
 		cout << "compare int by Comp(88, 99):  " << std::boolalpha << comp_int(88, 99) << "\n";
 		cout << "compare by greater(88, 99):  " << greater<int>()(88, 99) << "\n";
 		cout << "compare by comp Anonymous function:  " << Comp<double>()(88.9, 88.8) << "\n";
-		// greater<int>()(...) ´´½¨ÁËÄäÃû¶ÔÏó£¬µ÷ÓÃÄäÃû¶ÔÏóµÄoperator(), ¼´ÊµÏÖ·Âº¯ÊıµÄµ÷ÓÃ¡£
+		// greater<int>()(...) åˆ›å»ºäº†åŒ¿åå¯¹è±¡ï¼Œè°ƒç”¨åŒ¿åå¯¹è±¡çš„operator(), å³å®ç°ä»¿å‡½æ•°çš„è°ƒç”¨ã€‚
 	}
 }
 
@@ -166,15 +166,15 @@ int main(int argc, char* argv[])
 }
 
 /*
- * STL±ê×¼¿âÖ÷Òª·ÖÎªÁù´óÄ£¿é£º
- * ÈİÆ÷(Container)
- * Ëã·¨(Algorithm)
- * µü´ú(Iterator)
- * ·Âº¯(Functor)
- * ÊÊÅä(Adapter)
- * ÅäÖÃ(Allocator)
+ * STLæ ‡å‡†åº“ä¸»è¦åˆ†ä¸ºå…­å¤§æ¨¡å—ï¼š
+ * å®¹å™¨(Container)
+ * ç®—æ³•(Algorithm)
+ * è¿­ä»£(Iterator)
+ * ä»¿å‡½(Functor)
+ * é€‚é…(Adapter)
+ * é…ç½®(Allocator)
  */
 
 /*
- * ·Âº¯Êı(Functor) ¸ù¾İ²ÎÊı²»Í¬£¬·ÖÎªÁ½´óÀà£û unary_function(Á½¸ö²ÎÊı),  binary_function(Ò»¸ö²ÎÊı)
+ * ä»¿å‡½æ•°(Functor) æ ¹æ®å‚æ•°ä¸åŒï¼Œåˆ†ä¸ºä¸¤å¤§ç±»ï½› unary_function(ä¸¤ä¸ªå‚æ•°),  binary_function(ä¸€ä¸ªå‚æ•°)
  */

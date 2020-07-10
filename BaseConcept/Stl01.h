@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <string>
 
 namespace vector_demo
@@ -21,9 +21,9 @@ namespace vector_demo
 
 namespace stl_china_demo
 {
-	// ÊµÀıÀ´Ô´ÓÚhttp://stlchina.huhoo.net/twiki/bin/view.pl/Main/STLEasyStudy
-	// Í¨¹ıÊµÀı¶ÔC++ stl ±ê×¼Ä£°å¿â½øĞĞ´óÖÂÁË½â£¬stlÊÇC++µÄºËĞÄÒ²ÊÇÄÑµã£¬
-	// ĞèÒª²»¶ÏÑ§Ï°ºÍÉîÈë
+	// å®ä¾‹æ¥æºäºhttp://stlchina.huhoo.net/twiki/bin/view.pl/Main/STLEasyStudy
+	// é€šè¿‡å®ä¾‹å¯¹C++ stl æ ‡å‡†æ¨¡æ¿åº“è¿›è¡Œå¤§è‡´äº†è§£ï¼Œstlæ˜¯C++çš„æ ¸å¿ƒä¹Ÿæ˜¯éš¾ç‚¹ï¼Œ
+	// éœ€è¦ä¸æ–­å­¦ä¹ å’Œæ·±å…¥
 
 	inline int compare(const void* l_arg, const void* r_arg)
 	{
@@ -31,16 +31,16 @@ namespace stl_china_demo
 		return (*(int *)l_arg < *(int *)r_arg) ? -1 : (*(int *)l_arg > *(int *)r_arg ? 1 : 0);
 	}
 
-	// ²ÉÓÃÔ­Ê¼µÄCÓïÑÔ·½Ê½ÊµÏÖcompareºÍsort£¬ º¯ÊıÓĞºÜ¶àÎÊÌâÃ»ÓĞ½â¾ö
+	// é‡‡ç”¨åŸå§‹çš„Cè¯­è¨€æ–¹å¼å®ç°compareå’Œsortï¼Œ å‡½æ•°æœ‰å¾ˆå¤šé—®é¢˜æ²¡æœ‰è§£å†³
 	void compare_no_stl(void);
 
-	//Ê¹ÓÃSTL¿âÊµÏÖcompareºÍsort
+	//ä½¿ç”¨STLåº“å®ç°compareå’Œsort
 	void compare_stl(void);
 
-	// Ê¹ÓÃSTLÓÅ»¯°æ£¬Ê¹ÓÃtypedefÊ¹³ÌĞò¿É¶ÁĞÔ¸üÇ¿
+	// ä½¿ç”¨STLä¼˜åŒ–ç‰ˆï¼Œä½¿ç”¨typedefä½¿ç¨‹åºå¯è¯»æ€§æ›´å¼º
 	void compare_stl_v2(void);
 
-	// Ê¹ÓÃistream_iterator, ostream_iterator, sort copy ½øĞĞÊäÈë£¬ÅÅĞò£¬ Êä³ö¡£Ö÷ÒªÀí½âSTLµÄiterator²Ù×÷¡£
+	// ä½¿ç”¨istream_iterator, ostream_iterator, sort copy è¿›è¡Œè¾“å…¥ï¼Œæ’åºï¼Œ è¾“å‡ºã€‚ä¸»è¦ç†è§£STLçš„iteratoræ“ä½œã€‚
 	void io_iterator(void);
 
 	// 
@@ -72,14 +72,14 @@ namespace template_demo
 
 	class Fraction
 	{
-		int numerator_; // ·Ö×Ó
-		int denominator_; // ·ÖÄ¸
+		int numerator_; // åˆ†å­
+		int denominator_; // åˆ†æ¯
 	public:
 
 		/**
-		 * \brief ·ÖÊıÊ½
-		 * \param n ·Ö×Ó
-		 * \param d ·ÖÄ¸
+		 * \brief åˆ†æ•°å¼
+		 * \param n åˆ†å­
+		 * \param d åˆ†æ¯
 		 */
 		Fraction(int n, int d); // : numerator_(n), denominator_(d){};
 

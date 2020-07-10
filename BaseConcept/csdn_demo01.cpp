@@ -1,4 +1,4 @@
-//#pragma once
+ï»¿//#pragma once
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -95,7 +95,7 @@ bool write_file(VecUsers& w_users)
 
 namespace point_ref_demo
 {
-	// C++ »ù±¾¸ÅÄî( Ö¸Õë£¬ÒıÓÃ£¬Öµ) ´«µİ·½ÃæµÄÊ¹ÓÃ¡£ ÕâĞ©»ù±¾µÄ¶«Î÷¶¼Íü£¬  ŞÏŞÎ......
+	// C++ åŸºæœ¬æ¦‚å¿µ( æŒ‡é’ˆï¼Œå¼•ç”¨ï¼Œå€¼) ä¼ é€’æ–¹é¢çš„ä½¿ç”¨ã€‚ è¿™äº›åŸºæœ¬çš„ä¸œè¥¿éƒ½å¿˜ï¼Œ  å°´å°¬......
 	using namespace std;
 
 	void value_transfer(int value)

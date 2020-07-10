@@ -1,4 +1,4 @@
-#include <vector>
+ï»¿#include <vector>
 #include <iostream>
 
 namespace vec_demo
@@ -36,7 +36,7 @@ namespace vec_demo
 
 	class Ts
 		// vector push_back(object) demo;
-		// vector.push_back¶ÔÏóÊ±Òª½øĞĞ·´¸´¿½±´¹¹Ôì¡£
+		// vector.push_backå¯¹è±¡æ—¶è¦è¿›è¡Œåå¤æ‹·è´æ„é€ ã€‚
 	{
 	public:
 		Ts() : num_(0), c_str_(nullptr)
@@ -76,11 +76,11 @@ namespace vec_demo
 
 	constexpr static size_t kDefaultCapacity = 16;
 
-	void TsTest() // vector push_back ´æ´¢¶ÔÏó¡£
-	// ´ÓÀı×Ó¿´µ½£¬ÏòvectorÌí¼Ópush_back¶ÔÏóÊ±£¬ »áµ÷ÓÃÀàµÄ¿½±´¹¹Ôìº¯Êı£¬´´½¨ÁÙÊ±¶ÔÏó£¬²¢¼ÓÈëµ½vector,
-	// vectorµÄÈİÁ¿ÊÇ¶¯Ì¬À©Õ¹µÄ¡£ÈİÁ¿Ôö³¤ÊÇ2µÄ±¶ÊıÔö³¤µÄ£¬µ±ÈİÁ¿²»×ãÊ±vector»á½«µ±Ç°¶ÔÏóÈ«²¿¸´ÖÆµ½ĞÂµÄÄÚ´æÇø£¬ÓÖÈ«²¿µ÷ÓÃÒ»±écopy¹¹Ôìº¯Êı¡£
-	// ÕâÑùĞÔÄÜÊÇ·Ç³£µÍÏÂµÄ¡£ ×î¼ÑÊµ¼ù£¬¶ÔÓÚ´óÈİÁ¿¶ÔÏó£¬vector×îºÃÊÇ´æÖ¸Õë£¬»¹ĞèÒªÌáÇ°Ô¤¼ÆÈİÁ¿£¬¼õÉÙÄÚÔÚ¿Õ¼äÒÆ¶¯¡£
-	// ÕâÀïµ÷ÓÃÁËvec.reserve(ĞÂÈİÁ¿£©¿É¼õÉÙvector¶à´ÎÒÆ¶¯(ÒÆ¶¯ÓÖ»áµ÷ÓÃ¶ÔÏó¿½±´¹¹Ôìº¯Êı)
+	void TsTest() // vector push_back å­˜å‚¨å¯¹è±¡ã€‚
+	// ä»ä¾‹å­çœ‹åˆ°ï¼Œå‘vectoræ·»åŠ push_backå¯¹è±¡æ—¶ï¼Œ ä¼šè°ƒç”¨ç±»çš„æ‹·è´æ„é€ å‡½æ•°ï¼Œåˆ›å»ºä¸´æ—¶å¯¹è±¡ï¼Œå¹¶åŠ å…¥åˆ°vector,
+	// vectorçš„å®¹é‡æ˜¯åŠ¨æ€æ‰©å±•çš„ã€‚å®¹é‡å¢é•¿æ˜¯2çš„å€æ•°å¢é•¿çš„ï¼Œå½“å®¹é‡ä¸è¶³æ—¶vectorä¼šå°†å½“å‰å¯¹è±¡å…¨éƒ¨å¤åˆ¶åˆ°æ–°çš„å†…å­˜åŒºï¼Œåˆå…¨éƒ¨è°ƒç”¨ä¸€écopyæ„é€ å‡½æ•°ã€‚
+	// è¿™æ ·æ€§èƒ½æ˜¯éå¸¸ä½ä¸‹çš„ã€‚ æœ€ä½³å®è·µï¼Œå¯¹äºå¤§å®¹é‡å¯¹è±¡ï¼Œvectoræœ€å¥½æ˜¯å­˜æŒ‡é’ˆï¼Œè¿˜éœ€è¦æå‰é¢„è®¡å®¹é‡ï¼Œå‡å°‘å†…åœ¨ç©ºé—´ç§»åŠ¨ã€‚
+	// è¿™é‡Œè°ƒç”¨äº†vec.reserve(æ–°å®¹é‡ï¼‰å¯å‡å°‘vectorå¤šæ¬¡ç§»åŠ¨(ç§»åŠ¨åˆä¼šè°ƒç”¨å¯¹è±¡æ‹·è´æ„é€ å‡½æ•°)
 	{
 		//std::vector<Ts> vec(5);
 		std::vector<Ts> vec;
@@ -118,20 +118,20 @@ namespace vec_demo
 	}
 
 	void TsStoreVecEmplace()
-	// vectorÊ¹ÓÃemplace_backÌí¼Ó¶ÔÏóÊ±£¬¿É¼õÉÙÃ¿´ÎµÄ¿½±´¹¹Ôì¹ı³Ì£¬·½Ê½ÊÇ²»Òªemplace_back(....)Ö±½Ó¹¹Ôì£¬¼ûÏÂ£º
+	// vectorä½¿ç”¨emplace_backæ·»åŠ å¯¹è±¡æ—¶ï¼Œå¯å‡å°‘æ¯æ¬¡çš„æ‹·è´æ„é€ è¿‡ç¨‹ï¼Œæ–¹å¼æ˜¯ä¸è¦emplace_back(....)ç›´æ¥æ„é€ ï¼Œè§ä¸‹ï¼š
 	{
 		std::vector<Ts> vec_ts;
-		vec_ts.reserve(kDefaultCapacity); // Ö¸¶¨ÈİÁ¿Capacity£¬¼õÉÙ²»±ØÒªµÄÕû¿éÄÚ´æÒÆ¶¯
-		// Ê¹ÓÃ´ËÀà·½Ê½Í¬push_backÊÇÍêÈ«ÏàÍ¬µÄ¡£
-		vec_ts.emplace_back(Ts(101, const_cast<char*>("emplace_back01"))); //ÕâÀïµ÷ÓÃ¹¹ÔìºÍcopy¹¹Ôì¡£
+		vec_ts.reserve(kDefaultCapacity); // æŒ‡å®šå®¹é‡Capacityï¼Œå‡å°‘ä¸å¿…è¦çš„æ•´å—å†…å­˜ç§»åŠ¨
+		// ä½¿ç”¨æ­¤ç±»æ–¹å¼åŒpush_backæ˜¯å®Œå…¨ç›¸åŒçš„ã€‚
+		vec_ts.emplace_back(Ts(101, const_cast<char*>("emplace_back01"))); //è¿™é‡Œè°ƒç”¨æ„é€ å’Œcopyæ„é€ ã€‚
 		vec_ts.emplace_back(Ts(102, const_cast<char*>("emplace_back02")));
 		//
 
 		vec_ts.emplace_back();
-		vec_ts.emplace_back(103, const_cast<char*>("emplace_back03")); //ÕâÑùÖ±½Ó³õÊ¼»¯£¬ Êµ¼Êµ÷ÓÃµÄÄ¬ÈÏ¹¹Ôìº¯Êı
-		vec_ts.emplace_back(105, const_cast<char*>("emplace_back05")); //Ê¹ÓÃemplace_backÖ»ĞèÒªµ÷ÓÃ¹¹Ôì£¬¼õÉÙÁËcopy¹¹ÔìÒ»²½¡£
+		vec_ts.emplace_back(103, const_cast<char*>("emplace_back03")); //è¿™æ ·ç›´æ¥åˆå§‹åŒ–ï¼Œ å®é™…è°ƒç”¨çš„é»˜è®¤æ„é€ å‡½æ•°
+		vec_ts.emplace_back(105, const_cast<char*>("emplace_back05")); //ä½¿ç”¨emplace_backåªéœ€è¦è°ƒç”¨æ„é€ ï¼Œå‡å°‘äº†copyæ„é€ ä¸€æ­¥ã€‚
 
-		//vec_ts.push_back(104, const_cast<char*>("push_back04"));		// push_back ²»Ö§³Öemplace_back·½Ê½£¬Ö±½Ó¶ÔÏó³õÊ¼»¯¡£
+		//vec_ts.push_back(104, const_cast<char*>("push_back04"));		// push_back ä¸æ”¯æŒemplace_backæ–¹å¼ï¼Œç›´æ¥å¯¹è±¡åˆå§‹åŒ–ã€‚
 		printf("vec_ts: num: %d\n ", vec_ts[3].get_num()); //
 		printf("vec04.c_str:  %s\n", vec_ts[4].get_str());
 	}
@@ -154,12 +154,12 @@ namespace vec_demo
 		printf("vec_point.num:  %d\n", vec_ts_point[0]->get_num());
 		printf("vec_point.str:  %s\n", vec_ts_point[1]->get_str());
 
-		// µ½ÕâÀï¿ÉÒÔ¿´µ½£¬ º¯Êı½áÊøÊ±TsµÄ¶ÔÏó²¢µ÷ÓÃTsÎö¹¹º¯Êı¡£ Ò²¾ÍÊÇ´æÔÚÄÚ´æĞ¹Â©¡£ Èç¹û²»ÓÃÖÇÄÜÄÚ´æ£¬ĞèÒªÊÖ¶¯½øĞĞÄÚ´æÇåÀí¡£
+		// åˆ°è¿™é‡Œå¯ä»¥çœ‹åˆ°ï¼Œ å‡½æ•°ç»“æŸæ—¶Tsçš„å¯¹è±¡å¹¶è°ƒç”¨Tsææ„å‡½æ•°ã€‚ ä¹Ÿå°±æ˜¯å­˜åœ¨å†…å­˜æ³„æ¼ã€‚ å¦‚æœä¸ç”¨æ™ºèƒ½å†…å­˜ï¼Œéœ€è¦æ‰‹åŠ¨è¿›è¡Œå†…å­˜æ¸…ç†ã€‚
 		//for (auto i = 0; i < vec_ts_point.size(); ++i) {
 		//	delete vec_ts_point[i];
 		//	vec_ts_point[i] = nullptr;
 		//}
-		// vector ´æ´¢Ö¸Õë£¬ĞèÒªÊÖ¶¯±éÀú½øĞĞ¶ÔÏóÏú»Ù¡£
+		// vector å­˜å‚¨æŒ‡é’ˆï¼Œéœ€è¦æ‰‹åŠ¨éå†è¿›è¡Œå¯¹è±¡é”€æ¯ã€‚
 		for(auto it = vec_ts_point.begin(); it != vec_ts_point.end(); ++it) {
 			if (nullptr != *it) {
 				delete *it;
@@ -167,19 +167,19 @@ namespace vec_demo
 			}
 		}
 
-		vec_ts_point.clear(); // clear ÇåÀí¶ÔÏó£¬µ«vectorÈİÁ¿capacityÊÇ²»»á¼õÉÙµÄ£¬ ĞèÒª²ÉÓÃswap½»»»³ÉÒ»¿ÕµÄvector
+		vec_ts_point.clear(); // clear æ¸…ç†å¯¹è±¡ï¼Œä½†vectorå®¹é‡capacityæ˜¯ä¸ä¼šå‡å°‘çš„ï¼Œ éœ€è¦é‡‡ç”¨swapäº¤æ¢æˆä¸€ç©ºçš„vector
 		printf("vec.size: %lld\n", vec_ts_point.size());
 		printf("vec.capacity: %lld\n", vec_ts_point.capacity());
 
 		std::vector<Ts*> tmp;
-		vec_ts_point.swap(tmp);		// ²ÉÓÃswap½»»»£¬½«vector½»»»µ½Ò»¸ö¿ÕvectorÊµÏÖÄÚ´æÕæÕıÊÍ·Å¡£
+		vec_ts_point.swap(tmp);		// é‡‡ç”¨swapäº¤æ¢ï¼Œå°†vectoräº¤æ¢åˆ°ä¸€ä¸ªç©ºvectorå®ç°å†…å­˜çœŸæ­£é‡Šæ”¾ã€‚
 		printf("vec.size: %lld\n", vec_ts_point.size());
 		printf("vec.capacity: %lld\n", vec_ts_point.capacity());
 	}
 
 	void TsStoreIntelligentPoint()
 	{
-		//Ê¹ÓÃÖ¸Õë´æÈëvectorĞèÒªÊÖ¶¯ÊÍ·ÅÄÚ´æ£¬Ê¹ÓÃÖÇÄÜÖ¸Õë¹ÜÀí¶ÔÏó´æÈëvector.
+		//ä½¿ç”¨æŒ‡é’ˆå­˜å…¥vectoréœ€è¦æ‰‹åŠ¨é‡Šæ”¾å†…å­˜ï¼Œä½¿ç”¨æ™ºèƒ½æŒ‡é’ˆç®¡ç†å¯¹è±¡å­˜å…¥vector.
 		std::unique_ptr<Ts> unique_ts1;
 		std::vector<std::unique_ptr<Ts>> vec_unique_ptf_ts;
 		vec_unique_ptf_ts.push_back(unique_ts1);
