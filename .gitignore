@@ -59,6 +59,8 @@ dlldata.c
 *.db
 *.opendb
 *.exe
+*.vcxproj
+*.vcxproj.filters
 
 # Chutzpah Test files
 _Chutzpah*
