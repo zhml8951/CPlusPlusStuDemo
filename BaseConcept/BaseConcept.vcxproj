@@ -83,6 +83,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mem_manager.cpp" />
     <ClCompile Include="point_demo.cpp" />
+    <ClCompile Include="static_stu.cpp" />
     <ClCompile Include="std_function.cpp" />
     <ClCompile Include="Stl01.cpp" />
     <ClCompile Include="stl_tuple_pair.cpp" />

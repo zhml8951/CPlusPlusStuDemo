@@ -98,6 +98,9 @@
     <ClCompile Include="const_stu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="static_stu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stl01.h">
