@@ -1,5 +1,7 @@
 ﻿#include <vector>
 #include <iostream>
+#include <memory>
+#include <cstring>
 
 namespace vec_demo
 {
@@ -160,7 +162,7 @@ namespace vec_demo
 		//	vec_ts_point[i] = nullptr;
 		//}
 		// vector 存储指针，需要手动遍历进行对象销毁。
-		for(auto it = vec_ts_point.begin(); it != vec_ts_point.end(); ++it) {
+		for (auto it = vec_ts_point.begin(); it != vec_ts_point.end(); ++it) {
 			if (nullptr != *it) {
 				delete *it;
 				*it = nullptr;
@@ -172,7 +174,7 @@ namespace vec_demo
 		printf("vec.capacity: %lld\n", vec_ts_point.capacity());
 
 		std::vector<Ts*> tmp;
-		vec_ts_point.swap(tmp);		// 采用swap交换，将vector交换到一个空vector实现内存真正释放。
+		vec_ts_point.swap(tmp); // 采用swap交换，将vector交换到一个空vector实现内存真正释放。
 		printf("vec.size: %lld\n", vec_ts_point.size());
 		printf("vec.capacity: %lld\n", vec_ts_point.capacity());
 	}
@@ -180,10 +182,66 @@ namespace vec_demo
 	void TsStoreIntelligentPoint()
 	{
 		//使用指针存入vector需要手动释放内存，使用智能指针管理对象存入vector.
+
 		std::unique_ptr<Ts> unique_ts1;
 		std::vector<std::unique_ptr<Ts>> vec_unique_ptf_ts;
-		vec_unique_ptf_ts.push_back(unique_ts1);
+		//vec_unique_ptf_ts.push_back(unique_ts1);
+	}
 
+	void VecPushUseLoop()
+	{
+		std::vector<int*> data;
+		for (auto i = 0; i < 10; i++) {
+			auto temp = new int(i);
+			data.push_back(temp);
+			delete temp;
+			temp = nullptr;
+		}
+
+		for (auto i = 0; i < 10; i++) {
+			//通过显示可以看出来， push_back 一个指针到vector后直接进行delete会导致vector内容失效
+			// 这里涉及到对象浅拷贝，删除对象会导致vector内部对象同时被删除。
+			printf("vec[%d]: %d \n", i, *data[i]);
+		}
+	}
+
+	void VecObjectClear()
+	{
+		std::vector<const char*> data;
+		for (auto i = 0; i < 10; i++) {
+			char char_num[4];
+			char c_str[] = "vector_c-str_";
+			_itoa_s(i, char_num, sizeof(char_num), 10);
+			const auto length = sizeof(c_str) + sizeof(char_num);
+			//strcpy_s(c_str, sizeof(c_str)+sizeof(char_num), char_num);
+			strcat_s(c_str, sizeof(c_str) + sizeof(char_num), char_num);
+			printf("sizeof: %lld", sizeof(c_str) + sizeof(char_num));
+			const auto elem = new char[length];
+			memcpy_s(elem, length + 1, c_str, length);
+			printf("c_str: %s\n", elem);
+			data.push_back(elem);
+		}
+
+		for (auto it = data.begin(); it != data.end(); ++it) {
+			printf("*it: %s \n", *it);
+		}
+
+		const auto elem0 = data[0];
+		const auto elem1 = data[1];
+
+		data.clear();
+		printf("After clear the Vector. \n");
+		printf("data.size: %lld, data.capacity: %lld\n", data.size(), data.capacity());
+		printf("elem0: %s\n", elem0);
+		printf("elem1: %s\n", elem1);
+
+		std::vector<const char*> tmp;
+		data.swap(tmp);
+
+		printf("After swap the Vector. \n");
+		printf("data.size: %lld, data.capacity: %lld\n", data.size(), data.capacity());
+		printf("elem0: %s\n", elem0);
+		printf("elem1: %s\n", elem1);
 	}
 }
 
@@ -194,4 +252,8 @@ int main(int argc, char* argv[])
 	vec_demo::TsStoreVecEmplace();
 	printf("Ts emplace end....\n\n");
 	vec_demo::TsStorePointerVec();
+	printf("end Store Pointer to Vector. \n\n");
+	vec_demo::VecPushUseLoop();
+	printf("End vector push use for loop and delete object. \n\n");
+	vec_demo::VecObjectClear();
 }

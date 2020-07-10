@@ -1,4 +1,4 @@
-#include "winapi_demo01.h"
+ï»¿#include "winapi_demo01.h"
 #include <iostream>
 #include <cstdio>
 #include <Windows.h>
@@ -20,12 +20,12 @@ void test_find_window()
 		//strcpy_s(title, 100*sizeof(char),"Windows api stu01" );
 		//title = nullptr;
 
-		//auto const title_ch = "notepad++ĞÂÎÄµµ";
+		//auto const title_ch = "notepad++æ–°æ–‡æ¡£";
 		//WCHAR title[256];
 		//memset(title, 0, sizeof(title));
 		//MultiByteToWideChar(CP_ACP, 0, title_ch, strlen(title_ch) + 1, title, sizeof(title) / sizeof(title[0]));
 
-		auto title = L"ĞÂÎÄµµ";
+		auto title = L"æ–°æ–‡æ¡£";
 		if (!title) {
 			MessageBox(nullptr, TEXT("malloc mem error."), TEXT("ERROR!"), MB_OK);
 			return;
@@ -59,7 +59,7 @@ void win_api_demo_main()
 {
 	//test_find_window();
 	setlocale(LC_ALL, "chs");
-	wchar_t test_wchar01[] = L"²âÊÔÓï¾ä01__";
+	wchar_t test_wchar01[] = L"æµ‹è¯•è¯­å¥01__";
 	std::wcout << "test_wch: " << test_wchar01 << "\n";
 	wchar_to_char(test_wchar01);
 	HMODULE hDll = LoadLibrary(TEXT("..//dynamic.dll"));
