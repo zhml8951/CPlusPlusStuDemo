@@ -1,4 +1,6 @@
 ﻿#include <iostream>
+#include <memory>
+#include <string>
 
 //指针相关操作记录
 
@@ -58,6 +60,7 @@ namespace csdn_demo01
 		estimate(lines, cal_m1);
 		estimate(lines, cal_m2);
 	}
+
 	// End demo01
 
 	/* ---------------------------------------------------------------------------------------------*/
@@ -77,8 +80,8 @@ namespace csdn_demo01
 		// ReSharper disable CppUseAuto
 		const double* (*func01_p)(const double*, int) = func01;
 		// 两种定义方式一样，auto可精简代码，实际编译时会自动转换为 const double* (*func02_p)(const double*, int);
-		auto func02_p = func02;
-		Pf func03_p = func03;
+		const auto func02_p = func02;
+		const Pf func03_p = func03;
 		// ReSharper restore CppUseAuto
 
 		double arr[5]{11.1, 12.2, 13.3, 14.4, 15.5};
@@ -114,9 +117,126 @@ namespace csdn_demo01
 	}
 
 	// End Demo02
+}
 
+namespace intelligent_point
+{
+	// C++ 提供4种智能指针： auto_ptr, unique_ptr, shared_ptr, weak_ptr;(auto_ptr目前已被弃用)
 
+	// unique_ptr 
+	template <class T, class Deleter=std::default_delete<T>>
+	class UniquePtr;
 
+	template <typename T, typename Deleter>
+	class UniquePtr<T[], Deleter>;
+
+	/*
+	 * unique_ptr 独立拥有它所指的对象， 在某一时刻只能有一个unique_ptr指向特定对象， 当unique_ptr被销毁(reset)时，
+	 * 它所指的对象会自动被销毁。 unique_ptr不允许拷贝构造和赋值操作。只能进行std::move. 也就是右值引用
+	 * unique_ptr release()时放弃它所指对象的控制权，将其置空，并返回对象指针，但并不会释放内存。
+	 * unique_ptr reset(...) 释放ptr对象，并重置ptr的值。 
+	 */
+
+	void UniquePtrTest()
+	{
+		// unique_ptr 不允许使用赋值，也就是不存在赋值构造
+
+		std::unique_ptr<std::string> str_ptr01(new std::string("unique_ptr string."));
+
+		auto db = new double(88.8);
+		std::unique_ptr<double> db_ptr01(db);
+		printf("db_ptr01: %.2lf, address: %p\n", *db_ptr01, &(*db_ptr01));
+		std::unique_ptr<double> db_ptr02(db);
+		printf("db_ptr02: %.2lf, address: %p\n", *db_ptr02, &(*db_ptr02));
+
+		db_ptr01.reset();
+		printf("db: %.2lf\n", *db_ptr02);
+
+		std::unique_ptr<float> f_ptr01 = nullptr;
+		printf("str: %s,  address: %p\n", str_ptr01->c_str(), &(*str_ptr01));
+
+		auto str01 = str_ptr01.get(); // unique_ptr.get返回对象指针。 str01与str_ptr01指向同一对象。
+		printf("str: %s,  address: %p\n", str01->c_str(), str01);
+
+		str_ptr01.release(); // unique_ptr.release 只是释放控制权， 并不销毁对象
+		printf("str: %s, address: %p\n", str01->c_str(), str01);
+
+		//printf("str: %s,  address: %p\n", str_ptr01->c_str(), &(*str_ptr01)); //unique_ptr失去对象控制， 
+		str_ptr01.reset(nullptr);
+
+		delete db;
+		printf("db_ptr02: %.2lf, address: %p\n", *db_ptr02, &(*db_ptr02));
+	}
+
+	std::string* UniquePtrString()
+	{
+		std::unique_ptr<std::string> ptr_str01(new std::string("Test String."));
+		std::string* str01 = ptr_str01.get();
+		std::unique_ptr<std::string> str02 = std::move(ptr_str01);
+		//ptr_str01.release();
+		ptr_str01.reset();
+		str02.reset();
+		return str01;
+	}
+
+	class ClassA
+	{
+	public:
+		ClassA(const std::string& name_cs, const std::string& own_name_cs, const int n_val):
+			s_name_(name_cs), s_own_name_(own_name_cs)
+		{
+			if (0 == n_val) {
+				std::runtime_error o_rt_ex("nValue can not 0\n");
+				throw o_rt_ex;
+			}
+			else {
+				d_value_ = 1.0 / n_val;
+			}
+			printf("own_name [%s] ClassA Object, Finished construct.\n", this->s_name_.c_str());
+		}
+
+		ClassA(const ClassA& be_copy)
+		{
+			this->d_value_ = be_copy.d_value_;
+			this->s_name_ = be_copy.s_name_;
+			this->s_own_name_ = be_copy.s_own_name_;
+			printf("ClassA copy constructor. \n");
+		}
+
+		~ClassA()
+		{
+			printf_s("ClassA object[%s] ~ClassA Called. object Destroy. \n", this->s_name_.c_str());
+		}
+
+		void set_owner_name(const std::string& own_name) { this->s_own_name_ = own_name; }
+
+	private:
+		double d_value_;
+		std::string s_name_;
+		std::string s_own_name_;
+	};
+
+	class ClassB
+	{
+	public:
+		ClassB(int val1, int val2, const std::string& name)
+		{
+			printf("Name: %s ClassB object begin Construct. \n", name.c_str());
+			a_ptr1_ = new ClassA("a_ptr1", name, val1);
+			a_ptr2_ = new ClassA("a_ptr2", name, val2);
+			this->s_name_ = name;
+		}
+		ClassB(const ClassB& be_copy)
+		{
+			//TODO some constructor....
+			// https://blog.csdn.net/xuyouqiang1987/article/details/104127669?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.nonecase&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.nonecase#default_delete%3C%3E%E7%B1%BB
+		}
+
+	private:
+		ClassA* a_ptr1_;
+		ClassA* a_ptr2_;
+		std::string s_name_;
+	};
 }
 
 int main(int argc, char* argv[])
@@ -124,4 +244,10 @@ int main(int argc, char* argv[])
 	test_function_pointer();
 	csdn_demo01::test();
 	csdn_demo01::demo02_test();
+	printf("\n----------------------\n");
+	intelligent_point::UniquePtrTest();
+	printf("\n----------------------\n");
+	const auto str = intelligent_point::UniquePtrString();
+	printf("str: %s, address: %p", str->c_str(), str);
+	delete str;
 }

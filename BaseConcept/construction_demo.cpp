@@ -1,41 +1,41 @@
-#include <iostream>
+﻿#include <iostream>
 #include <string>
 #include <cstring>
 
-// C++ ���캯����ظ���
-// C++ �������󳣼�3�ַ�ʽ: (���캯��, �������캯��,  ��ֵ����)
+// C++ 构造函数相关概念
+// C++ 创建对象常见3种方式: (构造函数, 拷贝构造函数,  赋值函数)
 
 
-// ����һ������ClsA, ������Ĭ�Ͼ������º�����
-// Ĭ�Ϲ��캯��				ClsA()=default;
-// Ĭ�Ͽ������캯��			ClsA(ClsA& b) = default;
-// ��������					~ClsA()=default;
-// ��ֵ����					ClsA& operator= (const ClsA&);
-// ȡֵ����
-// �������캯����һ�����⹹�캯���� ͬһ�������һ��������ͳ�ʼ����һ���� 
+// 创建一个空类ClsA, 编译器默认就有以下函数：
+// 默认构造函数				ClsA()=default;
+// 默认拷贝构造函数			ClsA(ClsA& b) = default;
+// 析构函数					~ClsA()=default;
+// 赋值函数					ClsA& operator= (const ClsA&);
+// 取值函数
+// 拷贝构造函数是一种特殊构造函数， 同一类对象，用一个对象构造和初始化另一对象。 
 class ClsA
 {
 };
 
-// ǳ����(λ����):���ڻ����������͵ĳ�Ա�������ֽڸ��ƣ����ڴ����ֻ������ָ�룬 �����ͳ�Ա������������Ӧ���͵Ŀ������캯��;
-// �������Ա��������ָ�������������ڴ��ˡ� ʹ��ǳ������ֻ�Ǹ���ָ�룬Ҳ����������ָ��ͬһ���ڴ棬 �����ı䶯��Ӱ�쵽��һ���� 
-// ����������ʱ������ָ����ͬһ�ڴ�飬����һ�������ͷ����λ��Σ����³����쳣��
+// 浅拷贝(位拷贝):对于基本数据类型的成员变量按字节复制，堆内存变量只复制其指针， 类类型成员变量调用其相应类型的拷贝构造函数;
+// 对于类成员变量含有指针变量，分配堆内存了。 使用浅拷贝，只是复制指针，也就两个对象指向同一块内存， 变量的变动会影响到另一对象， 
+// 而对象析构时，由于指向于同一内存块，导致一个对象被释放两次或多次，导致程序异常。
 
-// Ϊ���ǳ��������(Ĭ�ϼ�ǳ����)��������ʽ�ṩ�������캯���͸�ֵ���������ֶ�ʵ��  <���>
+// 为解决浅拷贝问题(默认即浅拷贝)，必须显式提供拷贝构造函数和赋值函数，即手动实现  <深拷贝>
 
-//�������캯���븳ֵ�����ǳ����׻����ģ� �����������ڶ��󴴽�ʱ���ã� ����ֵ����ֻ�ܱ��Ѿ����ڵĶ�����á� 
+//拷贝构造函数与赋值函数非常容易混淆的， 拷贝构造是在对象创建时调用， 而赋值函数只能被已经存在的对象调用。 
 void str_copy_assign()
 {
 	using namespace std;
 	string a_cs("String a_cs");
 	string b_cs("String b_cs");
 
-	string c_cs = a_cs; // ������õ��ǿ������캯���� ��õ�д�� *** string c_cs(a_cs) *** 
-	auto d_cs{a_cs}; // ���ÿ������캯���� string d_cs(a_ca);
-	c_cs = b_cs; // ���ø�ֵ����    
+	string c_cs = a_cs; // 这里调用的是拷贝构造函数。 最好的写法 *** string c_cs(a_cs) *** 
+	auto d_cs{a_cs}; // 调用拷贝构造函数。 string d_cs(a_ca);
+	c_cs = b_cs; // 调用赋值函数    
 }
 
-// �ֶ�ʵ��String�࣬ʵ�����
+// 手动实现String类，实现深拷贝
 class CString
 {
 public:
@@ -50,7 +50,7 @@ public:
 		std::cout << "CString(const char* str='') called.\n";
 	}
 
-	// �������캯���� �ڱ������弰��ʼ��ʱʹ�ã� CString cs02{cs01} ==> CString cs02 = cs01;
+	// 拷贝构造函数， 在变量定义及初始化时使用： CString cs02{cs01} ==> CString cs02 = cs01;
 	CString(const CString& s) : str_(nullptr)
 	{
 		str_ = new char[strlen(s.c_str()) + 1];
@@ -76,7 +76,7 @@ public:
 		return *this;
 	}
 
-	friend std::ostream& operator<< (std::ostream &os, CString &s)
+	friend std::ostream& operator<<(std::ostream& os, CString& s)
 	{
 		os << "Cstring in operator:  " << s.str_ << "\n";
 		return os;
@@ -100,11 +100,20 @@ void cstring_test()
 
 	const CString cstr02{"C String 02"};
 	cout << "cstr02: " << cstr02.c_str() << "\n";
-	cstr01 = cstr02; // ������� CString& operator=(const CString& s);
+	cstr01 = cstr02; // 这里调用 CString& operator=(const CString& s);
 	cout << "cstr01=cstr02, cstr01: " << cstr01.c_str() << '\n';
 	auto cstr03{cstr01};
 	cout << "cstr03: " << cstr03.c_str() << "\n";
-	cout << "cstr03: " << cstr03 <<'\n';
+	cout << "cstr03: " << cstr03 << '\n';
+
+	// CString point 
+	CString* cstr_ptr(new CString("new constructor.\n")); // 默认构造函数。
+	CString* cstr_ptr02 = cstr_ptr; // 不产生构造，也就是直接是两个指针指向同一对象。
+	CString* cstr_ptr03(cstr_ptr);
+	cstr_ptr02 = new CString(*cstr_ptr); // 调用copy constructor (拷贝构造)
+	*cstr_ptr03 = *cstr_ptr02; // 调用operator= (赋值)
+	delete cstr_ptr02;
+	delete cstr_ptr;
 }
 
 int main(int argc, char* argv[])

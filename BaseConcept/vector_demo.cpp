@@ -90,37 +90,37 @@ namespace vec_demo
 		printf("define vector end.\n");
 
 		vec.push_back(Ts(1, const_cast<char*>("a")));
-		printf("vec.cap: %lld\n", vec.capacity());
-		printf("vec.size: %lld\n", vec.size());
+		printf("vec.cap: %zu\n", vec.capacity());
+		printf("vec.size: %zu\n", vec.size());
 
 		vec.push_back(Ts(2, const_cast<char*>("ni")));
-		printf("vec.cap: %lld\n", vec.capacity());
-		printf("vec.size: %lld\n", vec.size());
+		printf("vec.cap: %zu\n", vec.capacity());
+		printf("vec.size: %zu\n", vec.size());
 
 		vec.push_back(Ts(3, const_cast<char*>("l")));
-		printf("vec.cap: %lld\n", vec.capacity());
-		printf("vec.size: %lld\n", vec.size());
+		printf("vec.cap: %zu\n", vec.capacity());
+		printf("vec.size: %zu\n", vec.size());
 
 		vec.push_back(Ts(4, const_cast<char*>("4")));
-		printf("vec.cap: %lld\n", vec.capacity());
-		printf("vec.size: %lld\n", vec.size());
+		printf("vec.cap: %zu\n", vec.capacity());
+		printf("vec.size: %zu\n", vec.size());
 
 		vec.push_back(Ts(5, const_cast<char*>("5")));
-		printf("vec.cap: %lld\n", vec.capacity());
-		printf("vec.size: %lld\n", vec.size());
+		printf("vec.cap: %zu\n", vec.capacity());
+		printf("vec.size: %zu\n", vec.size());
 
 		printf("end push_back. \n");
 
 		auto i = 0;
 		for (auto it = vec.begin(); it != vec.end(); ++it) {
 			*it = Ts(i, const_cast<char*>("for_loop"));
-			printf("iterator address: %p\n", it);
+			printf_s("iterator address: %p\n", &(*it));
 			++i;
 		}
 	}
 
 	void TsStoreVecEmplace()
-	// vector使用emplace_back添加对象时，可减少每次的拷贝构造过程，方式是不要emplace_back(....)直接构造，见下：
+		// vector使用emplace_back添加对象时，可减少每次的拷贝构造过程，方式是不要emplace_back(....)直接构造，见下：
 	{
 		std::vector<Ts> vec_ts;
 		vec_ts.reserve(kDefaultCapacity); // 指定容量Capacity，减少不必要的整块内存移动
@@ -143,15 +143,16 @@ namespace vec_demo
 		std::vector<Ts*> vec_ts_point;
 		//vec_ts_point.reserve(kDefaultCapacity);
 		vec_ts_point.push_back(new Ts(11, const_cast<char*>("point push_back01")));
-		printf("vec.size: %lld\n", vec_ts_point.size());
-		printf("vec.capacity: %lld\n", vec_ts_point.capacity());
+		printf("vec.size: %zu\n", vec_ts_point.size());
+		printf("vec.capacity: %zu\n", vec_ts_point.capacity());
 
 		vec_ts_point.push_back(new Ts(12, const_cast<char*>("vector push_back point02")));
-		printf("vec.size: %lld\n", vec_ts_point.size());
-		printf("vec.capacity: %lld\n", vec_ts_point.capacity());
+		printf("vec.size: %zu\n", vec_ts_point.size());
+		printf("vec.capacity: %zu\n", vec_ts_point.capacity());
+
 		vec_ts_point.push_back(new Ts(13, const_cast<char*>("vector push_back point03")));
-		printf("vec.size: %lld\n", vec_ts_point.size());
-		printf("vec.capacity: %lld\n", vec_ts_point.capacity());
+		printf("vec.size: %zu\n", vec_ts_point.size());
+		printf("vec.capacity: %zu\n", vec_ts_point.capacity());
 
 		printf("vec_point.num:  %d\n", vec_ts_point[0]->get_num());
 		printf("vec_point.str:  %s\n", vec_ts_point[1]->get_str());
@@ -170,22 +171,42 @@ namespace vec_demo
 		}
 
 		vec_ts_point.clear(); // clear 清理对象，但vector容量capacity是不会减少的， 需要采用swap交换成一空的vector
-		printf("vec.size: %lld\n", vec_ts_point.size());
-		printf("vec.capacity: %lld\n", vec_ts_point.capacity());
+		printf("vec.size: %zu\n", vec_ts_point.size());
+		printf("vec.capacity: %zu\n", vec_ts_point.capacity());
 
 		std::vector<Ts*> tmp;
 		vec_ts_point.swap(tmp); // 采用swap交换，将vector交换到一个空vector实现内存真正释放。
-		printf("vec.size: %lld\n", vec_ts_point.size());
-		printf("vec.capacity: %lld\n", vec_ts_point.capacity());
+		printf("vec.size: %zu\n", vec_ts_point.size());
+		printf("vec.capacity: %zu\n", vec_ts_point.capacity());
 	}
 
 	void TsStoreIntelligentPoint()
 	{
 		//使用指针存入vector需要手动释放内存，使用智能指针管理对象存入vector.
+		std::vector<std::unique_ptr<Ts>> unique_ptr_vector;
 
-		std::unique_ptr<Ts> unique_ts1;
-		std::vector<std::unique_ptr<Ts>> vec_unique_ptf_ts;
-		//vec_unique_ptf_ts.push_back(unique_ts1);
+		auto ptr_ts01 = std::make_unique<Ts>(21, const_cast<char*>("unique_ptr01"));
+		unique_ptr_vector.push_back(std::move(ptr_ts01));
+
+		std::unique_ptr<Ts> ptr_ts02(new Ts(22, const_cast<char*>("unique_ptr02")));
+		unique_ptr_vector.push_back(std::move(ptr_ts02));
+
+		printf("unique_ptr_vector: %d: %s\n", unique_ptr_vector[0]->get_num(), unique_ptr_vector[0]->get_str());
+		printf("unique_ptr_vector: %d: %s\n", unique_ptr_vector[1]->get_num(), unique_ptr_vector[1]->get_str());
+
+		auto elem0 = std::move(unique_ptr_vector[0]);
+		printf("elem01_num: %d \nelem01_cstr: %s\n", elem0->get_num(), elem0->get_str());
+
+		//printf("unique_vector[0], num: %d", unique_ptr_vector[0]->get_num());
+
+		// 使用智能指针unique_ptr还是需要重置unique_ptr，缺少reset而直接跳出函数，内存还是汇漏的。
+		for (auto it = unique_ptr_vector.begin(); it != unique_ptr_vector.end(); ++it) {
+			/*		auto ptr = it->release();
+					delete ptr;*/
+			it->reset();
+		}
+
+		printf("elem01_num: %d \nelem01_cstr: %s\n", elem0->get_num(), elem0->get_str());
 	}
 
 	void VecPushUseLoop()
@@ -215,7 +236,7 @@ namespace vec_demo
 			const auto length = sizeof(c_str) + sizeof(char_num);
 			//strcpy_s(c_str, sizeof(c_str)+sizeof(char_num), char_num);
 			strcat_s(c_str, sizeof(c_str) + sizeof(char_num), char_num);
-			printf("sizeof: %lld", sizeof(c_str) + sizeof(char_num));
+			printf("sizeof: %zu", sizeof(c_str) + sizeof(char_num));
 			const auto elem = new char[length];
 			memcpy_s(elem, length + 1, c_str, length);
 			printf("c_str: %s\n", elem);
@@ -231,7 +252,7 @@ namespace vec_demo
 
 		data.clear();
 		printf("After clear the Vector. \n");
-		printf("data.size: %lld, data.capacity: %lld\n", data.size(), data.capacity());
+		printf("data.size: %zu, data.capacity: %zu\n", data.size(), data.capacity());
 		printf("elem0: %s\n", elem0);
 		printf("elem1: %s\n", elem1);
 
@@ -239,7 +260,7 @@ namespace vec_demo
 		data.swap(tmp);
 
 		printf("After swap the Vector. \n");
-		printf("data.size: %lld, data.capacity: %lld\n", data.size(), data.capacity());
+		printf("data.size: %zu, data.capacity: %zu\n", data.size(), data.capacity());
 		printf("elem0: %s\n", elem0);
 		printf("elem1: %s\n", elem1);
 	}
@@ -248,12 +269,20 @@ namespace vec_demo
 int main(int argc, char* argv[])
 {
 	//vec_demo::StuTest();
-	//vec_demo::TsTest();
+	vec_demo::TsTest();
+	printf("Ts demo end....\n\n");
+
 	vec_demo::TsStoreVecEmplace();
 	printf("Ts emplace end....\n\n");
+
 	vec_demo::TsStorePointerVec();
 	printf("end Store Pointer to Vector. \n\n");
+
 	vec_demo::VecPushUseLoop();
 	printf("End vector push use for loop and delete object. \n\n");
+
 	vec_demo::VecObjectClear();
+
+	printf("End vector push use unique_ptr. \n\n");
+	vec_demo::TsStoreIntelligentPoint();
 }
