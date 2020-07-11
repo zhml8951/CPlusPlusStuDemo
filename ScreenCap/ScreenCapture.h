@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <cstdint>
 #include <cstdlib>
 #include "ScCommon.h"
@@ -32,7 +32,7 @@ namespace sc
 		size_t handle_size;
 		Point position_point;
 		Point size_point;
-		char name_c[128]{0};
+		char name_c[128]{ 0 };
 	};
 
 	struct SC_EXTERN Monitor
@@ -48,8 +48,8 @@ namespace sc
 		int offset_y_i = 0;
 		int original_offset_x_i = 0;
 		int original_offset_y_i = 0;
-		char name_c[128]{0};
-		float scaling_x{1.0f};
+		char name_c[128]{ 0 };
+		float scaling_x{ 1.0f };
 	};
 
 	struct SC_EXTERN Image;
@@ -58,7 +58,6 @@ namespace sc
 	{
 		unsigned char b, g, r, a;
 	};
-
 
 	inline SC_EXTERN int index(const Monitor& monitor) { return monitor.index_i; }
 

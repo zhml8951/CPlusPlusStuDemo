@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <vector>
 #include <atomic>
@@ -69,12 +69,12 @@ namespace sc
 	class Timer
 	{
 		using Clock = std::conditional<std::chrono::high_resolution_clock::is_steady,
-		                               std::chrono::high_resolution_clock, std::chrono::steady_clock>::type;
+			std::chrono::high_resolution_clock, std::chrono::steady_clock>::type;
 		using MicroSec = std::chrono::microseconds;
 
 	public:
 		template <typename Rep, typename Period>
-		explicit Timer(const std::chrono::duration<Rep, Period>& duration):
+		explicit Timer(const std::chrono::duration<Rep, Period>& duration) :
 			duration_(std::chrono::duration_cast<MicroSec>(duration)), dead_line_(Clock::now() + duration_)
 		{
 		}
@@ -105,7 +105,6 @@ namespace sc
 	{
 		std::shared_ptr<Timer> FrameTimer;
 	};
-
 
 	class SC_EXTERN IScreenCaptureManager
 	{
