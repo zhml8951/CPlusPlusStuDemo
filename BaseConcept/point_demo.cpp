@@ -270,22 +270,39 @@ namespace intelligent_point
 		ClassUseUnique(const int obj1, const int obj2, const std::string& name) : obj_name_(name)
 		{
 			printf_s("Name: %s ClassUseUnique object begin construct. \n", name.c_str());
+
+			//// unique_ptr 不允许赋值，可使用reset, make_unique, 如果使用赋值，右值引用 unique_ptr<...>(move(new class...)
 			obj_ptr1_.reset(new ClassA("obj1_ptr", obj_name_, obj1));
 			obj_ptr2_ = std::make_unique<ClassA>(ClassA("obj2_ptr", obj_name_, obj2));
 
 			std::unique_ptr<ClassA> obj3_ptr;
-			obj3_ptr = std::unique_ptr<ClassA>(std::move(new ClassA("obj3_ptr", obj_name_, obj2)));
+			obj3_ptr = std::unique_ptr<ClassA>(std::move(new ClassA("obj3_ptr", obj_name_, obj2))); // 使用move
 
 			std::unique_ptr<ClassA> obj4_ptr;
+			obj4_ptr = std::move(obj3_ptr); // 使用move可将obj3_ptr对象 直接转移到obj4
+
 			printf_s("Name: %s ClassUseUnique object begin construct. \n", obj_name_.c_str());
 		}
 
 		ClassUseUnique(const ClassUseUnique& copy_obj)
 		{
 			printf_s("Name: %s ClassUseUnique object begin copy construct.\n", this->obj_name_.c_str());
+			obj_ptr1_ = std::make_unique<ClassA>(*copy_obj.obj_ptr1_);
+			obj_ptr1_->set_owner_name("obj1_ptr copy constructor from obj");
+			std::ostringstream oss;
+			oss << "Name:  " << this->obj_name_ << ", copy constructor occur error. \n";
+			std::runtime_error runtime_error(oss.str());
+			throw runtime_error;
+			obj_ptr2_ = std::unique_ptr<ClassA>(std::move(new ClassA(*(copy_obj.obj_ptr2_))));
+			this->obj_ptr2_->set_owner_name("obj2_ptr copy constructor from copy_obj\n");
+			printf("Name: %s ClassUseUnique object finished copy construct. \n", this->obj_name_.c_str());
+		}
 
-			// TODO  add copy constructor. 
-			// https://blog.csdn.net/xuyouqiang1987/article/details/104127669?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.nonecase&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.nonecase#default_delete%3C%3E%E7%B1%BB
+		const ClassUseUnique& operator=(const ClassUseUnique& assign_obj2) const
+		{
+			*(this->obj_ptr1_) = *(assign_obj2.obj_ptr1_);
+			*(this->obj_ptr2_) = *(assign_obj2.obj_ptr2_);
+			return *this;
 		}
 
 	private:
@@ -313,6 +330,35 @@ namespace intelligent_point
 			printf("ClassB b102 execute occur error... %s\n", exception.what());
 		}
 	}
+
+	void test_cls_use_unique()
+	{
+		try {
+			ClassUseUnique b1(1, 0, "obj011");
+		}
+		catch (const std::exception& ex) {
+			printf("ClassUseUnique object b1 construct occur error. detail: %s \n", ex.what());
+		}
+
+		printf("---------------------------------------\n");
+
+		try {
+			const ClassUseUnique b2(2, 21, "obj021");
+			auto b3(b2);
+		}
+		catch (std::exception ex) {
+			printf("ClassUseUnique object construct occur error. detail:  %s\n", ex.what());
+		}
+
+		try {
+			ClassUseUnique b3(31, 32, "obj30");
+			ClassUseUnique b4(41, 42, "obj4");
+			b4 = b3;
+		}
+		catch (std::exception ex) {
+			printf("ClassUseUnique object assign occur error. %s\n", ex.what());
+		}
+	}
 }
 
 int main(int argc, char* argv[])
@@ -329,4 +375,7 @@ int main(int argc, char* argv[])
 
 	printf("\n----------------------\n");
 	intelligent_point::test_cls_ab();
+	printf("\n----------------------\n");
+
+	intelligent_point::test_cls_use_unique();
 }
