@@ -92,7 +92,6 @@ bool write_file(VecUsers& w_users)
 	return true;
 }
 
-
 namespace point_ref_demo
 {
 	// C++ 基本概念( 指针，引用，值) 传递方面的使用。 这些基本的东西都忘，  尴尬......
@@ -147,7 +146,6 @@ namespace point_ref_demo
 		printf("\n%d", num);
 	}
 }
-
 
 int csdn_main(int argc, char* argv[])
 {

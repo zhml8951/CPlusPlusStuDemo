@@ -30,10 +30,10 @@ namespace vec_demo
 
 	void StuTest()
 	{
-		Stu stu01((char*)"stu01", 8);
-		printf("stu01.get_name: %s", stu01.get_name());
+		Stu stu01((char*)"Stu01", 8);
+		printf("Stu01.get_name: %s", stu01.get_name());
 		stu01 = Stu();
-		printf("stu01.get_name: %s", stu01.get_name());
+		printf("Stu01.get_name: %s", stu01.get_name());
 	}
 
 	class Ts

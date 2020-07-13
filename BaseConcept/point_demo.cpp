@@ -13,13 +13,13 @@ double func01(const int num)
 
 // 函数指针与指针函数的区别 ==>
 double* func02(int) = delete;
-double(*func03)(int); // double* fun(int)  返回指针类型的函数即<指针函数>。 double (*func)(int) 指向函数的指针即<函数指针>
+double (*func03)(int); // double* fun(int)  返回指针类型的函数即<指针函数>。 double (*func)(int) 指向函数的指针即<函数指针>
 
 void test_function_pointer()
 {
 	// 定义函数指针，参数为int, 返回值double.
 	// ReSharper disable CppJoinDeclarationAndAssignment
-	double(*p_func01)(int);
+	double (*p_func01)(int);
 	p_func01 = func01;
 
 	printf_s("p_func01 output: %.2lf\n", (*p_func01)(8));
@@ -32,7 +32,7 @@ void test_function_pointer()
 }
 
 namespace csdn_demo01
-	// 函数指针直接使用是看不出本来用途的，只有当定义函数指针作形参，传递函数作实参时可实现回调效果，感觉比js回调还要自然。这才是函数指针的直正用途。
+// 函数指针直接使用是看不出本来用途的，只有当定义函数指针作形参，传递函数作实参时可实现回调效果，感觉比js回调还要自然。这才是函数指针的直正用途。
 {
 	// Begin demo01
 
@@ -48,7 +48,7 @@ namespace csdn_demo01
 		return 0.5 * lines;
 	}
 
-	void estimate(const int line_num, double(*pf)(int))
+	void estimate(const int line_num, double (*pf)(int))
 	{
 		auto ret = (*pf)(line_num);
 		std::cout << "num:  " << line_num << ",  need times is: " << ret << std::endl;
@@ -69,7 +69,7 @@ namespace csdn_demo01
 	// Begin Demo02
 
 	const double* func01(const double arr[], int n);
-	const double* func02(const double[], int);
+	const double* func02(const double [], int);
 	const double* func03(const double*, int);
 
 	void demo02_test()
@@ -85,14 +85,14 @@ namespace csdn_demo01
 		const Pf func03_p = func03;
 		// ReSharper restore CppUseAuto
 
-		double arr[5]{ 11.1, 12.2, 13.3, 14.4, 15.5 };
+		double arr[5]{11.1, 12.2, 13.3, 14.4, 15.5};
 
 		std::cout << "func01_point:  " << (*func01_p)(arr, 3) << "\n";
 		std::cout << "func02_point:  " << func02_p(arr, 3) << "\n";
 		std::cout << "*(func03_point):  " << *((*func03_p)(arr, 3)) << "\n";
 
-		const double* (*func_array_p1[3])(const double*, int) { func01, func02, func03 };
-		Pf func_array_p2[]{ func01, func02, func03 };
+		const double* (*func_array_p1[3])(const double*, int){func01, func02, func03};
+		Pf func_array_p2[]{func01, func02, func03};
 
 		std::cout << "func_p1[0]:  " << func_array_p1[0](arr, 2) << "\n";
 		std::cout << "*(func_p2[0]):  " << *(func_array_p2[0](arr, 2)) << "\n";
@@ -240,6 +240,7 @@ namespace intelligent_point
 
 			this->a_ptr2_ = new ClassA(*(be_copy.a_ptr2_));
 			this->a_ptr2_->set_owner_name("ptr2 copy constructor. \n");
+
 			printf_s("Name: %s  ClassB object finished Copy Constructor. \n", this->s_name_.c_str());
 		}
 
@@ -275,12 +276,13 @@ namespace intelligent_point
 			obj_ptr1_.reset(new ClassA("obj1_ptr", obj_name_, obj1));
 			obj_ptr2_ = std::make_unique<ClassA>(ClassA("obj2_ptr", obj_name_, obj2));
 
+			/*
 			std::unique_ptr<ClassA> obj3_ptr;
 			obj3_ptr = std::unique_ptr<ClassA>(std::move(new ClassA("obj3_ptr", obj_name_, obj2))); // 使用move
-
+		
 			std::unique_ptr<ClassA> obj4_ptr;
 			obj4_ptr = std::move(obj3_ptr); // 使用move可将obj3_ptr对象 直接转移到obj4
-
+			*/
 			printf_s("Name: %s ClassUseUnique object begin construct. \n", obj_name_.c_str());
 		}
 
@@ -293,8 +295,10 @@ namespace intelligent_point
 			oss << "Name:  " << this->obj_name_ << ", copy constructor occur error. \n";
 			std::runtime_error runtime_error(oss.str());
 			throw runtime_error;
+
 			obj_ptr2_ = std::unique_ptr<ClassA>(std::move(new ClassA(*(copy_obj.obj_ptr2_))));
 			this->obj_ptr2_->set_owner_name("obj2_ptr copy constructor from copy_obj\n");
+
 			printf("Name: %s ClassUseUnique object finished copy construct. \n", this->obj_name_.c_str());
 		}
 
@@ -352,13 +356,47 @@ namespace intelligent_point
 
 		try {
 			ClassUseUnique b3(31, 32, "obj30");
-			ClassUseUnique b4(41, 42, "obj4");
-			b4 = b3;
+			/*	ClassUseUnique b4(41, 42, "obj4");
+				b4 = b3;
+			*/
 		}
 		catch (std::exception ex) {
 			printf("ClassUseUnique object assign occur error. %s\n", ex.what());
 		}
 	}
+
+	class Stark;
+	class TargetYen;
+
+	class Stark
+	{
+	public:
+		static void print() { printf("stark love target_yen. \n "); }
+
+		~Stark()
+		{
+			//delete target_yen_;
+			printf("~Stark()\n");
+		}
+
+	private:
+		TargetYen* target_yen_ = nullptr;
+	};
+
+	class TargetYen
+	{
+	public:
+		static void print() { printf("target_yen love stark.\n"); }
+
+		~TargetYen()
+		{
+			delete stark_;
+			printf("~TargetYen()\n");
+		}
+
+	private:
+		Stark* stark_ = nullptr;
+	};
 }
 
 int main(int argc, char* argv[])

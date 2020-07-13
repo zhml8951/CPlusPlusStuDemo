@@ -1,4 +1,4 @@
-#include "IniParser.h"
+﻿#include "IniParser.h"
 #include <io.h>
 
 static void trim_string(string& str)
