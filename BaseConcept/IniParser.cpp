@@ -46,3 +46,10 @@ string IniParser::get_string_from_file(const string& ini_file)
 	free(buffer);
 	return "ok";
 }
+
+
+int main(int argc, char* argv[])
+{
+	
+}
+

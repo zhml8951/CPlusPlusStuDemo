@@ -397,6 +397,28 @@ namespace intelligent_point
 	private:
 		Stark* stark_ = nullptr;
 	};
+
+	void SharedPtrDemo01()
+	{
+		const std::shared_ptr<std::string> str_ptr(new std::string("first string shared_ptr, use default constructor."));
+		auto str2_ptr = str_ptr;
+		printf("str2_ptr use count: %d", str2_ptr.use_count());
+		str2_ptr.reset();
+		printf("str_ptr use count: %d", str_ptr.use_count());
+
+		std::shared_ptr<double> db1_ptr(std::move(new double(8.8)));
+		auto db2_ptr(db1_ptr);
+		auto db3_ptr(std::move(db1_ptr));
+		printf("db1_ptr use count: %d", db1_ptr.use_count());
+
+		std::shared_ptr<int> int_ptr;
+		std::shared_ptr<float> fl_ptr(nullptr);
+
+		const auto pair_ptr = std::make_shared<std::pair<int, double>>(33, 33.0);
+		printf("pair_ptr->data(first, second): %d, %lf", pair_ptr->first, pair_ptr->second);
+		
+
+	}
 }
 
 int main(int argc, char* argv[])
