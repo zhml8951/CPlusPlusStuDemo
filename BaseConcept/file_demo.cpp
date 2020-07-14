@@ -1,45 +1,76 @@
-#include "file_demo.h"
+﻿#include "file_demo.h"
 #include <string>
 #include <cstdlib>
 #include <cstdio>
 #include <iostream>
 
-constexpr int kBufferSize = 1024;
+// C-style read file
 
-// C-style read file 
-void file_read(const char* file_name)
+// C++ 文件操作大体分两类(ansi_C语言方式和modern_C++方式)
+
+namespace file_operator
 {
-	char buff[kBufferSize];
-	FILE* pf;
-	auto state = fopen_s(&pf, file_name, "r");
+	constexpr int kBufferSize = 1024;
 
-	std::cout << "file open state: " << state << "\n";
-	std::cout << "errno:  " << errno << "\n";
-	//int count, err_no = 0;
-	const auto read_cnt = fread(buff, sizeof(buff), kBufferSize, pf);
-	std::cout << "read count: " << read_cnt << "\n";
-	fclose(pf);
-}
+	// ANSI C 方式操作文件。
+	// 数据流 <fopen打开数据流，fclose关闭数据流> 程序与数据之间以流的方式进行。
+	// 缓冲区<Buffer>
+	void FileOpDemo01()
+	{
+		constexpr auto file_in = "d:\\temp\\c_file_operator.txt";
+		constexpr auto file_out = "d:\\temp\\c_file_out.txt";
 
-void write_file(const char* file_name)
-{
-	const auto data_ptr = static_cast<unsigned int*>(malloc(sizeof(int) * kBufferSize));
+		FILE* p_file = nullptr;
+		auto stat = fopen_s(&p_file, file_in, "r");
+		if (stat != 0) {
+			printf_s("\n!!Read file error. \n");
+		}
 
-	for (unsigned int i = 0; i < kBufferSize; i++) {
-		data_ptr[i] = i; //��������ʼ����
+		printf("seek: %ld\n", ftell(p_file));
+		char ch;
+
+		while (true) {
+			ch = fgetc(p_file);
+			if (feof(p_file)) break;
+			printf("%c", ch);
+		}
+		fclose(p_file);
 	}
-	FILE* pf;
-	auto state = fopen_s(&pf, file_name, "w");
+	// TODO some things 
 
-	std::cout << "file state: " << state << "\n";
+	void file_read(const char* file_name)
+	{
+		char buff[kBufferSize];
+		FILE* pf;
+		auto state = fopen_s(&pf, file_name, "r");
 
-	fwrite(data_ptr, sizeof(int), kBufferSize, pf);
-	fclose(pf);
-	free(data_ptr);
+		std::cout << "file open state: " << state << "\n";
+		std::cout << "errno:  " << errno << "\n";
+		//int count, err_no = 0;
+		const auto read_cnt = fread(buff, sizeof(buff), kBufferSize, pf);
+		std::cout << "read count: " << read_cnt << "\n";
+		fclose(pf);
+	}
+
+	void write_file(const char* file_name)
+	{
+		const auto data_ptr = static_cast<unsigned int*>(malloc(sizeof(int) * kBufferSize));
+
+		for (unsigned int i = 0; i < kBufferSize; i++) {
+			data_ptr[i] = i; //缓冲区初始化。
+		}
+		FILE* pf;
+		auto state = fopen_s(&pf, file_name, "w");
+
+		std::cout << "file state: " << state << "\n";
+
+		fwrite(data_ptr, sizeof(int), kBufferSize, pf);
+		fclose(pf);
+		free(data_ptr);
+	}
 }
 
-//int main(int argc, char* argv[])
-//{
-//	write_file("write_out");
-//	//file_read("zhihu_01.cpp");
-//}
+int main(int argc, char* argv[])
+{
+	file_operator::FileOpDemo01();
+}

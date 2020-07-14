@@ -31,7 +31,7 @@ string& IniParser::replace_all_distinct(string& str, const string& new_value, co
 
 string IniParser::get_string_from_file(const string& ini_file)
 {
-	unsigned char* buffer = nullptr;
+	uint8_t* buffer = nullptr;
 	size_t size = 0;
 	size_t read_size;
 	FILE* fp = nullptr;
