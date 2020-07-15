@@ -31,18 +31,25 @@ string& IniParser::replace_all_distinct(string& str, const string& new_value, co
 
 string IniParser::get_string_from_file(const string& ini_file)
 {
-	uint8_t* buffer = nullptr;
-	size_t size = 0;
-	size_t read_size;
 	FILE* fp = nullptr;
 	fopen_s(&fp, ini_file.c_str(), "rt");
 	if (fp == nullptr) { return ""; }
+
+	// 判断文件大小。也就是有多少字，开辟多少buff.
 	fseek(fp, 0, SEEK_END);
-	size = ftell(fp);
+	const auto size = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
-	buffer = static_cast<unsigned char*>(malloc(sizeof(unsigned char) * (size + 1)));
+
+	uint8_t* buffer = nullptr;
+	const auto buff_size = sizeof(uint8_t) * (size + 1);
+	buffer = static_cast<uint8_t*>(malloc(buff_size));
 	buffer[size] = '\0';
-	//read_size = fread_s(buffer, sizeof(unsigned char), size, fp);
+	auto read_size = fread_s(buffer, buff_size, sizeof(uint8_t), size, fp);
+	fclose(fp);
+	
+	if (read_size < size) buffer[read_size] = '\n';
+
+	//std::string str(reinterpret_cast<char*>(buffer));
 	free(buffer);
 	return "ok";
 }
@@ -50,6 +57,4 @@ string IniParser::get_string_from_file(const string& ini_file)
 
 int main(int argc, char* argv[])
 {
-	
 }
-

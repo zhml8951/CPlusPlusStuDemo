@@ -1,16 +1,14 @@
-// C++ static_cast<>(), const_cast<>, dynamic_cast<>.., reinterpret_cast<>()...// 
-// C++ ÀàĞÍ×ª»»£¬ ÓÅ»¯ÁËCÓïÑÔÊ½µÄÇ¿ÖÆ×ª»»·½Ê½£¬ £¨int)3.5 »òdouble(3);
-// 
+ï»¿// C++ static_cast<>(), const_cast<>, dynamic_cast<>.., reinterpret_cast<>()...//
+// C++ ç±»å‹è½¬æ¢ï¼Œ ä¼˜åŒ–äº†Cè¯­è¨€å¼çš„å¼ºåˆ¶è½¬æ¢æ–¹å¼ï¼Œ ï¼ˆint)3.5 æˆ–double(3);
+//
 #include "cast_demo.h"
 #include <iostream>
 #include <string>
-#include <cstring>
 #include <cstdio>
-#include <cstdlib>
 
-void demo01()
+void cast_stu::demo01()
 {
-	// static_cast<> Ç¿×ª£¬ ¾²Ì¬×ª»»£¬³£ÓÃÓÚ¼òµ¥±äÁ¿×ª»»¡£
+	// static_cast<> å¼ºè½¬ï¼Œ é™æ€è½¬æ¢ï¼Œå¸¸ç”¨äºç®€å•å˜é‡è½¬æ¢ã€‚
 	class ClsA
 	{
 	public:
@@ -25,28 +23,28 @@ void demo01()
 
 	auto n = static_cast<int>(3.1415);
 	std::printf("\nn: %d\n", n); // 3
-	n = static_cast<int>(cls01); // Êµ¼Êµ÷ÓÃoperator (); ·µ»Ø1(int)£»
+	n = static_cast<int>(cls01); // å®é™…è°ƒç”¨operator (); è¿”å›1(int)ï¼›
 	std::printf("n: %d\n", n); // 1
-	const auto ch = static_cast<const char*>(cls01); // µ÷ÓÃoperator (), ·µ»Ø char*; 
+	const auto ch = static_cast<const char*>(cls01); // è°ƒç”¨operator (), è¿”å› char*;
 	std::printf("ch: %s\n", ch);
-	//n = static_cast<int>(ch);				// Ö±½ÓÌáÊ¾´íÎó£¬²»ÄÜÕâÑù½øÇ¿ÖÆ×ª»»
+	//n = static_cast<int>(ch);				// ç›´æ¥æç¤ºé”™è¯¯ï¼Œä¸èƒ½è¿™æ ·è¿›å¼ºåˆ¶è½¬æ¢
 	//ch = static_cast<char*>(n);
-	printf_s("demo01 end.\n\n");
+	printf_s("cast_demo01 end.\n\n");
 }
 
-void demo02()
+void cast_stu::demo02()
 {
 	class ClsB
 	{
 	public:
-		// class ÔªËØÉêÃ÷Ë³ĞòÒ²¿ÉÒÔÓ°ÏìºóÃæ³ÌĞòµÄÔËĞĞ£¬Èç¹û½«ch_»òstr_·ÅµÚÒ»Î»£¬ reinterpret_cast<int&> ¾Í²»¿ÉÒÔÕı³£ÔËĞĞ¡£ 
+		// class å…ƒç´ ç”³æ˜é¡ºåºä¹Ÿå¯ä»¥å½±å“åé¢ç¨‹åºçš„è¿è¡Œï¼Œå¦‚æœå°†ch_æˆ–str_æ”¾ç¬¬ä¸€ä½ï¼Œ reinterpret_cast<int&> å°±ä¸å¯ä»¥æ­£å¸¸è¿è¡Œã€‚
 		int i_;
 		int j_;
 		char ch_[200]{};
 		const char* str_ = nullptr;
 		std::string string01_;
 
-		explicit ClsB(const int n): i_(n), j_(n)
+		explicit ClsB(const int n) : i_(n), j_(n)
 		{
 			sprintf_s(ch_, sizeof(ch_) / sizeof(ch_[0]), "%d sprintf_s()__ok", n);
 
@@ -58,7 +56,7 @@ void demo02()
 			string01_ = std::to_string(n);
 			string01_ += "_num,to_string__ok";
 
-			//// ÕâÀï_BufferCount: Ó¦¸ÃÓëÇ°ÃæµÄ×Ö·ûÊı×éÓ¦¸ÃÒ»Ñù£¬ Êı×éÔ½½ç£¬ ³£¼ûµÄÊÇ³ÌĞò±ÀÀ£.
+			//// è¿™é‡Œ_BufferCount: åº”è¯¥ä¸å‰é¢çš„å­—ç¬¦æ•°ç»„åº”è¯¥ä¸€æ ·ï¼Œ æ•°ç»„è¶Šç•Œï¼Œ å¸¸è§çš„æ˜¯ç¨‹åºå´©æºƒ.
 			//sprintf_s(ch_, 200, "%d,....sprintf_s()__ok, if the string is too long as along as here. ", n);
 			//std::cout << "ch:  " << ch_ << "\n";
 			//std::cout << "ch.length:  " << sizeof(ch_) / sizeof(char) << "\n";
@@ -78,16 +76,15 @@ void demo02()
 	printf_s("string01: %s\n", cls02.string01_.c_str());
 	printf_s("str: %s\n", cls02.str_);
 
-
-	// reinterpret_cast<int &> ÕâÑùµÄ½«¶ÔÏó×ªÒıÓÃ£¬ĞèÒª·Ç³£Ğ¡ĞÄ£¬ ËüÒÀÀµÓÚ¶ÔÏóÄÚµÄÔªËØË³Ğò£¬
-	// ÕâÀïcls02µÄµÚÒ»¸öÔªËØ¸ÕºÃÊÇint,ÕâÀïr ÒıÓÃÁËi_¡£ Èç¹û½«stringÀàĞÍ»òchar[]·ÅµÚÒ»Î»Ôò³öÏÖÎŞĞ§Êı¡£
+	// reinterpret_cast<int &> è¿™æ ·çš„å°†å¯¹è±¡è½¬å¼•ç”¨ï¼Œéœ€è¦éå¸¸å°å¿ƒï¼Œ å®ƒä¾èµ–äºå¯¹è±¡å†…çš„å…ƒç´ é¡ºåºï¼Œ
+	// è¿™é‡Œcls02çš„ç¬¬ä¸€ä¸ªå…ƒç´ åˆšå¥½æ˜¯int,è¿™é‡Œr å¼•ç”¨äº†i_ã€‚ å¦‚æœå°†stringç±»å‹æˆ–char[]æ”¾ç¬¬ä¸€ä½åˆ™å‡ºç°æ— æ•ˆæ•°ã€‚
 	auto& r = reinterpret_cast<int &>(cls02);
 	std::printf("r: %d\n", r);
 	r = 200;
 	std::printf("cls02.i: %d,  cls02.j: %d\n", cls02.i_, cls02.j_);
 	std::cout << "cls02.i_: " << cls02.i_ << ", j_: " << cls02.j_ << ", ch_: " << cls02.ch_
 		<< ", str_: " << cls02.str_ << "\n";
-	// ÕâÀïr2 ÊÇchar& µ«cls02µÚÒ»ÎŞËØintÕâÑù½øĞĞÖğbit×ª»»ÊÇÎŞĞ§µÄ¡£ 
+	// è¿™é‡Œr2 æ˜¯char& ä½†cls02ç¬¬ä¸€æ— ç´ intè¿™æ ·è¿›è¡Œé€bitè½¬æ¢æ˜¯æ— æ•ˆçš„ã€‚
 	auto& r2 = reinterpret_cast<char &>(cls02);
 	std::cout << "r2=reinterpret_cast<char&>: " << r2 << "\n";
 
@@ -99,10 +96,10 @@ void demo02()
 	std::cout << "num:  " << num << "\n";
 }
 
-void demo03()
+void cast_stu::demo03()
 {
 	// const_cast<> demo
-	// const_cast<>()  ½öÓÃÓÚÈ¥³ıconst ÊôĞÔµÄ×ª»»
+	// const_cast<>()  ä»…ç”¨äºå»é™¤const å±æ€§çš„è½¬æ¢
 	using namespace std;
 	const std::string s1 = "Inception ";
 	auto& ref_s1 = const_cast<string&>(s1);
@@ -116,11 +113,11 @@ void demo03()
 	cout << "ref_s1: " << ref_s1 << "\n";
 }
 
-void demo04()
+void cast_stu::demo04()
 {
-	// dynamic_cast<>() demo 
-	// dynamic_cast Ö÷ÒªÓÃÓÚ½«¶àÌ¬»ùÀàµÄÖ¸ÕëºÍÒıÓÃÇ¿ÖÆ×ª»»ÎªÅÉÉúÀàµÄÖ¸ÕëºÍÒıÓÃ£¬ reinterpret_castÒ²¿É½øĞĞ´ËÀà×ª»»£¬µ«²»½øĞĞ°²È«¼ì²é¡£
-	// dynamic_cast ¿ÉÊµÏÖreinterpret_castÏàÍ¬¹¦ÄÜ£¬²¢ÇÒ½øĞĞ°²È«ĞÔ¼ì²é¡£
+	// dynamic_cast<>() demo
+	// dynamic_cast ä¸»è¦ç”¨äºå°†å¤šæ€åŸºç±»çš„æŒ‡é’ˆå’Œå¼•ç”¨å¼ºåˆ¶è½¬æ¢ä¸ºæ´¾ç”Ÿç±»çš„æŒ‡é’ˆå’Œå¼•ç”¨ï¼Œ reinterpret_castä¹Ÿå¯è¿›è¡Œæ­¤ç±»è½¬æ¢ï¼Œä½†ä¸è¿›è¡Œå®‰å…¨æ£€æŸ¥ã€‚
+	// dynamic_cast å¯å®ç°reinterpret_castç›¸åŒåŠŸèƒ½ï¼Œå¹¶ä¸”è¿›è¡Œå®‰å…¨æ€§æ£€æŸ¥ã€‚
 
 	class Base01
 	{
@@ -129,15 +126,15 @@ void demo04()
 	protected:
 		const char* base_str_ = nullptr;
 	public:
-		explicit Base01(const int n): base_a_(n)
+		explicit Base01(const int n) : base_a_(n)
 		{
 			const auto s = std::to_string(n);
-			this->base_str_ = s.c_str(); // std::to_string(n).c_str(); Ö±½ÓÊ¹ÓÃÕâÀàµ÷ÓÃ¾¡È»²»¿ÉÒÔ¡£
+			this->base_str_ = s.c_str(); // std::to_string(n).c_str(); ç›´æ¥ä½¿ç”¨è¿™ç±»è°ƒç”¨å°½ç„¶ä¸å¯ä»¥ã€‚
 			printf_s("Init object in base\n");
 			std::cout << "str: " << base_str_ << ", base_int_a: " << base_a_ << "\n";
 		}
 
-		virtual ~Base01() { base_a_ = 0; } // ~ ¶ÔÏóÏú»ÙÕâÑù²Ù×÷Ö»ÊÇ²âÊÔ£¬Ã»ÓĞÊµ¼ÊÓÃ´¦¡£
+		virtual ~Base01() { base_a_ = 0; } // ~ å¯¹è±¡é”€æ¯è¿™æ ·æ“ä½œåªæ˜¯æµ‹è¯•ï¼Œæ²¡æœ‰å®é™…ç”¨å¤„ã€‚
 
 		virtual int get_a() const { return this->base_a_; }
 
@@ -154,7 +151,7 @@ void demo04()
 			printf_s("Initial object in derived \n");
 			auto s = std::to_string(n);
 			s += s;
-			base_str_ = s.c_str(); // (std::string(base_str_) + s).c_str(); ## python Á´Ê½µ÷ÓÃ²»ÄÜÊ¹ÓÃ£¬ĞèÒªÖĞ×ª±äÁ¿¡£
+			base_str_ = s.c_str(); // (std::string(base_str_) + s).c_str(); ## python é“¾å¼è°ƒç”¨ä¸èƒ½ä½¿ç”¨ï¼Œéœ€è¦ä¸­è½¬å˜é‡ã€‚
 			std::cout << "Derived._base_str: " << this->base_str_ << ", this->a: " << this->derived_a_ << "\n";
 		}
 
@@ -169,13 +166,13 @@ void demo04()
 	std::cout << "b01.get_str(virtual):  " << b01.get_str() << "\n";
 	Derived d01(99);
 	Derived* d02 = nullptr;
-	d02 = reinterpret_cast<Derived*>(&b01); // ×ÓÀàÖ¸ÕëÇ¿ÖÆ×ªÏò¸¸Àà£¬ÊÇ²»°²È«µÄ¡£ ÕâÍ¬javaµÈÓïÑÔ¼Ì³ĞÏàÍ¬µÄ¡£ 
+	d02 = reinterpret_cast<Derived*>(&b01); // å­ç±»æŒ‡é’ˆå¼ºåˆ¶è½¬å‘çˆ¶ç±»ï¼Œæ˜¯ä¸å®‰å…¨çš„ã€‚ è¿™åŒjavaç­‰è¯­è¨€ç»§æ‰¿ç›¸åŒçš„ã€‚
 	if (d02 == nullptr)
 		std::cout << "Unsafe reinterpret_cast. " << "\n";
 	else {
 		std::cout << "d02.get_a:  " << d02->get_a() << "\n";
-		std::cout << "d02.get_info: " << d02->get_info() << "\n"; // Ö¸Ïò¸¸¶ÔÏó£¬¸¸¶ÔÏóÃ»get_infoº¯Êı£¬·µ»ØÎª¿Õ
-		std::cout << "d02.get_str: " << d02->get_str() << "\n"; // ¸¸¶ÔÏóget_strÊÇvirtualº¯Êı£¬Ã»ÓĞÊµ¼ÊÖ´ĞĞ¡£ 
+		std::cout << "d02.get_info: " << d02->get_info() << "\n"; // æŒ‡å‘çˆ¶å¯¹è±¡ï¼Œçˆ¶å¯¹è±¡æ²¡get_infoå‡½æ•°ï¼Œè¿”å›ä¸ºç©º
+		std::cout << "d02.get_str: " << d02->get_str() << "\n"; // çˆ¶å¯¹è±¡get_stræ˜¯virtualå‡½æ•°ï¼Œæ²¡æœ‰å®é™…æ‰§è¡Œã€‚
 	}
 
 	d02 = dynamic_cast<Derived*>(&b01);
@@ -188,11 +185,8 @@ void demo04()
 	printf("demo04 end.");
 }
 
-//
+
 //int main(int argc, char* argv[])
 //{
-//	//demo01();
-//	//demo02();
-//	//demo03();
-//	demo04();
+//	cast_stu::demo04();
 //}

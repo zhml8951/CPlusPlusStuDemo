@@ -4,8 +4,6 @@
 #include <cstdio>
 #include <iostream>
 
-// C-style read file
-
 // C++ 文件操作大体分两类(ansi_C语言方式和modern_C++方式)
 
 namespace file_operator
@@ -27,18 +25,18 @@ namespace file_operator
 		}
 
 		printf("seek: %ld\n", ftell(p_file));
-		char ch;
-
+		fpos_t fpos;
+		auto ch = '\n';
 		while (true) {
 			ch = fgetc(p_file);
 			if (feof(p_file)) break;
 			printf("%c", ch);
 		}
+		printf("fgetpos: %d\n fpos: %lld", fgetpos(p_file, &fpos), fpos);
 		fclose(p_file);
 	}
-	// TODO some things 
 
-	void file_read(const char* file_name)
+	void FileReadDemo1(const char* file_name)
 	{
 		char buff[kBufferSize];
 		FILE* pf;
@@ -52,7 +50,7 @@ namespace file_operator
 		fclose(pf);
 	}
 
-	void write_file(const char* file_name)
+	void WriteFileDemo1(const char* file_name)
 	{
 		const auto data_ptr = static_cast<unsigned int*>(malloc(sizeof(int) * kBufferSize));
 
@@ -68,6 +66,8 @@ namespace file_operator
 		fclose(pf);
 		free(data_ptr);
 	}
+
+	// TODO C语言方式的文件处理看似简单，目前还不知道具体什么情怀下使用及如何使用。 后面再补充吧。 
 }
 
 int main(int argc, char* argv[])

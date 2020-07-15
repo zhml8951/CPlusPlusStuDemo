@@ -18,7 +18,7 @@ private:
 public:
 	~IniParser() { clear(); }
 
-	string get_string_from_file(const string& ini_file);
+	static string get_string_from_file(const string& ini_file);
 
 	size_t get_size() const;
 
