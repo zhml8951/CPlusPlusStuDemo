@@ -6,6 +6,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
+#include <random>
 
 namespace mem_operator
 {
@@ -19,7 +20,7 @@ namespace mem_operator
 
 	int AllocatorDemo02()
 	{
-		std::vector<int> vec01{ 1, 2, 3, 4, 5 };
+		std::vector<int> vec01{1, 2, 3, 4, 5};
 		std::allocator<int> alloc;
 		auto p = alloc.allocate(vec01.size() * 2);
 		auto q = std::uninitialized_copy(vec01.begin(), vec01.end(), p);
@@ -31,7 +32,7 @@ namespace mem_operator
 	{
 		using namespace std;
 		allocator<string> alloc;
-		const auto n{ 5 };
+		const auto n{5};
 
 		const auto p = alloc.allocate(n);
 		auto q = p;
@@ -100,7 +101,7 @@ namespace mem_operator
 		std::printf("\n");
 		delete[] array_double;
 
-		auto array_float = new float{ 10.0 };
+		auto array_float = new float{10.0};
 		array_float[100] = 100.100;
 		std::printf("[0]: %lf\n[1]: %lf\n\n[100]: %lf\n", array_float[0], array_float[1], array_float[100]);
 		std::printf("\n");
@@ -115,7 +116,7 @@ namespace mem_operator
 	}
 
 	void MemchrDemo()
-		// void* memchr(const void* buf, int ch, size_t count);
+	// void* memchr(const void* buf, int ch, size_t count);
 	{
 		char str[] = "Example String. ";
 		// 从字符串里查找某个字符。
@@ -127,19 +128,19 @@ namespace mem_operator
 	}
 
 	void MemcmpDemo()
-		// int memcmp(const void* buf1, const void* buf2, unsigned int count);
-		// memcmp 两个string或数组比较，相同返回0， buf1<buf2返回<0; buf1>buf2 返回>0;
+	// int memcmp(const void* buf1, const void* buf2, unsigned int count);
+	// memcmp 两个string或数组比较，相同返回0， buf1<buf2返回<0; buf1>buf2 返回>0;
 	{
 		char buf1[] = "String1_name_buf1, compare element buf1. ";
 		char buf2[] = "String2_name_buf2, compare element buf2. ";
-		auto cmp_ret = memcmp(buf1, buf2, sizeof(buf1));
+		const auto cmp_ret = memcmp(buf1, buf2, sizeof(buf1));
 
 		printf("compare result num:  %d", cmp_ret);
 	}
 
 	void MemcpyDemo()
-		// memcpy 将字节值从源指向的位置直接复制到目标指向的内存块， 返回目的地址。
-		// auto memcpy(void* destination, const void* source, size_t num) -> void* {....}
+	// memcpy 将字节值从源指向的位置直接复制到目标指向的内存块， 返回目的地址。
+	// auto memcpy(void* destination, const void* source, size_t num) -> void* {....}
 	{
 		struct
 		{
@@ -161,14 +162,14 @@ namespace mem_operator
 	}
 
 	void MemsetDemo()
-		// auto memset(void* ptr, int value, size_t num) -> void* {.... }
-		// memset 将ptr指向的某一块内存的前num个字节全部设置成value制成的ASCII值， 块大小由第三参数决定，此函数通常为新申请的内存做初始工作。
+	// auto memset(void* ptr, int value, size_t num) -> void* {.... }
+	// memset 将ptr指向的某一块内存的前num个字节全部设置成value制成的ASCII值， 块大小由第三参数决定，此函数通常为新申请的内存做初始工作。
 	{
 		char str[] = "almost every programmer should know memset.";
 		printf("Original str:  %s\n", str);
 		memset(str, '-', 6);
 		printf("After memset str: %s\n", str);
-		// memset 通常用于初始化某段内存区域。
+		// memset 通常用于初始化某段内存区域。使用memset初始化某段内存时，除char外，赋值只能是-1或0， 
 		char buf[80];
 		memset(buf, 0, sizeof(buf));
 		printf("buf: %s", buf);
@@ -176,13 +177,14 @@ namespace mem_operator
 
 	// C-style memory
 	void MemoryAllocate()
-		// alloca 在栈内申请分配内存，无需释放 // 好像不需使用了。
-		// malloc 在堆内分配内存，但内容没有初始化，故需使用memset来初始化内存空间
-		// calloc 在堆内分配内存，同malloc相似，但始始化这部分内存
-		// realloc 对malloc分配的内存进行大小调整
+	// alloca 在栈内申请分配内存，无需释放 // 好像不需使用了。
+	// malloc 在堆内分配内存，但内容没有初始化，故需使用memset来初始化内存空间
+	// calloc 在堆内分配内存，同malloc相似，但始始化这部分内存
+	// realloc 对malloc分配的内存进行大小调整
 	{
-		auto block = static_cast<char*>(malloc(_MAX_PATH));
+		auto block = static_cast<char*>(malloc(_MAX_PATH * sizeof(char)));
 		if (block == nullptr) exit(1);
+		memset(block, 0, _MAX_PATH*sizeof(char));
 
 		for (auto i = 0; i < _MAX_PATH; i++) {
 			block[i] = rand() % 26 + 'a';
@@ -191,7 +193,22 @@ namespace mem_operator
 		block[_MAX_PATH] = '\n';
 
 		printf("Block string: %s\n", block);
+
+		auto buffer = static_cast<char*>(malloc(_MAX_PATH * sizeof(char)));
+		memset(buffer, 0, _MAX_PATH*sizeof(char));
+		printf("buffer.new: %s\n", buffer);
+
 		free(block);
+		free(buffer);
+
+		int* int_buf = static_cast<int*>(malloc(sizeof(int) * 2)); // 这类C风格操作内存都是逐字节操作的。 int是4字节，2个数应该4*2；
+		memset(int_buf, -1, sizeof(int) * 2);
+
+		printf("buf0: %d,  buf1: %d\n", *int_buf, *(int_buf + 1));
+		printf("buf[0]: %d, buf[1]: %d\n", int_buf[0], int_buf[1]);
+
+
+		free(int_buf);
 	}
 }
 
