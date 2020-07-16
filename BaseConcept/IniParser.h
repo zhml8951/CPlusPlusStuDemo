@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include <iostream>
 #include <string>
 #include <vector>
 #include <map>
@@ -19,8 +18,12 @@ public:
 	~IniParser() { clear(); }
 
 	static string get_string_from_file(const string& ini_file);
+	static bool read_file_content(string& rst, const string& file_name);
 
-	size_t get_size() const;
+	size_t get_size() const { return this->map_ini_.size(); };
+
+	bool read_ini(const std::string& filename);
+
 
 	void clear() { map_ini_.clear(); }
 };

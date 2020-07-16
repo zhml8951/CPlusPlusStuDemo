@@ -1,29 +1,21 @@
-#pragma once
-
+ï»¿#pragma once
 #include <cstdint>
 
-// vc ¶¯Ì¬Á´½Ó¿âµ¼³öÓëµ¼ÈëÉêÃ÷
-// __declspec(dllexport)
-// __declspec(dllimport)
-
-// ²ÉÓÃ #if defined(WINDOW) || defined(WIN32) ÕâÀàºê£¬ÊµÏÖ¿çÆ½Ì¨Í¨ÓÃ¹²ÓÃ´úÂë. 
-// #define SC_LITE_EXTERN __declspec(dllexport)
-// ÕâÀàÊ¹ÓÃcmake¹ÜÀíÏîÄ¿£¬×ö¿çÆ½Ì¨¿âÊ±³£ÓÃ·½·¨¡£
-
-#if defined(WINDOWS)|| defined(WIN32)			//µÚÒ»²ãÅĞ¶Ï£¬Æ½Ì¨Îªwin32 Ö´ĞĞÏÂÃæ¶¨Òå
-#if defined(SC_LITE_DLL)						//ÓÉcmake¶¨ÒåÁËBUILD_SHARED_LIBSÊ±Ö´ĞĞ,Ò²¾ÍÊÇÊ¹ÓÃ¶¯Ì¬¿âÊ±£¬
-#define SC_LITE_EXTERN __declspec(dllexport)    //set_target_properties PROPERTIES DEFINE_SYMBOL SC_LITE_DLL 
-#else											// #define SC_LITE_EXTERN extern "C" __declspec(dllexport)
-#define SC_LITE_EXTERN				// #define SC_LITE_EXTERN   ==> Èç¹ûÊ¹ÓÃ¾²Ì¬¿âlibÔò SC_LITE_EXTERN ¿Õ
+#if defined(WINDOWS) || defined(WIN32)
+#if defined(SC_LITE_DLL)
+#define SC_LITE_EXTERN __declspec(dllexport)
+#else
+#define SC_LITE_EXTERN
 #endif
 #else
 #define SC_LITE_EXTERN
 #endif
 
-// ¾²Ì¬¿âlib/*.aºÍ¶¯Ì¬¿âdll/so, ±àÒë¶ÎÊÇÒ»ÑùµÄ£¬ ÔÚÁ´½Ó½×½×¶Î½«¾²Ì¬¿âÒ»Æğ´ò°ü£¬¶ø¶¯Ì¬¿âÖ»ÔÚÔËĞĞ½×¶Î²Å»á±»¼ÓÔØ¡£
-// ÏÔÊ¾µ÷ÓÃdll  
+// é™æ€åº“lib/*.aå’ŒåŠ¨æ€åº“dll/so, ç¼–è¯‘æ®µæ˜¯ä¸€æ ·çš„ï¼Œ åœ¨é“¾æ¥é˜¶é˜¶æ®µå°†é™æ€åº“ä¸€èµ·æ‰“åŒ…ï¼Œè€ŒåŠ¨æ€åº“åªåœ¨è¿è¡Œé˜¶æ®µæ‰ä¼šè¢«åŠ è½½ã€‚
+// æ˜¾ç¤ºè°ƒç”¨dll
 // HMODULE hDll = LoadLibrary("\\..\\dynamic.dll");
 // ReSharper disable CppInconsistentNaming
+
 struct SC_LITE_EXTERN Monitor
 {
 	int Id = INT32_MAX;

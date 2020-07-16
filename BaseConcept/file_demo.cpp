@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <iostream>
+#include <cstring>
 
 // C++ 文件操作大体分两类(ansi_C语言方式和modern_C++方式)
 
@@ -15,11 +16,12 @@ namespace file_operator
 	// 缓冲区<Buffer>
 	void FileOpDemo01()
 	{
-		constexpr auto file_in = "d:\\temp\\c_file_operator.txt";
+		constexpr auto file_in = "d:\\temp\\Test01.ini";
+		//constexpr auto file_in = "d:\\temp\\test.xml";
 		constexpr auto file_out = "d:\\temp\\c_file_out.txt";
 
 		FILE* p_file = nullptr;
-		auto stat = fopen_s(&p_file, file_in, "r");
+		const auto stat = fopen_s(&p_file, file_in, "rt");
 		if (stat != 0) {
 			printf_s("\n!!Read file error. \n");
 		}
@@ -30,9 +32,22 @@ namespace file_operator
 		while (true) {
 			ch = fgetc(p_file);
 			if (feof(p_file)) break;
-			printf("%c", ch);
+			//printf("%c", ch);
 		}
+		printf("read end.\n");
 		printf("fgetpos: %d\n fpos: %lld", fgetpos(p_file, &fpos), fpos);
+		fseek(p_file, 0, SEEK_END);
+		auto size = ftell(p_file);
+		fseek(p_file, 0, SEEK_SET);
+		auto buf_size = size + 1;
+		auto p_buf = static_cast<char*>(calloc(buf_size, sizeof(char)));
+		
+		const auto read_size = fread_s(p_buf, buf_size, sizeof(char), size, p_file);
+		std::string str(p_buf);
+		printf("\n");
+		std::cout << "\n...out content...\n " << str << "\n";
+		std::cout << "\n" << "read_size:  " << read_size << "\n"; 
+		free(p_buf);
 		fclose(p_file);
 	}
 

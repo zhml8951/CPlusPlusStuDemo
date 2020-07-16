@@ -1,5 +1,9 @@
 ﻿#include "IniParser.h"
-#include <io.h>
+#include <sstream>
+#include <cstdio>
+#include <iostream>
+#include <fstream>
+
 
 static void trim_string(string& str)
 {
@@ -29,6 +33,20 @@ string& IniParser::replace_all_distinct(string& str, const string& new_value, co
 	return str;
 }
 
+bool IniParser::read_file_content(string& rst, const string& file_name)
+{
+	try {
+		const std::ifstream file_in(file_name);
+		std::ostringstream tmp;
+		tmp << file_in.rdbuf();
+		rst = tmp.str();
+		return true;
+	}
+	catch (...) {
+		return false;
+	}
+}
+
 string IniParser::get_string_from_file(const string& ini_file)
 {
 	FILE* fp = nullptr;
@@ -39,22 +57,42 @@ string IniParser::get_string_from_file(const string& ini_file)
 	fseek(fp, 0, SEEK_END);
 	const auto size = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
-
 	uint8_t* buffer = nullptr;
 	const auto buff_size = sizeof(uint8_t) * (size + 1);
+	std::cout << "buff_size: " << buff_size << "\n";
 	buffer = static_cast<uint8_t*>(malloc(buff_size));
+	memset(buffer, 0, buff_size);
 	buffer[size] = '\0';
-	auto read_size = fread_s(buffer, buff_size, sizeof(uint8_t), size, fp);
+	const auto read_size = fread_s(buffer, buff_size, sizeof(uint8_t), buff_size, fp);
 	fclose(fp);
-	
+
 	if (read_size < size) buffer[read_size] = '\n';
 
-	//std::string str(reinterpret_cast<char*>(buffer));
+	std::string str(reinterpret_cast<char*>(buffer));
+	std::cout << "str:  " << str << "\n";
 	free(buffer);
-	return "ok";
+	return str;
 }
 
+bool IniParser::read_ini(const std::string& filename)
+{
+	using std::string;
+	std::stringstream conf_file_in;
+	std::string content;
+	try {
+		//auto content = get_string_from_file(filename);
+		auto success = read_file_content(content, filename);
+		replace_all_distinct(content, "\r", "\n");
+		std::cout << content << "\n";
+	}
+	catch (...) {
+		return false;
+	}
+}
 
 int main(int argc, char* argv[])
 {
+	std::string file_name = "d:\\temp\\Test01.ini";
+
+	IniParser().read_ini(file_name);
 }
