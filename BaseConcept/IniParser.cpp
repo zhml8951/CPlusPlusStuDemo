@@ -39,7 +39,9 @@ bool IniParser::read_file_content(string& rst, const string& file_name)
 		const std::ifstream file_in(file_name);
 		std::ostringstream tmp;
 		tmp << file_in.rdbuf();
-		rst = tmp.str();
+		auto lvalue = new std::string(tmp.str());
+		memmove(&rst,lvalue, sizeof(*lvalue) ); // std::string(tmp.str());
+
 		return true;
 	}
 	catch (...) {
@@ -78,12 +80,17 @@ bool IniParser::read_ini(const std::string& filename)
 {
 	using std::string;
 	std::stringstream conf_file_in;
-	std::string content;
+	const auto content = new string();
+	std::cout << "content.address: " << content << "\n";
 	try {
 		//auto content = get_string_from_file(filename);
-		auto success = read_file_content(content, filename);
-		replace_all_distinct(content, "\r", "\n");
+		auto success = read_file_content(*content, filename);
 		std::cout << content << "\n";
+		std::cout << content->c_str() << "\n";
+
+		replace_all_distinct(*content, "\r", "\n");
+		delete content;
+		return true;
 	}
 	catch (...) {
 		return false;
