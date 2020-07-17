@@ -12,7 +12,7 @@ class IniParser
 private:
 	map<string, map<string, string>> map_ini_;
 	static string& replace_all(string& str, const string& old_value, const string& new_value);
-	static string& replace_all_distinct(string& str, const string& new_value, const string& old_value);
+	static bool replace_all_distinct(string& str, const string& new_value, const string& old_value);
 
 public:
 	~IniParser() { clear(); }
@@ -23,7 +23,7 @@ public:
 
 	size_t get_size() const { return this->map_ini_.size(); };
 
-	bool read_ini(const std::string& filename);
+	static bool read_ini(const std::string& filename);
 
 
 	void clear() { map_ini_.clear(); }

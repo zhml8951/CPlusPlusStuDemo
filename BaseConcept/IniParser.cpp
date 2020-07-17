@@ -4,7 +4,6 @@
 #include <iostream>
 #include <fstream>
 
-
 static void trim_string(string& str)
 {
 	str.erase(0, str.find_first_not_of(' '));
@@ -22,15 +21,22 @@ string& IniParser::replace_all(string& str, const string& old_value, const strin
 	return str;
 }
 
-string& IniParser::replace_all_distinct(string& str, const string& new_value, const string& old_value)
-{
-	for (size_t pos = 0; pos != string::npos; pos += new_value.length()) {
-		pos = str.find(old_value, pos);
-		if (pos == string::npos) break;
+// 主要目的确保文件换行符为\r\n(CRLF), 当文本由mac导出时，换行符是\r(CR),读取文档是最长文档叠加到一起。
 
-		str.replace(pos, old_value.length(), new_value);
+bool IniParser::replace_all_distinct(string& str, const string& new_value, const string& old_value)
+{
+	try {
+		for (size_t pos = 0; pos != string::npos; pos += new_value.length()) {
+			pos = str.find(old_value, pos);
+			if (pos == string::npos) break;
+
+			str.replace(pos, old_value.length(), new_value);
+		}
+		return true;
 	}
-	return str;
+	catch (...) {
+		return false;
+	}
 }
 
 bool IniParser::read_file_content(string& rst, const string& file_name)
@@ -40,8 +46,8 @@ bool IniParser::read_file_content(string& rst, const string& file_name)
 		std::ostringstream tmp;
 		tmp << file_in.rdbuf();
 		auto lvalue = new std::string(tmp.str());
-		memmove(&rst,lvalue, sizeof(*lvalue) ); // std::string(tmp.str());
 
+		memmove(&rst, lvalue, sizeof(*lvalue)); // std::string(tmp.str());
 		return true;
 	}
 	catch (...) {
@@ -80,15 +86,18 @@ bool IniParser::read_ini(const std::string& filename)
 {
 	using std::string;
 	std::stringstream conf_file_in;
-	const auto content = new string();
+	const auto content = new string;
 	std::cout << "content.address: " << content << "\n";
 	try {
 		//auto content = get_string_from_file(filename);
 		auto success = read_file_content(*content, filename);
 		std::cout << content << "\n";
-		std::cout << content->c_str() << "\n";
 
-		replace_all_distinct(*content, "\r", "\n");
+		// 主要目的确保文件换行符为\r\n(CRLF), 当文本由mac导出时，换行符是\r(CR),读取文档是最长文档叠加到一起。
+		if (!(replace_all_distinct(*content, "\r", "\r\n"))) {
+			return false;
+		}
+		std::cout << *content << "\n";
 		delete content;
 		return true;
 	}
@@ -99,7 +108,7 @@ bool IniParser::read_ini(const std::string& filename)
 
 int main(int argc, char* argv[])
 {
-	std::string file_name = "d:\\temp\\Test01.ini";
+	std::string file_name = "d:\\temp\\Config.ini";
 
-	IniParser().read_ini(file_name);
+	auto rst = IniParser().read_ini(file_name);
 }
