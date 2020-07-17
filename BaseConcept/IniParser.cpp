@@ -39,6 +39,8 @@ bool IniParser::replace_all_distinct(string& str, const string& new_value, const
 	}
 }
 
+
+
 bool IniParser::read_file_content(string& rst, const string& file_name)
 {
 	try {
@@ -52,6 +54,15 @@ bool IniParser::read_file_content(string& rst, const string& file_name)
 	}
 	catch (...) {
 		return false;
+	}
+}
+
+void IniParser::ReplaceAllDistinct(string& content, const string& old_val, const string& new_val)
+{
+	auto begin = -1;
+	while((begin = content.find(old_val, begin+1)) != string::npos) {
+		content.replace(begin, old_val.length(), new_val);
+		begin += old_val.length();
 	}
 }
 
@@ -97,7 +108,11 @@ bool IniParser::read_ini(const std::string& filename)
 		if (!(replace_all_distinct(*content, "\r", "\r\n"))) {
 			return false;
 		}
-		std::cout << *content << "\n";
+		conf_file_in << content;
+		string str_line = "";
+
+		// TODO. read ini file
+
 		delete content;
 		return true;
 	}

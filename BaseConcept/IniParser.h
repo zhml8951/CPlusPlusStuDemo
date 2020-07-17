@@ -17,6 +17,8 @@ private:
 public:
 	~IniParser() { clear(); }
 
+	static void ReplaceAllDistinct(string& content, const string& old_val, const string& new_val);
+
 	static string get_string_from_file(const string& ini_file);
 
 	static bool read_file_content(string& rst, const string& file_name);
