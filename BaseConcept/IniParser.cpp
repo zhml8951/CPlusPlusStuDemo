@@ -7,7 +7,7 @@
 static void trim_string(string& str)
 {
 	str.erase(0, str.find_first_not_of(' '));
-	str.erase(str.find_first_not_of(' ') + 1);
+	str.erase(str.find_last_not_of(" ") + 1);
 }
 
 string& IniParser::replace_all(string& str, const string& old_value, const string& new_value)
@@ -39,8 +39,6 @@ bool IniParser::replace_all_distinct(string& str, const string& new_value, const
 	}
 }
 
-
-
 bool IniParser::read_file_content(string& rst, const string& file_name)
 {
 	try {
@@ -60,7 +58,7 @@ bool IniParser::read_file_content(string& rst, const string& file_name)
 void IniParser::ReplaceAllDistinct(string& content, const string& old_val, const string& new_val)
 {
 	auto begin = -1;
-	while((begin = content.find(old_val, begin+1)) != string::npos) {
+	while ((begin = content.find(old_val, begin + 1)) != string::npos) {
 		content.replace(begin, old_val.length(), new_val);
 		begin += old_val.length();
 	}
@@ -108,10 +106,43 @@ bool IniParser::read_ini(const std::string& filename)
 		if (!(replace_all_distinct(*content, "\r", "\r\n"))) {
 			return false;
 		}
+
 		conf_file_in << content;
 		string str_line = "";
+		std::map<string, string>* kv_node = nullptr;
+		size_t left_pos;
+		size_t right_pos;
+		size_t equal_div_pos;
 
-		// TODO. read ini file
+		while (std::getline(conf_file_in, str_line)) {
+			if (str_line.empty()) continue;
+			if ((string::npos != (left_pos = str_line.find("["))) &&
+				(str_line.npos != (right_pos = str_line.find("]")))) {
+				auto root = str_line.substr(left_pos + 1, right_pos - left_pos - 1);
+				trim_string(root);
+				if (!root.empty()) {
+					this->map_ini_[root] = std::map<string, string>{};
+					kv_node = &(this->map_ini_[root]);
+				}
+			}
+			else if (string::npos != (equal_div_pos = str_line.find("="))) {
+				auto key = str_line.substr(0, equal_div_pos);
+				const auto note_pos = str_line.find(";");
+				string value;
+				if (string::npos != note_pos) {
+					value = str_line.substr(equal_div_pos + 1, note_pos - equal_div_pos - 1);
+				}
+				else {
+					value = str_line.substr(equal_div_pos + 1, str_line.size() - 1);
+				}
+
+				trim_string(key);
+				trim_string(value);
+				if (kv_node != nullptr && !key.empty()) {
+					(*kv_node)[key] = value;
+				}
+			}
+		}
 
 		delete content;
 		return true;

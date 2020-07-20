@@ -25,7 +25,7 @@ public:
 
 	size_t get_size() const { return this->map_ini_.size(); };
 
-	static bool read_ini(const std::string& filename);
+	bool read_ini(const std::string& filename);
 
 
 	void clear() { map_ini_.clear(); }
