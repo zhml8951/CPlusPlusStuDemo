@@ -3,6 +3,8 @@
 #include <cstdio>
 #include <iostream>
 #include <fstream>
+#include <cstring>
+#include <algorithm>
 
 static void trim_string(string& str)
 {
@@ -42,7 +44,11 @@ bool IniParser::replace_all_distinct(string& str, const string& new_value, const
 bool IniParser::read_file_content(string& rst, const string& file_name)
 {
 	try {
-		const std::ifstream file_in(file_name);
+		const std::ifstream file_in(file_name.c_str());
+		if (!(file_in.is_open())) {
+			printf("Read ini file(%s) error.\n", file_name.c_str());
+			return false;
+		}
 		std::ostringstream tmp;
 		tmp << file_in.rdbuf();
 		auto lvalue = new std::string(tmp.str());
@@ -99,15 +105,18 @@ bool IniParser::read_ini(const std::string& filename)
 	std::cout << "content.address: " << content << "\n";
 	try {
 		//auto content = get_string_from_file(filename);
-		auto success = read_file_content(*content, filename);
-		std::cout << content << "\n";
+		const auto success = read_file_content(*content, filename);
+		if (!success) {
+			printf("Read ini file(%s), Returned content Failure.\n", filename.c_str());
+			return false;
+		}
 
 		// 主要目的确保文件换行符为\r\n(CRLF), 当文本由mac导出时，换行符是\r(CR),读取文档是最长文档叠加到一起。
 		if (!(replace_all_distinct(*content, "\r", "\r\n"))) {
 			return false;
 		}
 
-		conf_file_in << content;
+		conf_file_in << (*content);
 		string str_line = "";
 		std::map<string, string>* kv_node = nullptr;
 		size_t left_pos;
@@ -143,18 +152,147 @@ bool IniParser::read_ini(const std::string& filename)
 				}
 			}
 		}
-
-		delete content;
-		return true;
 	}
 	catch (...) {
 		return false;
 	}
+
+	delete content;
+	return true;
+}
+
+void IniParser::view() const
+{
+	for (auto it = this->map_ini_.begin(); it != map_ini_.end(); ++it) {
+		printf(it->first.data());
+		printf(":\n");
+		for (auto val_it = it->second.begin(); val_it != it->second.end(); ++val_it) {
+			printf(val_it->first.c_str());
+			printf(" = ");
+			printf(val_it->second.c_str());
+			printf("\n");
+		}
+	}
+}
+
+string IniParser::get_string(const string& root, const string& key, const string& def) const
+{
+	auto iter = this->map_ini_.find(root);
+	if (iter == map_ini_.end()) return "";
+	auto sub_iter = iter->second.find(key);
+	if (sub_iter == iter->second.end()) return "";
+	if (!(sub_iter->second).empty())
+		return sub_iter->second;
+	return def;
+}
+
+int IniParser::get_int(const string& root, const string& key, int def) const
+{
+	const auto str = get_string(root, key, "");
+	if (str.empty()) return def;
+	int rst;
+	try {
+		std::istringstream is(str);
+		is >> rst;
+	}
+	catch (...) {
+		rst = def;
+	}
+	return rst;
+}
+
+double IniParser::get_double(const string& root, const string& key, double def) const
+{
+	const auto str = get_string(root, key, "");
+	if (str.empty()) return def;
+
+	double rst;
+	try {
+		std::istringstream is(str);
+		is >> rst;
+	}
+	catch (...) {
+		rst = def;
+	}
+	return rst;
+}
+
+bool IniParser::get_bool(const string& root, const string& key, bool def) const
+{
+	auto str = get_string(root, key, "");
+	if (str.empty()) return def;
+
+	if (str == "1") return true;
+
+	std::transform(str.begin(), str.end(), str.begin(), tolower);
+
+	if (str == "true") return true;
+
+	return false;
+}
+
+bool IniParser::write_ini(const string& path)
+{
+	std::ofstream out_conf_file(path.c_str());
+	if (!out_conf_file) return false;
+	for (auto it = this->map_ini_.begin(); it != map_ini_.end(); ++it) {
+		out_conf_file << "[" << it->first << "]" << std::endl;
+		for (map<string, string>::iterator sub_it = it->second.begin(); sub_it != it->second.end(); ++sub_it) {
+			out_conf_file << sub_it->first << " = " << sub_it->second << std::endl;
+		}
+	}
+	out_conf_file.close();
+	out_conf_file.clear();
+	return true;
+}
+
+void IniParser::set_value(const string& root, const string& key, const string& value)
+{
+	map<string, map<string, string>>::iterator it = this->map_ini_.find(root);
+	if (map_ini_.end() != it) {
+		map<string, string>::iterator sub_it = it->second.find(key);
+		if (sub_it != it->second.end())
+			sub_it->second = value;
+		else
+			it->second[key] = value;
+	}
+	else {
+		map<string, string> m;
+		m[key] = value;
+		this->map_ini_[root] = std::move(m);
+	}
+}
+
+void IniParser::set_string(const string& root, const string& key, const string& value)
+{
+	set_value(root, key, value);
+}
+
+void IniParser::set_int(const string& root, const string& key, int value)
+{
+	const auto str = std::to_string(value);
+	set_value(root, key, str);
+}
+
+void IniParser::set_double(const string& root, const string& key, double value)
+{
+	char buff[64];
+	sprintf_s(buff, "%lf", value);
+	set_value(root, key, buff);
+}
+
+void IniParser::set_bool(const string& root, const string& key, bool value)
+{
+	if (value) set_value(key, key, "1");
+	else set_value(root, key, "0");
 }
 
 int main(int argc, char* argv[])
 {
-	std::string file_name = "d:\\temp\\Config.ini";
+	const std::string ini_file = "d:\\temp\\Config.ini";
+	IniParser parser01;
+	auto res = parser01.read_ini(ini_file);
+	parser01.view();
 
-	auto rst = IniParser().read_ini(file_name);
+	std::cout << std::boolalpha << res << "\n";
 }

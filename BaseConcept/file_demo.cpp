@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <iostream>
 #include <cstring>
+#include <fstream>
 
 // C++ 文件操作大体分两类(ansi_C语言方式和modern_C++方式)
 
@@ -20,35 +21,35 @@ namespace file_operator
 		//constexpr auto file_in = "d:\\temp\\test.xml";
 		constexpr auto file_out = "d:\\temp\\c_file_out.txt";
 
-		FILE* p_file = nullptr;
-		const auto stat = fopen_s(&p_file, file_in, "rt");
+		FILE* file_ptr = nullptr;
+		const auto stat = fopen_s(&file_ptr, file_in, "rt");
 		if (stat != 0) {
 			printf_s("\n!!Read file error. \n");
 		}
 
-		printf("seek: %ld\n", ftell(p_file));
+		printf("seek: %ld\n", ftell(file_ptr));
 		fpos_t fpos;
 		auto ch = '\n';
 		while (true) {
-			ch = fgetc(p_file);
-			if (feof(p_file)) break;
+			ch = fgetc(file_ptr);
+			if (feof(file_ptr)) break;
 			//printf("%c", ch);
 		}
 		printf("read end.\n");
-		printf("fgetpos: %d\n fpos: %lld", fgetpos(p_file, &fpos), fpos);
-		fseek(p_file, 0, SEEK_END);
-		auto size = ftell(p_file);
-		fseek(p_file, 0, SEEK_SET);
-		auto buf_size = size + 1;
-		auto p_buf = static_cast<char*>(calloc(buf_size, sizeof(char)));
-		
-		const auto read_size = fread_s(p_buf, buf_size, sizeof(char), size, p_file);
+		printf("fgetpos: %d\n fpos: %lld", fgetpos(file_ptr, &fpos), fpos);
+		fseek(file_ptr, 0, SEEK_END);
+		const auto file_length = ftell(file_ptr);
+		fseek(file_ptr, 0, SEEK_SET);
+		const auto buf_size = file_length + 1;
+		const auto p_buf = static_cast<char*>(calloc(buf_size, sizeof(char)));
+
+		const auto read_size = fread_s(p_buf, buf_size, sizeof(char), file_length, file_ptr);
 		std::string str(p_buf);
 		printf("\n");
 		std::cout << "\n...out content...\n " << str << "\n";
-		std::cout << "\n" << "read_size:  " << read_size << "\n"; 
+		std::cout << "\n" << "read_size:  " << read_size << "\n";
 		free(p_buf);
-		fclose(p_file);
+		fclose(file_ptr);
 	}
 
 	void FileReadDemo1(const char* file_name)
@@ -82,7 +83,25 @@ namespace file_operator
 		free(data_ptr);
 	}
 
-	// TODO C语言方式的文件处理看似简单，目前还不知道具体什么情怀下使用及如何使用。 后面再补充吧。 
+	// TODO C语言方式的文件处理看似简单，目前还不知道具体什么情怀下使用及如何使用。 后面再补充吧。
+
+	void ReadFileStream()
+	{
+		auto print_state = [](const std::ios& stream) -> void {
+			using std::cout;
+			cout << "good()=" << stream.good() << "\n";
+			cout << "eof()=" << stream.eof() << "\n";
+			cout << "fail()=" << stream.fail() << "\n";
+			cout << "bad()=" << stream.bad() << "\n";
+		};
+
+		std::string content;
+		std::ifstream ifs("d:\\temp\\csdn.sql");
+		if (ifs) {
+			while (bool(std::getline(ifs, content))) {
+			}
+		}
+	}
 }
 
 int main(int argc, char* argv[])

@@ -27,6 +27,27 @@ public:
 
 	bool read_ini(const std::string& filename);
 
+	void view() const;
+
+	string get_string(const string& root, const string& key, const string& def) const;
+
+	int get_int(const string& root, const string& key, int def) const;
+
+	double get_double(const string& root, const string& key, double def) const;
+
+	bool get_bool(const string& root, const string& key, bool def) const ;
+
+	bool write_ini(const string& path);
+
+	void set_value(const string& root, const string& key, const string& value);
+
+	void set_string(const string& root, const string& key, const string& value);
+
+	void set_int(const string& root, const string& key, int value);
+
+	void set_double(const string& root, const string& key, double value);
+
+	void set_bool(const string& root, const string& key, bool value);
 
 	void clear() { map_ini_.clear(); }
 };
