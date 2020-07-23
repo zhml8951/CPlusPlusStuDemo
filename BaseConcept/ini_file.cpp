@@ -13,7 +13,6 @@ namespace ini_file
 		string clean_line;
 		string comment;
 		string right_comment;
-		IniSection* cur_section = nullptr;
 
 		int error_no;
 
@@ -26,7 +25,7 @@ namespace ini_file
 			return kErrorOpenFileFailed;
 		}
 
-		cur_section = new IniSection();
+		auto cur_section = new IniSection();
 		cur_section->name = "";
 		sections_vec_.push_back(cur_section);
 
@@ -50,20 +49,57 @@ namespace ini_file
 
 			// step 2.
 			if (clean_line[0] == '[') {
-				error_no = 0;
+				error_no = UpdateSection(clean_line, comment, right_comment, &cur_section);
 			}
 			else {
-				error_no = 1;
+				error_no = AddKeyValuePair(clean_line, comment, right_comment, cur_section);
+			}
+			if (error_no != 0) {
+				ifs.close();
+				return error_no;
 			}
 		}
+		ifs.close();
+		return kRetOk;
 	}
 
 	int IniFile::Save()
 	{
+		return SaveAs(this->ini_filepath_);
 	}
 
 	int IniFile::SaveAs(const string& file_name)
 	{
+		string data = "";
+		for (auto sec_it = sections_vec_.begin(); sec_it != sections_vec_.end(); ++sec_it) {
+			if ((*sec_it)->comment != "") {
+				data += (*sec_it)->comment;
+			}
+			if ((*sec_it)->name != "") {
+				data += string("[") + (*sec_it)->name + string("]");
+				data += kDelimit;
+			}
+			if ((*sec_it)->right_comment != "") {
+				data += " " + this->comment_delimiter_ + (*sec_it)->right_comment;
+			}
+
+			for (auto item_it = (*sec_it)->items.begin(); item_it != (*sec_it)->items.end(); ++item_it) {
+				if (item_it->comment != "") {
+					data += item_it->comment;
+					if (data[data.length() - 1] != '\n') data += kDelimit;
+				}
+
+				data += item_it->key + "=" + item_it->value;
+				if (item_it->right_comment != "") {
+					data += " " + this->comment_delimiter_ + item_it->right_comment;
+				}
+				if (data[data.length() - 1] != '\n') data += kDelimit;
+			}
+		}
+		std::ofstream ofs;
+		ofs << data;
+		ofs.close();
+		return kRetOk;
 	}
 
 	int IniFile::GetStringValue(const string& section, const string& key, string* value)
@@ -165,8 +201,71 @@ namespace ini_file
 	                             IniSection* section)
 	{
 		string key, value;
-	// TODO ....
+		if (!Parse(clean_line, &key, &value)) {
+			err_msg_ = string("parse line failed:  ") + clean_line;
+			return kErrorParseKeyValueFailed;
+		}
+		IniItem item;
+		item.key = key;
+		item.value = value;
+		item.comment = comment;
+		item.right_comment = right_comment;
+		section->items.push_back(item);
 		return 0;
+	}
+
+	bool IniFile::Parse(const string& content, string* key, string* value)
+	{
+		return Split(content, "=", key, value);
+	}
+
+	int IniFile::GetValues(const string& section, const string& key, vector<string>* values, vector<string>* comments)
+	{
+		values->clear();
+		comments->clear();
+		auto sect = GetSection(section);
+		if (sect == nullptr) {
+			err_msg_ = string("Not found the section. ") + section;
+			return kErrorNotFoundSection;
+		}
+
+		for(auto it = sect->begin(); it != sect->end(); ++it) {
+			if(it->key == key) {
+				auto value = it->value;
+				auto comment = it->comment;
+				values->push_back(value);
+				comments->push_back(comment);
+			}
+		}
+		if(values->size() == 0) {
+			err_msg_ = string("Not found the key  ") + key;
+			return kErrorNotFoundKey;
+		}
+		return kRetOk;
+	}
+
+	void IniFile::Print()
+	{
+		printf("################# print start ################\n");
+		printf("file path: [%s] \n", this->ini_filepath_.c_str());
+		printf("comment delimiter: [%s]\n", this->comment_delimiter_.c_str());
+
+		for (auto it = sections_vec_.begin(); it != sections_vec_.end(); ++it) {
+			printf("comment:  [\n%s]\n", (*it)->comment.data());
+			printf("section:  \n[%s]\n", (*it)->name.c_str());
+			if ((*it)->right_comment != "") {
+				printf("right comment:\n%s", (*it)->right_comment.c_str());
+			}
+			for (auto item_it = (*it)->items.begin(); item_it != (*it)->items.end(); ++item_it) {
+				printf("    comment  :  [\n%s]\n", item_it->comment.c_str());
+				printf("    param    :  %s=%s\n", item_it->key.c_str(), item_it->value.c_str());
+
+				if (item_it->right_comment != "") {
+					printf("     right comment:  [\n%s]\n", item_it->right_comment.c_str());
+				}
+			}
+		}
+		printf("################# print start ################\n");
 	}
 
 	// string 两端空格去除，实现方式比较复杂，两次创建string. 这里不再使用，

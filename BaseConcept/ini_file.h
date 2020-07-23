@@ -57,17 +57,26 @@ namespace ini_file
 		int SaveAs(const string& file_name);
 
 		int GetStringValue(const string& section, const string& key, string* value);
-		IniSection* GetSection(const string& section="");
+		IniSection* GetSection(const string& section = "");
 
 	private:
-		void Release();
 		static void Trim(string& str);
 		bool IsCommentLine(const string& str) const;
 		static bool StartWith(const string& str, const string& prefix);
-		static bool Split(const string& str, const string& sep, string *p_left, string* p_right);
-		int UpdateSection(const string& clean_line, const string& comment, const string& right_comment, IniSection **section);
-		int AddKeyValuePair(const string& clean_line, const string& comment, const string& right_comment, IniSection *section);
+		static bool Split(const string& str, const string& sep, string* p_left, string* p_right);
 
+		int UpdateSection(const string& clean_line, const string& comment, const string& right_comment,
+		                  IniSection** section);
+
+		int AddKeyValuePair(const string& clean_line, const string& comment, const string& right_comment,
+		                    IniSection* section);
+
+		static bool Parse(const string& content, string* key, string* value);
+		
+		 int GetValues(const string& section, const string& key, vector<string>* values, vector<string>* comments);
+		
+		void Print();
+		void Release();
 
 
 	private:
