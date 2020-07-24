@@ -63,6 +63,16 @@ namespace ini_file
 		return kRetOk;
 	}
 
+	void IniFile::Release()
+	{
+		this->ini_filepath_ = "";
+		// ReSharper disable once CppUseAuto
+		for (IniSectionIter it = sections_vec_.begin(); it != sections_vec_.end(); ++it) {
+			delete(*it);
+		}
+		this->sections_vec_.clear();
+	}
+
 	int IniFile::Save()
 	{
 		return SaveAs(this->ini_filepath_);
@@ -102,8 +112,20 @@ namespace ini_file
 		return kRetOk;
 	}
 
+	int IniFile::GetValues(const string& section, const string& key, vector<string>* values)
+	{
+		vector<string> comments;
+		return GetValues(section, key, values, &comments);
+	}
+
 	int IniFile::GetStringValue(const string& section, const string& key, string* value)
 	{
+		return;
+	}
+
+	int IniFile::GetIntValue(const string* section, const string& key, int* value)
+	{
+		return 0;
 	}
 
 	IniSection* IniFile::GetSection(const string& section)
@@ -112,16 +134,6 @@ namespace ini_file
 			if ((*it)->name == section) { return *it; }
 		}
 		return nullptr;
-	}
-
-	void IniFile::Release()
-	{
-		this->ini_filepath_ = "";
-		// ReSharper disable once CppUseAuto
-		for (IniSectionIter it = sections_vec_.begin(); it != sections_vec_.end(); ++it) {
-			delete(*it);
-		}
-		this->sections_vec_.clear();
 	}
 
 	// 使用string::erase 去除两端空格
@@ -143,7 +155,7 @@ namespace ini_file
 		return false;
 	}
 
-	bool IniFile::Split(const string& str, const string& sep, string* p_left, string* p_right)
+	bool IniFile::Split(const string& str, const string& sep, string* left_content, string* right_comment)
 	{
 		const auto pos = str.find(sep);
 		string left, right;
@@ -152,22 +164,22 @@ namespace ini_file
 			right = string(str, pos + 1);
 			Trim(left);
 			Trim(right);
-			*p_left = left;
-			*p_right = right;
+			*left_content = left;
+			*right_comment = right;
 			return true;
 		}
 		else {
 			left = str;
 			right = "";
 			Trim(left);
-			*p_left = left;
-			*p_right = right;
+			*left_content = left;
+			*right_comment = right;
 			return false;
 		}
 	}
 
 	int IniFile::UpdateSection(const string& clean_line, const string& comment, const string& right_comment,
-	                           IniSection** section)
+		IniSection** section)
 	{
 		const auto pos = clean_line.find_first_of(']');
 		if (pos == string::npos) {
@@ -198,7 +210,7 @@ namespace ini_file
 	}
 
 	int IniFile::AddKeyValuePair(const string& clean_line, const string& comment, const string& right_comment,
-	                             IniSection* section)
+		IniSection* section)
 	{
 		string key, value;
 		if (!Parse(clean_line, &key, &value)) {
@@ -229,19 +241,30 @@ namespace ini_file
 			return kErrorNotFoundSection;
 		}
 
-		for(auto it = sect->begin(); it != sect->end(); ++it) {
-			if(it->key == key) {
+		for (auto it = sect->begin(); it != sect->end(); ++it) {
+			if (it->key == key) {
 				auto value = it->value;
 				auto comment = it->comment;
 				values->push_back(value);
 				comments->push_back(comment);
 			}
 		}
-		if(values->size() == 0) {
+		if (values->size() == 0) {
 			err_msg_ = string("Not found the key  ") + key;
 			return kErrorNotFoundKey;
 		}
 		return kRetOk;
+	}
+
+	int IniFile::GetValue(const string& section, const string& key, string* value)
+	{
+		return 0;
+	}
+
+	int IniFile::GetValue(const string& section, const string& key, string* value, string* comment)
+	{
+		IniSection* sect = GetSection(section);
+		return 0;
 	}
 
 	void IniFile::Print()
