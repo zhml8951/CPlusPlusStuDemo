@@ -97,9 +97,12 @@ namespace file_operator
 
 		std::string content;
 		std::ifstream ifs("d:\\temp\\csdn.sql");
-		if (ifs) {
+		if (ifs.is_open()) {
 			while (bool(std::getline(ifs, content))) {
 			}
+		}
+		else {
+			throw "Read file error";
 		}
 	}
 }
