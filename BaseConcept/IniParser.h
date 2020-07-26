@@ -11,7 +11,9 @@ class IniParser
 {
 private:
 	map<string, map<string, string>> map_ini_;
+
 	static string& replace_all(string& str, const string& old_value, const string& new_value);
+	
 	static bool replace_all_distinct(string& str, const string& new_value, const string& old_value);
 
 public:

@@ -52,37 +52,59 @@ namespace ini_file
 	public:
 		IniFile();
 		~IniFile() { Release(); }
-		
+
 		int Load(const string& file_name);
-		
+
 		int Save();
 		int SaveAs(const string& file_name);
 
-		int GetValues(const string& section, const string& key, vector<string> *values);
-
-
-		int GetIntValue(const string* section, const string& key, int* value);
+		int GetValues(const string& section, const string& key, vector<string>* values);
 
 		int GetStringValue(const string& section, const string& key, string* value);
-		
+
+		int GetIntValue(const string& section, const string& key, int* value);
+
+		int GetDoubleValue(const string& section, const string& key, double* value);
+
+		int GetBoolValue(const string& section, const string& key, bool* value);
+
+		int GetComment(const string& section, const string& key, string* comment);
+
+		int GetRightComment(const string& section, const string& key, string* right_comment);
+
+		int GetSections(vector<string>* sections);
+
+		int GetSectionCount();
+
+		bool HasSection(const string& section);
+
+		bool HasKey(const string& section, const string& key);
+
 		IniSection* GetSection(const string& section = "");
+
+		void test()
+		{
+			Print();
+		}
 
 	private:
 		static void Trim(string& str);
-		
-		bool IsCommentLine(const string& str) const;
-		
+
 		static bool StartWith(const string& str, const string& prefix);
-		
+
 		static bool Split(const string& str, const string& sep, string* left_content, string* right_comment);
 
-		int UpdateSection(const string& clean_line, const string& comment, const string& right_comment,
-		                  IniSection** section);
-
-		int AddKeyValuePair(const string& clean_line, const string& comment, const string& right_comment,
-		                    IniSection* section);
+		static bool StrCmpIgnoreCase(const string& str1, const string& str2);
 
 		static bool Parse(const string& content, string* key, string* value);
+
+		bool IsCommentLine(const string& str) const;
+
+		int UpdateSection(const string& clean_line, const string& comment, const string& right_comment,
+			IniSection** section);
+
+		int AddKeyValuePair(const string& clean_line, const string& comment, const string& right_comment,
+			IniSection* section);
 
 		int GetValues(const string& section, const string& key, vector<string>* values, vector<string>* comments);
 
@@ -93,7 +115,6 @@ namespace ini_file
 		void Print();
 
 		void Release();
-
 
 	private:
 		typedef vector<IniSection*>::iterator IniSectionIter;

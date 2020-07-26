@@ -1,5 +1,7 @@
 ﻿#include "ini_file.h"
 #include <fstream>
+#include <cstring>
+#include <algorithm>
 
 namespace ini_file
 {
@@ -112,25 +114,96 @@ namespace ini_file
 		return kRetOk;
 	}
 
-	int IniFile::GetValues(const string& section, const string& key, vector<string>* values)
-	{
-		vector<string> comments;
-		return GetValues(section, key, values, &comments);
-	}
-
 	int IniFile::GetStringValue(const string& section, const string& key, string* value)
 	{
-		return;
+		return GetValue(section, key, value);
 	}
 
-	int IniFile::GetIntValue(const string* section, const string& key, int* value)
+	int IniFile::GetIntValue(const string& section, const string& key, int* value)
 	{
-		return 0;
+		string str_value;
+		const auto error_no = GetValue(section, key, &str_value);
+		*value = atoi(str_value.c_str());
+		return error_no;
+	}
+
+	int IniFile::GetDoubleValue(const string& section, const string& key, double* value)
+	{
+		string str_value;
+		const auto error_no = GetValue(section, key, &str_value);
+		*value = atof(str_value.c_str());
+		return error_no;
+	}
+
+	int IniFile::GetBoolValue(const string& section, const string& key, bool* value)
+	{
+		string str_value;
+		auto err = GetValue(section, key, &str_value);
+
+		if (StrCmpIgnoreCase(str_value, "true") || StrCmpIgnoreCase(str_value, "1")) *value = true;
+
+		if (StrCmpIgnoreCase(str_value, "false") || StrCmpIgnoreCase(str_value, "0")) *value = false;
+
+		return err;
+	}
+
+	int IniFile::GetComment(const string& section, const string& key, string* comment)
+	{
+		auto sect = GetSection(section);
+		if (sect == nullptr) {
+			err_msg_ = string("not found the section. ") + section;
+			return kErrorNotFoundSection;
+		}
+		if (key == "") {
+			*comment = sect->comment;
+			return kRetOk;
+		}
+
+		// ReSharper disable once CppUseAuto
+		for (IniSection::IniItemIter it = sect->begin(); it != sect->end(); ++it) {
+			if (it->key == key) {
+				*comment = it->comment;
+				return kRetOk;
+			}
+		}
+		this->err_msg_ = string("not found the key") + section;
+		return kErrorNotFoundKey;
+	}
+
+	int IniFile::GetRightComment(const string& section, const string& key, string* right_comment)
+	{
+		IniSection* sect = GetSection(section);
+		if (sect == nullptr) {
+			err_msg_ = string("not found the section.") + section;
+			return kErrorNotFoundSection;
+		}
+		if (key == "") {
+			*right_comment = sect->right_comment;
+			return kRetOk;
+		}
+
+		for (auto it = sect->items.begin(); it != sect->items.end(); ++it) {
+			if (it->key == key) {
+				*right_comment = it->right_comment;
+				return kRetOk;
+			}
+		}
+
+		this->err_msg_ = string("not found the key.") + key;
+		return kErrorNotFoundKey;
+	}
+
+	int IniFile::GetSections(vector<string>* sections)
+	{
+		for(auto it = this->sections_vec_.begin(); it != this->sections_vec_.end(); ++it) {
+			sections->push_back((*it)->name);
+			//*(*it)->name
+		}
 	}
 
 	IniSection* IniFile::GetSection(const string& section)
 	{
-		for (IniSectionIter it = this->sections_vec_.begin(); it != this->sections_vec_.end(); ++it) {
+		for (auto it = this->sections_vec_.begin(); it != this->sections_vec_.end(); ++it) {
 			if ((*it)->name == section) { return *it; }
 		}
 		return nullptr;
@@ -178,8 +251,18 @@ namespace ini_file
 		}
 	}
 
+	bool IniFile::StrCmpIgnoreCase(const string& str1, const string& str2)
+	{
+		auto first_str{str1};
+		auto last_str{str2};
+		std::transform(first_str.begin(), first_str.end(), first_str.begin(), tolower);
+		std::transform(last_str.begin(), last_str.end(), last_str.begin(), tolower);
+
+		return (first_str == last_str);
+	}
+
 	int IniFile::UpdateSection(const string& clean_line, const string& comment, const string& right_comment,
-		IniSection** section)
+	                           IniSection** section)
 	{
 		const auto pos = clean_line.find_first_of(']');
 		if (pos == string::npos) {
@@ -210,7 +293,7 @@ namespace ini_file
 	}
 
 	int IniFile::AddKeyValuePair(const string& clean_line, const string& comment, const string& right_comment,
-		IniSection* section)
+	                             IniSection* section)
 	{
 		string key, value;
 		if (!Parse(clean_line, &key, &value)) {
@@ -256,39 +339,58 @@ namespace ini_file
 		return kRetOk;
 	}
 
-	int IniFile::GetValue(const string& section, const string& key, string* value)
+	int IniFile::GetValues(const string& section, const string& key, vector<string>* values)
 	{
-		return 0;
+		vector<string> comments;
+		return GetValues(section, key, values, &comments);
 	}
 
 	int IniFile::GetValue(const string& section, const string& key, string* value, string* comment)
 	{
-		IniSection* sect = GetSection(section);
-		return 0;
+		auto sect = GetSection(section);
+		if (sect == nullptr) {
+			err_msg_ = string("not found the section. ") + section;
+			return kErrorNotFoundSection;
+		}
+		for (auto it = sect->begin(); it != sect->end(); ++it) {
+			if (it->key == key) {
+				*value = it->value;
+				*comment = it->comment;
+				return kRetOk;
+			}
+		}
+		this->err_msg_ = string("not fond the key. ") + key;
+		return kErrorNotFoundKey;
+	}
+
+	int IniFile::GetValue(const string& section, const string& key, string* value)
+	{
+		string comment;
+		return GetValue(section, key, value, &comment);
 	}
 
 	void IniFile::Print()
 	{
-		printf("################# print start ################\n");
+		printf("\n################# print start ################\n\n");
 		printf("file path: [%s] \n", this->ini_filepath_.c_str());
 		printf("comment delimiter: [%s]\n", this->comment_delimiter_.c_str());
 
 		for (auto it = sections_vec_.begin(); it != sections_vec_.end(); ++it) {
-			printf("comment:  [\n%s]\n", (*it)->comment.data());
-			printf("section:  \n[%s]\n", (*it)->name.c_str());
+			printf("comment:  [%s]\n", (*it)->comment.data());
+			printf("section:  [%s]\n", (*it)->name.c_str());
 			if ((*it)->right_comment != "") {
-				printf("right comment:\n%s", (*it)->right_comment.c_str());
+				printf("right comment: [%s]\n", (*it)->right_comment.c_str());
 			}
 			for (auto item_it = (*it)->items.begin(); item_it != (*it)->items.end(); ++item_it) {
-				printf("    comment  :  [\n%s]\n", item_it->comment.c_str());
-				printf("    param    :  %s=%s\n", item_it->key.c_str(), item_it->value.c_str());
+				printf("    comment  :  [%s]\n", item_it->comment.c_str());
+				printf("    param    :  [%s=%s]\n", item_it->key.c_str(), item_it->value.c_str());
 
 				if (item_it->right_comment != "") {
-					printf("     right comment:  [\n%s]\n", item_it->right_comment.c_str());
+					printf("     right comment:  [%s]\n", item_it->right_comment.c_str());
 				}
 			}
 		}
-		printf("################# print start ################\n");
+		printf("\n\n################# print start ################\n");
 	}
 
 	// string 两端空格去除，实现方式比较复杂，两次创建string. 这里不再使用，
@@ -308,5 +410,19 @@ namespace ini_file
 			if (!isspace(str[i])) { break; }
 		}
 		str = string(str, 0, i + 1);
+	}
+}
+
+
+int main(int argc, char* argv[])
+{
+	const std::string config_file = "d:\\temp\\Config.ini";
+	auto ini_config = ini_file::IniFile();
+	ini_file::IniFile config_ini;
+	ini_config.Load(config_file);
+	ini_config.test();
+	auto sect = ini_config.GetSection("HotKey");
+	for (auto it = sect->begin(); it != sect->end(); ++it) {
+		printf("item: [%s = %s]\n", it->key.c_str(), it->value.c_str());
 	}
 }
