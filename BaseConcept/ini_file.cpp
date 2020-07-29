@@ -195,10 +195,11 @@ namespace ini_file
 
 	int IniFile::GetSections(vector<string>* sections)
 	{
-		for(auto it = this->sections_vec_.begin(); it != this->sections_vec_.end(); ++it) {
+		for (auto it = this->sections_vec_.begin(); it != this->sections_vec_.end(); ++it) {
 			sections->push_back((*it)->name);
 			//*(*it)->name
 		}
+		// TODO ADD Sections.
 	}
 
 	IniSection* IniFile::GetSection(const string& section)
@@ -253,8 +254,8 @@ namespace ini_file
 
 	bool IniFile::StrCmpIgnoreCase(const string& str1, const string& str2)
 	{
-		auto first_str{str1};
-		auto last_str{str2};
+		auto first_str{ str1 };
+		auto last_str{ str2 };
 		std::transform(first_str.begin(), first_str.end(), first_str.begin(), tolower);
 		std::transform(last_str.begin(), last_str.end(), last_str.begin(), tolower);
 
@@ -262,7 +263,7 @@ namespace ini_file
 	}
 
 	int IniFile::UpdateSection(const string& clean_line, const string& comment, const string& right_comment,
-	                           IniSection** section)
+		IniSection** section)
 	{
 		const auto pos = clean_line.find_first_of(']');
 		if (pos == string::npos) {
@@ -293,7 +294,7 @@ namespace ini_file
 	}
 
 	int IniFile::AddKeyValuePair(const string& clean_line, const string& comment, const string& right_comment,
-	                             IniSection* section)
+		IniSection* section)
 	{
 		string key, value;
 		if (!Parse(clean_line, &key, &value)) {
@@ -412,7 +413,6 @@ namespace ini_file
 		str = string(str, 0, i + 1);
 	}
 }
-
 
 int main(int argc, char* argv[])
 {

@@ -66,6 +66,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="array_stu.cpp" />
     <ClCompile Include="base01.cpp" />
     <ClCompile Include="BitMapAlgo.cpp" />
     <ClCompile Include="bits_operation.cpp" />

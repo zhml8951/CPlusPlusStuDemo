@@ -23,7 +23,8 @@ string& IniParser::replace_all(string& str, const string& old_value, const strin
 	return str;
 }
 
-// 主要目的确保文件换行符为\r\n(CRLF), 当文本由mac导出时，换行符是\r(CR),读取文档是最长文档叠加到一起。
+// 文件换行符有3种， windows下是"\r\n"(CRLF), Linux默认 '\n'(LF), Mac默认'\r'(CR), 不同换行符会影响文件读取。
+// 此函数主要目的确保文件换行符为\r\n(CRLF), 当文本由mac导出时，换行符是\r(CR),读取文档会叠加到一起。
 
 bool IniParser::replace_all_distinct(string& str, const string& new_value, const string& old_value)
 {
