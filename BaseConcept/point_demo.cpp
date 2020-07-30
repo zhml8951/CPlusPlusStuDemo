@@ -5,8 +5,100 @@
 
 //指针相关操作记录
 
+/* & 在两个元素之间时 位与操作： int a=12, b=11; int c=a&b; 则c=8; 位操作。
+ * && 逻辑与操作。 同and
+ * & 在类型后接元素声明一个引用变量： float f1 = 200; float& ref_f = f1; func(double& d) 这里声明一个引用。
+ * & 在右值方向则是取地址。 int* p = &a;
+ * & 引用主要代替部分指针作用，作为参数时可减少拷贝。
+ * 
+ * * 指针。 int* p1 = &a; 
+ * * 解引用。  *p1 = 88; int num = *p; 
+ * ** 指针的指针。 int** p2 = &p1;
+ * *& 指针引用。 int*& rf2 = p1;
+*/
+namespace pointer_simple_demo
+{
+	void demo01()
+	{
+		int m_value = 11;
+		// 指针在C++属复合类型，它包含两部分内容: 指针本身(4字节32位长整类似)、指针指向的对象。 在函数传参时要注意实际意图.
+		// 这类复合类型，可以修改它本身的值(指向别的对象)，也可以修改它指的对象的值。
+		auto t1 = [&](int* ptr) // 指针传参对指针本身是值传递(拷贝) //
+		{
+			ptr = &m_value; //注意，这样修改指针ptr的指向，但调用实参的实际指向是不会改变的。
+			// 这里修改了ptr指向(指针值)，下面显示可以看到也确实修改了。但仅限函数内部。
+			printf("In lambda func: \n");
+			printf("pn: %p, *pn: %d\n", ptr, *ptr);
+		};
+
+		int n = 2;
+		int* pn = &n;
+		printf("pn: %p, *pn: %d\n", pn, *pn);
+
+		t1(pn); // 传t1给pn指针，目标实现改变pn的指向，指针在这里是值传递(拷贝)，所以函数内部修改的是值的拷贝，而实参本身并没有变。
+		printf("pn: %p, *pn: %d\n", pn, *pn);
+	}
+
+	void demo02() //要修改指针的实际指向(指针的值)，采用指针的指针，即指向指针的指针(同二维数组样式，但有本质区别)
+	{
+		int m_value = 100;
+
+		auto t2 = [&](int** p)
+		{
+			printf("p: %p, *p: %p, **p: %d\n", p, *p, **p);
+			*p = &m_value;
+			printf("p: %p, *p: %p, **p: %d\n", p, *p, **p);
+		};
+
+		int n = 2;
+		int* pn = &n;
+		printf("pn: %p, *pn: %d\n", pn, *pn);
+
+		t2(&pn);
+		printf("pn: %p, *pn: %d\n", pn, *pn);
+	}
+
+	void demo03()
+	{
+		// 判断变量类型，从右向左，离变量名最近的符号确定变量类型，int*& ref. 这里ref是引用类型，引用int指针。即int*& p;
+		// int& *p, p指针变量，指向int类型的引用。这在C++是不允许的。
+		int m_value = 88;
+		auto t3 = [&](int*& p)
+		{
+			// 指针引用， 即指向指针的引用
+			printf("p: %p, *p: %d\n", p, *p);
+			p = &m_value; //同int** p 效果类似，但传引用效率会更高。但要确切理解这里的p
+			printf("p: %p, *p: %d\n", p, *p);
+		};
+		int n = 3;
+		int* pn = &n;
+
+		printf("pn: %p, *pn: %d\n", pn, *pn);
+		t3(pn);
+		printf("pn: %p, *pn: %d\n", pn, *pn);
+	}
+
+	void demo04()
+	{
+		// 这里没有始终没有修改指针的指向，*p解引用，
+		int m_value = 488;
+		auto t4 = [&](int* p)
+		{
+			printf("p: %p, *p: %d", p, *p);
+			*p = m_value; // *p 直接修改p指向对象的值。但指针地址
+			printf("p: %p, *p: %d", p, *p);
+		};
+
+		int n = 4;
+		int* pn = &n;
+		printf("pn: %p, *pn: %d\n", pn, *pn);
+		t4(pn);
+		printf("pn: %p, *pn: %d\n", pn, *pn);
+	}
+} // namespace pointer_simple_demo
+
 namespace csdn_demo01
-	// 函数指针直接使用是看不出本来用途的，只有当定义函数指针作形参，传递函数作实参时可实现回调效果，感觉比js回调还要自然。这才是函数指针的直正用途。
+// 函数指针直接使用是看不出本来用途的，只有当定义函数指针作形参，传递函数作实参时可实现回调效果，感觉比js回调还要自然。这才是函数指针的直正用途。
 {
 	double Func01(const int num)
 	{
@@ -16,13 +108,13 @@ namespace csdn_demo01
 
 	// 函数指针与指针函数的区别 ==>
 	double* Func02(int) = delete;
-	double(*p_func03)(int); // double* fun(int)  返回指针类型的函数即<指针函数>。 double (*func)(int) 指向函数的指针即<函数指针>
+	double (*p_func03)(int); // double* fun(int)  返回指针类型的函数即<指针函数>。 double (*func)(int) 指向函数的指针即<函数指针>
 
 	void test_function_pointer()
 	{
 		// 定义函数指针，参数为int, 返回值double.
 		// ReSharper disable CppJoinDeclarationAndAssignment
-		double(*p_func01)(int);
+		double (*p_func01)(int);
 		p_func01 = Func01;
 
 		printf_s("p_func01 output: %.2lf\n", (*p_func01)(8));
@@ -49,7 +141,7 @@ namespace csdn_demo01
 		return 0.5 * lines;
 	}
 
-	void estimate(const int line_num, double(*pf)(int))
+	void estimate(const int line_num, double (*pf)(int))
 	{
 		const auto ret = (*pf)(line_num);
 		std::cout << "num:  " << line_num << ",  need times is: " << ret << std::endl;
@@ -70,7 +162,7 @@ namespace csdn_demo01
 	// Begin Demo02
 
 	const double* Demo02Func01(const double arr[], int n);
-	const double* Demo02Func02(const double[], int);
+	const double* Demo02Func02(const double [], int);
 	const double* Demo02Func03(const double*, int);
 
 	void Demo02Main()
@@ -81,19 +173,19 @@ namespace csdn_demo01
 		typedef const double* (*Pf)(const double*, int);
 
 		// 3种定义方式一样，auto可精简代码，实际编译时会自动转换为 const double* (*func02_p)(const double*, int);
-		
+
 		const double* (*p_func01)(const double*, int) = Demo02Func01;
 		const auto p_func02 = Demo02Func02;
 		const Pf p_func03 = Demo02Func03;
 
-		double arr[5]{ 11.1, 12.2, 13.3, 14.4, 15.5 };
+		double arr[5]{11.1, 12.2, 13.3, 14.4, 15.5};
 
 		std::cout << "func01_point:  " << (*p_func01)(arr, 3) << "\n";
 		std::cout << "func02_point:  " << p_func02(arr, 3) << "\n";
 		std::cout << "*(func03_point):  " << *((*p_func03)(arr, 3)) << "\n";
 
-		const double* (*func_array_p1[3])(const double*, int) { Demo02Func01, Demo02Func02, p_func03 };
-		Pf func_array_p2[]{ Demo02Func01, Demo02Func02, p_func03 };
+		const double* (*func_array_p1[3])(const double*, int){Demo02Func01, Demo02Func02, p_func03};
+		Pf func_array_p2[]{Demo02Func01, Demo02Func02, p_func03};
 
 		std::cout << "func_p1[0]:  " << func_array_p1[0](arr, 2) << "\n";
 		std::cout << "*(func_p2[0]):  " << *(func_array_p2[0](arr, 2)) << "\n";
@@ -184,8 +276,8 @@ namespace intelligent_point
 	class ClassA
 	{
 	public:
-		ClassA(const std::string& name_cs, const std::string& own_name_cs, const int n_val) :
-			s_name_(name_cs), s_own_name_(own_name_cs)
+		ClassA(const std::string& name_cs, const std::string& own_name_cs, const int n_val) : s_name_(name_cs),
+		                                                                                      s_own_name_(own_name_cs)
 		{
 			if (0 == n_val) {
 				std::runtime_error o_rt_ex("n_val can not 0\n");

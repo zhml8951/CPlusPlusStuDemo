@@ -102,17 +102,18 @@ namespace string_demo
 
 		auto char_test06 = [](const char* str_ptr) -> void
 			// 这里调用看似改变了形参str_ptr的指向，然而调用时，实参的指向并没有改变。说明： 指针传递也是传值，传参时会对实参进行拷贝，而改变实参指向的内容是可行的。
+
 		{
 			str_ptr = "String in char_test06";
 		}; // 这些地方的纠结，终于明白了为什么C++/C 的指针有多么坑了。
 
-		auto char_test061 = [](const char** str_ptr) -> void
-		{
+		auto char_test061 = [](const char** str_ptr) -> void {
 			*str_ptr = "String in char_test06B, modify by char**";
-		};// 需要改变指针指向，就需传指针的指针。 也就是**ptr，那就*ptr = "改变指针"；
+		};
+		// 如果需要改变指针指向的内容，直接传指针(char* ptr).此时的ptr='...' 实质是改变指针指向的第1个指向的值，可采用++或下标方式改变。
+		// 需要改变指针指向(也就是修改指针本身)，就需传指针的指针。 也就是**ptr，那就*ptr = "改变指针"；
 
-		auto char_test07 = [](char& str_ref) -> const char*
-		{
+		auto char_test07 = [](char& str_ref) -> const char* {
 			const char* str = "const char* string, in test07";
 			str_ref = *str;
 			return str;
