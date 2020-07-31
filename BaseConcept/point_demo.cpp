@@ -2,6 +2,7 @@
 #include <memory>
 #include <string>
 #include <sstream>
+#include <functional>
 
 //指针相关操作记录
 
@@ -10,12 +11,15 @@
  * & 在类型后接元素声明一个引用变量： float f1 = 200; float& ref_f = f1; func(double& d) 这里声明一个引用。
  * & 在右值方向则是取地址。 int* p = &a;
  * & 引用主要代替部分指针作用，作为参数时可减少拷贝。
- * 
- * * 指针。 int* p1 = &a; 
- * * 解引用。  *p1 = 88; int num = *p; 
+ *
+ * * 指针。 int* p1 = &a;
+ * * 解引用。  *p1 = 88; int num = *p;
  * ** 指针的指针。 int** p2 = &p1;
  * *& 指针引用。 int*& rf2 = p1;
 */
+
+// ReSharper disable CppUseAuto
+
 namespace pointer_simple_demo
 {
 	void demo01()
@@ -25,9 +29,11 @@ namespace pointer_simple_demo
 		// 这类复合类型，可以修改它本身的值(指向别的对象)，也可以修改它指的对象的值。
 		auto t1 = [&](int* ptr) // 指针传参对指针本身是值传递(拷贝) //
 		{
+			printf("before func rewritten.\n");
+			printf("pn: %p, *pn: %d\n", ptr, *ptr);
 			ptr = &m_value; //注意，这样修改指针ptr的指向，但调用实参的实际指向是不会改变的。
 			// 这里修改了ptr指向(指针值)，下面显示可以看到也确实修改了。但仅限函数内部。
-			printf("In lambda func: \n");
+			printf("In lambda func rewritten. \n");
 			printf("pn: %p, *pn: %d\n", ptr, *ptr);
 		};
 
@@ -43,8 +49,7 @@ namespace pointer_simple_demo
 	{
 		int m_value = 100;
 
-		auto t2 = [&](int** p)
-		{
+		auto t2 = [&](int** p) {
 			printf("p: %p, *p: %p, **p: %d\n", p, *p, **p);
 			*p = &m_value;
 			printf("p: %p, *p: %p, **p: %d\n", p, *p, **p);
@@ -63,8 +68,7 @@ namespace pointer_simple_demo
 		// 判断变量类型，从右向左，离变量名最近的符号确定变量类型，int*& ref. 这里ref是引用类型，引用int指针。即int*& p;
 		// int& *p, p指针变量，指向int类型的引用。这在C++是不允许的。
 		int m_value = 88;
-		auto t3 = [&](int*& p)
-		{
+		auto t3 = [&](int*& p) {
 			// 指针引用， 即指向指针的引用
 			printf("p: %p, *p: %d\n", p, *p);
 			p = &m_value; //同int** p 效果类似，但传引用效率会更高。但要确切理解这里的p
@@ -82,8 +86,7 @@ namespace pointer_simple_demo
 	{
 		// 这里没有始终没有修改指针的指向，*p解引用，
 		int m_value = 488;
-		auto t4 = [&](int* p)
-		{
+		auto t4 = [&](int* p) {
 			printf("p: %p, *p: %d", p, *p);
 			*p = m_value; // *p 直接修改p指向对象的值。但指针地址
 			printf("p: %p, *p: %d", p, *p);
@@ -95,10 +98,87 @@ namespace pointer_simple_demo
 		t4(pn);
 		printf("pn: %p, *pn: %d\n", pn, *pn);
 	}
+
+	void AllocSpaceDemo()
+	{
+		const auto alloc_one = [](const int n) -> char* {
+			const auto p = static_cast<char*>(malloc(sizeof(char) * n));
+			return p;
+		};
+
+		char*(*alloc_one_p)(const int n) = alloc_one;
+
+		const auto alloc_two = [](char** p, const int n) -> int {
+			*p = static_cast<char*>(malloc(sizeof(char) * n));
+			return *p == nullptr ? -1 : 1;
+		};
+
+		int(*alloc_two_p)(float**, const int) = [](float** ptr, const int n) -> int {
+			*ptr = static_cast<float*>(calloc(n, sizeof(float)));
+			return *ptr == nullptr ? -1 : 1;
+		};
+
+		std::function<int(double**, const int)> alloc_two_f = [](double** ptr, const int n)-> int {
+			*ptr = static_cast<double*>(calloc(1000, sizeof(**ptr)));
+			*ptr = static_cast<double*>(realloc(*ptr, n * sizeof(**ptr)));
+			return *ptr ? 1 : -1;
+		};
+
+		auto str1 = "China";
+		auto ptr1 = alloc_one(100);
+		strcpy_s(ptr1, strlen(str1) + 1, str1);
+		printf_s("ptr1: %s\n", ptr1);
+		free(ptr1);
+		ptr1 = nullptr;
+		str1 = "Chinese.";
+		if (alloc_two(&ptr1, 100) < 0) {
+			exit(-1);
+		}
+		strcpy_s(ptr1, strlen(str1) + 1, str1);
+		printf("after alloc_two(char** p, const int)\n");
+		printf("ptr1: %s", ptr1);
+		free(ptr1);
+	}
+
+	void Alloc2dSpaceDemo()
+	{
+		const std::function<void*(int, int, int)> alloc2d = [](const int base, const int row, const int line)->void* {
+			void* p = malloc(base*row*line);
+			return p;
+		};
+
+		void*(*p_alloc2d)(uint8_t, uint8_t, uint8_t) = [](const uint8_t base, const uint8_t row, const uint8_t line) -> void* {
+			void* ptr = calloc(row*line, base);
+			return ptr;
+		};
+
+		printf("Test allocate space use *ptr. \n");
+
+		constexpr auto row = 3;
+		constexpr auto line = 5;
+
+		const auto arr2d_ptr = static_cast<int*>(alloc2d(sizeof(int), row, line));
+		for (int i = 0; i < row; i++) {
+			for (int j = 0; j < line; j++) {
+				*(arr2d_ptr + (line * i + j)) = i + j;
+			}
+		}
+
+		for (int i = 0; i < row; i++) {
+			for (int j = 0; j < line; j++) {
+				printf(" ptr:  %d  ", *(arr2d_ptr + (line * i + j)));
+			}
+			printf("\n");
+		}
+
+		int *arr02 = static_cast<int*>(p_alloc2d(sizeof(int), row, line));
+
+		free(arr2d_ptr);
+	}
 } // namespace pointer_simple_demo
 
 namespace csdn_demo01
-// 函数指针直接使用是看不出本来用途的，只有当定义函数指针作形参，传递函数作实参时可实现回调效果，感觉比js回调还要自然。这才是函数指针的直正用途。
+	// 函数指针直接使用是看不出本来用途的，只有当定义函数指针作形参，传递函数作实参时可实现回调效果，感觉比js回调还要自然。这才是函数指针的直正用途。
 {
 	double Func01(const int num)
 	{
@@ -108,13 +188,13 @@ namespace csdn_demo01
 
 	// 函数指针与指针函数的区别 ==>
 	double* Func02(int) = delete;
-	double (*p_func03)(int); // double* fun(int)  返回指针类型的函数即<指针函数>。 double (*func)(int) 指向函数的指针即<函数指针>
+	double(*p_func03)(int); // double* fun(int)  返回指针类型的函数即<指针函数>。 double (*func)(int) 指向函数的指针即<函数指针>
 
 	void test_function_pointer()
 	{
 		// 定义函数指针，参数为int, 返回值double.
 		// ReSharper disable CppJoinDeclarationAndAssignment
-		double (*p_func01)(int);
+		double(*p_func01)(int);
 		p_func01 = Func01;
 
 		printf_s("p_func01 output: %.2lf\n", (*p_func01)(8));
@@ -141,7 +221,7 @@ namespace csdn_demo01
 		return 0.5 * lines;
 	}
 
-	void estimate(const int line_num, double (*pf)(int))
+	void estimate(const int line_num, double(*pf)(int))
 	{
 		const auto ret = (*pf)(line_num);
 		std::cout << "num:  " << line_num << ",  need times is: " << ret << std::endl;
@@ -162,7 +242,7 @@ namespace csdn_demo01
 	// Begin Demo02
 
 	const double* Demo02Func01(const double arr[], int n);
-	const double* Demo02Func02(const double [], int);
+	const double* Demo02Func02(const double[], int);
 	const double* Demo02Func03(const double*, int);
 
 	void Demo02Main()
@@ -178,14 +258,14 @@ namespace csdn_demo01
 		const auto p_func02 = Demo02Func02;
 		const Pf p_func03 = Demo02Func03;
 
-		double arr[5]{11.1, 12.2, 13.3, 14.4, 15.5};
+		double arr[5]{ 11.1, 12.2, 13.3, 14.4, 15.5 };
 
 		std::cout << "func01_point:  " << (*p_func01)(arr, 3) << "\n";
 		std::cout << "func02_point:  " << p_func02(arr, 3) << "\n";
 		std::cout << "*(func03_point):  " << *((*p_func03)(arr, 3)) << "\n";
 
-		const double* (*func_array_p1[3])(const double*, int){Demo02Func01, Demo02Func02, p_func03};
-		Pf func_array_p2[]{Demo02Func01, Demo02Func02, p_func03};
+		const double* (*func_array_p1[3])(const double*, int) { Demo02Func01, Demo02Func02, p_func03 };
+		Pf func_array_p2[]{ Demo02Func01, Demo02Func02, p_func03 };
 
 		std::cout << "func_p1[0]:  " << func_array_p1[0](arr, 2) << "\n";
 		std::cout << "*(func_p2[0]):  " << *(func_array_p2[0](arr, 2)) << "\n";
@@ -209,8 +289,6 @@ namespace csdn_demo01
 	{
 		return arr + 3;
 	}
-
-	// End Demo02
 }
 
 namespace intelligent_point
@@ -277,7 +355,7 @@ namespace intelligent_point
 	{
 	public:
 		ClassA(const std::string& name_cs, const std::string& own_name_cs, const int n_val) : s_name_(name_cs),
-		                                                                                      s_own_name_(own_name_cs)
+			s_own_name_(own_name_cs)
 		{
 			if (0 == n_val) {
 				std::runtime_error o_rt_ex("n_val can not 0\n");
