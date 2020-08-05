@@ -96,6 +96,7 @@
     <ClCompile Include="string_demo.cpp" />
     <ClCompile Include="str_demo.cpp" />
     <ClCompile Include="template_st.cpp" />
+    <ClCompile Include="thread_demo.cpp" />
     <ClCompile Include="vector_demo.cpp" />
     <ClCompile Include="volatile_demo.cpp" />
     <ClCompile Include="winapi_demo01.cpp" />

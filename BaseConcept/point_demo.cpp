@@ -108,6 +108,13 @@ namespace pointer_simple_demo
 
 		char*(*alloc_one_p)(const int n) = alloc_one;
 
+		//使用typedef 定义函数指针类型。可直接代替长串的定义式。
+		typedef char*(*GFuncApp)(const int);
+		using GFuncPtr = char*(*)(const int);
+
+		GFuncApp alloc_one_p2 = alloc_one;
+		GFuncPtr alloc_one_p3 = alloc_one;
+
 		const auto alloc_two = [](char** p, const int n) -> int {
 			*p = static_cast<char*>(malloc(sizeof(char) * n));
 			return *p == nullptr ? -1 : 1;
@@ -117,12 +124,19 @@ namespace pointer_simple_demo
 			*ptr = static_cast<float*>(calloc(n, sizeof(float)));
 			return *ptr == nullptr ? -1 : 1;
 		};
-
+		/// 这些操作，重点是可以明了 typedef 和using比较高阶的用法。 //
+		typedef int(*AllocTwoFuncPtr)(float**, const int); /// 使用typedef 定义类型，这里要理解类型处于中间位置时的含义。
+		AllocTwoFuncPtr t02 = alloc_two_p;
+		typedef std::function<int(double**, const int)> FuncPtrAllocTwo;
+		using FuncPtrAllocTwoUsing = std::function<int(double**, const int)>;
 		std::function<int(double**, const int)> alloc_two_f = [](double** ptr, const int n)-> int {
 			*ptr = static_cast<double*>(calloc(1000, sizeof(**ptr)));
 			*ptr = static_cast<double*>(realloc(*ptr, n * sizeof(**ptr)));
 			return *ptr ? 1 : -1;
 		};
+
+		FuncPtrAllocTwo t2 = alloc_two_f;
+		FuncPtrAllocTwoUsing t3 = alloc_two_f;
 
 		auto str1 = "China";
 		auto ptr1 = alloc_one(100);
@@ -142,38 +156,92 @@ namespace pointer_simple_demo
 
 	void Alloc2dSpaceDemo()
 	{
-		const std::function<void*(int, int, int)> alloc2d = [](const int base, const int row, const int line)->void* {
-			void* p = malloc(base*row*line);
+		const std::function<void*(int, int, int)> alloc2d = [](const int base, const int row, const int col)-> void* {
+			void* p = malloc(base * row * col);
 			return p;
 		};
 
-		void*(*p_alloc2d)(uint8_t, uint8_t, uint8_t) = [](const uint8_t base, const uint8_t row, const uint8_t line) -> void* {
-			void* ptr = calloc(row*line, base);
-			return ptr;
+		void*(*p_alloc2d)(uint8_t, uint8_t, uint8_t) = [](const uint8_t base, const uint8_t row,
+			const uint8_t col) -> void* {
+				void* ptr = calloc(row * col, base);
+				return ptr;
 		};
 
 		printf("Test allocate space use *ptr. \n");
 
 		constexpr auto row = 3;
-		constexpr auto line = 5;
+		constexpr auto col = 5;
 
-		const auto arr2d_ptr = static_cast<int*>(alloc2d(sizeof(int), row, line));
+		const auto arr2d_ptr = static_cast<int*>(alloc2d(sizeof(int), row, col));
 		for (int i = 0; i < row; i++) {
-			for (int j = 0; j < line; j++) {
-				*(arr2d_ptr + (line * i + j)) = i + j;
+			for (int j = 0; j < col; j++) {
+				*(arr2d_ptr + (col * i + j)) = i + j;
 			}
 		}
 
 		for (int i = 0; i < row; i++) {
-			for (int j = 0; j < line; j++) {
-				printf(" ptr:  %d  ", *(arr2d_ptr + (line * i + j)));
+			for (int j = 0; j < col; j++) {
+				printf(" ptr:  %d  ", *(arr2d_ptr + (col * i + j)));
 			}
 			printf("\n");
 		}
 
-		int *arr02 = static_cast<int*>(p_alloc2d(sizeof(int), row, line));
+		int* arr02 = static_cast<int*>(p_alloc2d(sizeof(int), row, col));
 
 		free(arr2d_ptr);
+	}
+
+	//内在释放问题测试；
+	// 这里重点关注：当我们把指针的指针传进函数，函数内可对指针创建对象new T;也可以创建对象数组new T[10]; 这时我们如果在函数外释放
+	// delete时，就需要分别对待了。new[]创建就必须使用delete[], new创建单个对象就用delete;
+	// 当然简单类型(int, char, double, string),可以不用考虑直接delete就可以了。 但如果是自定义类型就必须确认创建的方式。
+	// 所以最佳实践都是在调用函数外创建对象，函数外释放，保证内存正常释放。传对象引用是最优选择。
+	// 最佳实践： 不要在函数内创建对象，返回指针，这是最容易造成内在泄漏的。
+
+	void TestMemoryFree()
+	{
+		class T
+		{
+		public:
+			T() { printf("T constructor.\n"); }
+			~T() { printf("~T destructor.\n"); }
+		};
+
+		auto t1_func = [](T** t1) {
+			*t1 = new T[10];
+		};
+		auto t2_func = [](T** t2) {
+			*t2 = new T;
+		};
+
+		T* ptr1 = nullptr;
+		t1_func(&ptr1);
+		delete[] ptr1;
+		T* ptr2 = nullptr;
+		t2_func(&ptr2);
+		delete ptr2;
+
+		auto t0_func = [](T** t0, const int n) -> int {
+			if (n > 1) {
+				*t0 = new T[n];
+			}
+			else {
+				*t0 = new T;
+			}
+			return *t0 == nullptr ? 0 : 1;
+		};
+
+		T* ptr0 = nullptr;
+		int n1 = 3, n2 = 1;
+		if (n1 > 1 && t0_func(&ptr0, n1)) {
+			delete[] ptr0;
+			ptr0 = nullptr;
+		} else if(n2 == 1 && t0_func(&ptr0, n2)) {
+			delete ptr0;
+			ptr0 = nullptr;
+		} else {
+			printf("nothing to do.\n");
+		}
 	}
 } // namespace pointer_simple_demo
 

@@ -14,8 +14,8 @@
 	* 目前的理解是二级指针int** p 并不完全等价于arr[][];
 
  * 2. 指针与数组：
-	# 指针数组， 元素都是指针的数组： int *ptr_arr[10];	    总体是数组,"存储指针的数组,元素类型int*";
-	# 数组指针， 指向数组的指针：   int (*arr_ptr)[10];		总体是指针,"指向数组，数组元素int"; 等同于 int (*)[10] arr_ptr;
+	# 指针数组， 元素都是指针的数组： int *ptr_arr[10]; 总体是数组,"存储指针的数组",多用于字符串，例如： char* names[] = {"arnni", "John"};
+	# 数组指针， 指向数组的指针：   int (*arr_ptr)[10];  总体是指针,"指向数组，数组元素int"; 等同于 int (*)[10] arr_ptr;
 	#
 	// 指针函数 指针数组， 函数指针 数组指针 这些都有异曲同工之作。
  * 3. 指针与函数
@@ -28,7 +28,7 @@ namespace arr01
 {
 	// 数组指针做为返回类型。
 	// 数组指针样式： int (*ptr)[10] 代换进去 int (*func(args...))[10] 这里args: int (&arr)[10] 数组引用
-	int (* GetCpyArr(int (&arr)[10]))[10] // 这就难看了。 换成 ->int(*)[10] 就好理解了。
+	int (* GetCpyArr(int (&arr)[10]))[10] /* 这就难看了。 换成 ->int(*)[10] 就好理解了。*/
 	{
 		int (*n)[10] = reinterpret_cast<int(*)[10]>(new int[10]);
 		for (int i = 0; i < 10; i++) {
@@ -63,13 +63,86 @@ namespace arr01
 
 	auto GetCpyArr03(const double (&arr)[10]) -> double(*)[10]
 	{
-		using DoubleArrPtr = double (*)[10];
-		using DoubleArrRef = double (&)[10];
+		using DoubleArrPtr = double(*)[10];
+		using DoubleArrRef = double(&)[10];
 
-		DoubleArrPtr n_arr = reinterpret_cast<DoubleArrPtr>(new double[20]);
+		const DoubleArrPtr n_arr = reinterpret_cast<DoubleArrPtr>(new double[20]);
 		for (int i = 0; i < 10; i++) {
 			(*n_arr)[i] = arr[i] + 1000.0;
 		}
 		return n_arr;
 	}
+
+	void ArrayPointTest()
+	{
+		int arr01[20][10];
+		for (int y = 0, i = 100; y < 20; y++, i += 10) {
+			for (int x = 0; x < 10; x++) {
+				arr01[y][x] = i + x;
+			}
+		}
+
+		int (*p_arr01)[10] = arr01;
+		for (int i = 0; i < 10; i++) {
+			std::cout << (*p_arr01)[i] << "\n";
+		}
+
+		// 使用数组指针编历全部元素
+		for (int y = 0; y < 20; y++) {
+			for (int x = 0; x < 10; x++) {
+				std::cout << (*(p_arr01 + y))[x] << "  ";
+			}
+			printf("\n");
+		}
+
+		// 指针数组最好理解的用法则在于用数组存储char* 的字符串。
+		const char* arr_str[] = {"str01", "str02"};
+		for (int i = 0; i < (sizeof(arr_str) / sizeof(arr_str[0])); i++) {
+			std::cout << "str:  " << arr_str[i] << "\n";
+		}
+
+		int* p_int[20];
+		for (int i = 0; i < 20; i++) {
+			p_int[i] = arr01[i];
+		}
+
+		printf("Use int* p[]. \n");
+		int* pi = nullptr;
+		for (int i = 0; i < 20; i++) {
+			pi = p_int[i];
+			for (int j = 0; j < 10; j++) {
+				printf("%d  ", *pi);
+				pi++;
+			}
+			printf("\n");
+		}
+
+		printf("\nTest GetCpyArr\n");
+		const auto p_cpy_arr = GetCpyArr(arr01[10]);
+		pi = nullptr;
+		for (int i = 0; i < 20; i++) {
+			pi = p_cpy_arr[i];
+			for (int j = 0; j < 10; j++) {
+				printf("%d  ", *pi);
+				pi++;
+			}
+			printf("\n");
+		}
+	}
+}
+
+/*
+ *  # 二维数组 行(row)Y, 列(col)X 在一般固定行和固定列的数组再转 指针数组或数组指针 的意义不大。 
+ *  # 当行(Y)固定，列长不一定采用指针数组，这时应用指针数组如： const char* names[4] = {"John", "Green", "Arnni", "pic"}. 这里的4是行数，
+ *  # 当列(X)固定，行不固定时采用数组指针， int (*Sex)[3]; 主要作用是将数组降级到数组，便于有时传参使用。如下：
+  	int ar[][3] = {{3, 4, 5}, {33, 44, 55}};
+	int (*sex)[3] = ar;
+	int ar2[][3] = {{11, 22, 33}, {44, 55, 66}, {77, 88, 99}};
+	sex = ar2; 
+ *  
+ */
+
+int main(int argc, char* argv[])
+{
+	arr01::ArrayPointTest();
 }
