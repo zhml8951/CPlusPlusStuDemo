@@ -1,53 +1,72 @@
-#include <chrono>
+ï»¿#include <chrono>
 #include <iostream>
 #include <string>
 #include <ctime>
 #include <type_traits>
 
-// chrono ÊÇC++11ÒıÈëµÄÊ±¼ä¿â£¬Ô´ÓÚboost.
-// ¿âµÄ¹Ø¼üµã£º Durations(Ê±¼ä¶Î)chrono::duration £¬  TimerPointers(Ê±¼äµã) chrono::time_point£¬ Clock(Ê±ÖÓ)
-// Ê±¼ä×ª»»¿ÉÒşÊ½ÏòÏÂ×ª»»£¬¼´hours -> minutes, minutes -> seconds.
-// ÏòÉÏ×ª»»±ØĞëÏÔÊ½×ª»» duration_cast<chrono::hours> minutes_i ..
+// chrono æ˜¯C++11å¼•å…¥çš„æ—¶é—´åº“ï¼Œæºäºboost.
+// åº“çš„å…³é”®ç‚¹ï¼š Durations(æ—¶é—´æ®µ)chrono::duration ï¼Œ  TimerPointers(æ—¶é—´ç‚¹) chrono::time_pointï¼Œ Clock(æ—¶é’Ÿ)
+// æ—¶é—´è½¬æ¢å¯éšå¼å‘ä¸‹è½¬æ¢ï¼Œå³hours -> minutes, minutes -> seconds.
+// å‘ä¸Šè½¬æ¢å¿…é¡»æ˜¾å¼è½¬æ¢ duration_cast<chrono::hours> minutes_i ..
+// duration_cast ç†è§£æ–¹å¼åŒstatic_cast, dynamic_cast, reinterpret_cast, const_cast è¿™ä¸€ç±»çš„ç±»å‹è½¬æ¢å·¥å…·ç±»ä¼¼ã€‚
+// Clockä¸­ steady_clock ä¸€ä¸ªå…³é”®ä½¿ç”¨åˆ™æ˜¯è®¡ç®—ä¸¤ä¸ªæ—¶é—´ç‚¹å·®ï¼Œä¹Ÿå°±æ˜¯æ—¶é—´æ®µ(duration)
 
 using namespace std;
 
-// ¼òµ¥¸´ÏÔ±ê×¼¿âchronoµÄ Duration£»  chronoµÚÒ»¹Ø¼üµã: Duration, Ê±¼ä¶Î
+namespace chrono_sample
+{
+	void Demo01()
+	{
+		using namespace std::chrono;
+		const duration<int, std::ratio<60 * 60 * 24, 1>> one_day(1);
+		system_clock::time_point now = system_clock::now();
+		system_clock::time_point tomorrow = now + one_day;
+		time_t tm_tomorrow = system_clock::to_time_t(tomorrow);
+		char tm_str[256];
+		ctime_s(tm_str, 256, &tm_tomorrow);
+		std::cout << "tomorrow will be: " << tm_str << "\n";
+
+		struct tm* time;
+		auto p = localtime(&tm_tomorrow);
+		//localtime_s(time, &tm_tomorrow);
+	}
+}
+
+// ç®€å•å¤æ˜¾æ ‡å‡†åº“chronoçš„ Durationï¼›  chronoç¬¬ä¸€å…³é”®ç‚¹: Duration, æ—¶é—´æ®µ
 namespace chrono_duration
 {
 	void chrono_demo01()
 	{
-		// chrono ÄÚÖÃÁË»ù±¾³£ÓÃÊ±¼äµ¥Î»£¬Ò²¿É×Ô¶¨ÒåÊ±¼ä
+		// chrono å†…ç½®äº†åŸºæœ¬å¸¸ç”¨æ—¶é—´å•ä½ï¼Œä¹Ÿå¯è‡ªå®šä¹‰æ—¶é—´
 		using TSec = chrono::duration<int32_t>;
 		using TMilli = chrono::duration<uint64_t, ratio<1, 1000>>;
-		// ²é¿´±ê×¼¿âÒ²¿ÉÒÔÖªµÀ£¬ ¿âÄÚ³£ÓÃµÄÊ±¼äµ¥Î»Ò²ÊÇÕâÕâÑù¶¨ÒåµÄ£¬ ÀıÈç£º
-		typedef chrono::duration<int64_t, ratio<1, 1>> TSecond; //±ê×¼¿â¶¨ÒåÈçÏÂ£º
+		// æŸ¥çœ‹æ ‡å‡†åº“ä¹Ÿå¯ä»¥çŸ¥é“ï¼Œ åº“å†…å¸¸ç”¨çš„æ—¶é—´å•ä½ä¹Ÿæ˜¯è¿™è¿™æ ·å®šä¹‰çš„ï¼Œ ä¾‹å¦‚ï¼š
+		typedef chrono::duration<int64_t, ratio<1, 1>> TSecond; //æ ‡å‡†åº“å®šä¹‰å¦‚ä¸‹ï¼š
 		using TSecondStd = chrono::duration<long long>; // ==> typedef chrono::duration<int64_t, ratio<1,1>> TSEC;
 		typedef chrono::duration<int32_t, ratio<60>> TMinute;
 		typedef chrono::duration<int32_t, ratio<3600, 1>> THour;
-		typedef chrono::duration<int32_t, ratio<3600 * 24, 1>> TDay; // 1ÌìÓĞ24*3600Ãë¡£86400
-		typedef chrono::duration<int64_t, ratio<1, 10>> TDeci; // 10·ÖÖ®1Ãë
-		using TCenti = chrono::duration<int64_t, ratio<1, 100>>; // °Ù·ÖÖ®Ò»Ãë
-		// ³£ÓÃµÄ±ÈÀıÔÚratioÒÑ¾­¶¨ÒåºÃÁË£¬ ¿ÉÖ±½ÓÊ¹ÓÃ£¬
+		typedef chrono::duration<int32_t, ratio<3600 * 24, 1>> TDay; // 1å¤©æœ‰24*3600ç§’ã€‚86400
+		typedef chrono::duration<int64_t, ratio<1, 10>> TDeci; // 10åˆ†ä¹‹1ç§’
+		using TCenti = chrono::duration<int64_t, ratio<1, 100>>; // ç™¾åˆ†ä¹‹ä¸€ç§’
+		// å¸¸ç”¨çš„æ¯”ä¾‹åœ¨ratioå·²ç»å®šä¹‰å¥½äº†ï¼Œ å¯ç›´æ¥ä½¿ç”¨ï¼Œ
 		using TMicro = chrono::duration<int64_t, micro>; // typedef ratio<1, 1000000> micro
 	}
 
+	// è‡ªå®ç° Duration.
 	template <typename Rep, typename Period = ratio<1>>
 	class Duration
 	{
 	public:
-		using period = Period;
-		using rep = Rep;
+		using rep = Rep; // Repè®¡æ•°çš„ç®—æœ¯ç±»å‹
+		using period = Period; // è®¡æ¬¡å‘¨æœŸ std::ratio
 		constexpr Duration() = default;
 
 		template <class Rep2>
-		constexpr explicit Duration(const Rep2& r)
-		{
-		}
+		constexpr explicit Duration(const Rep2& r) { }
 
 		template <class Rep2, class Period2>
-		explicit constexpr Duration(const Duration<Rep2, Period2>& d) // ¸ÅÄî<¿½±´¹¹Ôìº¯Êı>
-		{
-		}
+		explicit constexpr Duration(const Duration<Rep2, Period2>& d) // æ¦‚å¿µ<æ‹·è´æ„é€ å‡½æ•°>
+		{ }
 
 		Duration(const Duration&) = default;
 
@@ -91,19 +110,19 @@ namespace chrono_duration
 		using Weeks = ::chrono::duration<int32_t, std::ratio<7 * 24 * 3600, 1>>;
 		using Years = chrono::duration<int32_t, ratio<year, 1>>;
 
-		using NanoCentury = chrono::duration<double, std::ratio<100 * year, 1000000000>>; // Ã¿ÊÀ¼Í¶àÉÙÄÉÃë£¬ ÕâÑù¼ÆËãÊÇ´íÎóµÄ£¬Ó¦¸ÃÓÃÏÂÃæ·½Ê½£»
-		typedef chrono::duration<uint64_t, ratio<100 * year * 1000000000, 1>> NanoCentury2; // Ã¿ÊÀ¼ÍÄÉÃë
+		using NanoCentury = chrono::duration<double, std::ratio<100 * year, 1000000000>>; // æ¯ä¸–çºªå¤šå°‘çº³ç§’ï¼Œ è¿™æ ·è®¡ç®—æ˜¯é”™è¯¯çš„ï¼Œåº”è¯¥ç”¨ä¸‹é¢æ–¹å¼ï¼›
+		typedef chrono::duration<uint64_t, ratio<100 * year * 1000000000, 1>> NanoCentury2; // æ¯ä¸–çºªçº³ç§’
 
 		typedef chrono::duration<int32_t, std::centi /* std::ratio<1, 100> */> Jiffies;
 
 		const chrono::seconds sec(1);
 
-		// ÎŞ¾«¶ÈËğÊ§×ª»»£¬ÒşÊ½×Ô¶¯×ª»»
+		// æ— ç²¾åº¦æŸå¤±è½¬æ¢ï¼Œéšå¼è‡ªåŠ¨è½¬æ¢
 		std::cout << chrono::microseconds(sec).count() << "  micro_seconds \n"
 			<< Shakes(sec).count() << "  Shakes. \n"
 			<< Jiffies(sec).count() << "  Jiffies: \n";
 
-		// ÓĞ¾«¶ÈËğÊ§×ª»»£¬ duration_cast<chrono::minutes>(sec) Ò²¾ÍÊÇĞ¡µ¥Î»Ïò´óµ¥Î»×ª»»
+		// æœ‰ç²¾åº¦æŸå¤±è½¬æ¢ï¼Œ duration_cast<chrono::minutes>(sec) ä¹Ÿå°±æ˜¯å°å•ä½å‘å¤§å•ä½è½¬æ¢
 
 		std::cout << chrono::duration_cast<chrono::minutes>(sec).count() << " minutes. \n";
 		std::cout << NanoCentury(3).count() << " NanoCentury(3).\n";
@@ -116,9 +135,9 @@ namespace chrono_duration
 	}
 }
 
-// chrono µÚ¶ş¹Ø¼üµã time_point;  Ê±¼äµã, Ö÷Òª¹ØÁªÊ±ÖÓ£ºsteady_clock, system_clock;
+// chrono ç¬¬äºŒå…³é”®ç‚¹ time_point;  æ—¶é—´ç‚¹, ä¸»è¦å…³è”æ—¶é’Ÿï¼šsteady_clock, system_clock;
 
-// chrono µÚÈı¹Ø¼üµãclock
+// chrono ç¬¬ä¸‰å…³é”®ç‚¹clock
 //std::chrono::steady_clock, chrono::system_clock, chrono::high_resolution_clock
 
 namespace clock_time_point
@@ -160,18 +179,14 @@ namespace clock_time_point
 
 		constexpr TimePoint() = default;
 
-		constexpr explicit TimePoint(const Duration& other) : my_dur_(other)
-		{
-		}
+		constexpr explicit TimePoint(const Duration& other) : my_dur_(other) { }
 
-		// ÕâÀï template<typename Duration2, typename=typename enable_if_t<is_convertible_v<...> 
+		// è¿™é‡Œ template<typename Duration2, typename=typename enable_if_t<is_convertible_v<...>
 		// typename = enable_if<is_conf
-		// enable_if, enable_if_t ÓÃÓÚÄ£°åÀàĞÍ¼ì²é,Ê¹ÓÃ±È½Ï¸´ÔÓ£¬ÔİÊ±ÏÈ¼òµ¥Àí½âÔÙËµ¡£ 
+		// enable_if, enable_if_t ç”¨äºæ¨¡æ¿ç±»å‹æ£€æŸ¥,ä½¿ç”¨æ¯”è¾ƒå¤æ‚ï¼Œæš‚æ—¶å…ˆç®€å•ç†è§£å†è¯´ã€‚
 
 		template <typename Duration2, typename = enable_if_t<is_convertible<Duration2, Duration>::value>>
-		explicit constexpr TimePoint(const TimePoint<Clock, Duration2>& tp) : my_dur_(tp.time_since_epoch())
-		{
-		}
+		explicit constexpr TimePoint(const TimePoint<Clock, Duration2>& tp) : my_dur_(tp.time_since_epoch()) { }
 
 		constexpr Duration time_since_epoch() const
 		{
@@ -188,19 +203,19 @@ namespace clock_time_point
 			return (TimePoint((Duration::min)()));
 		}
 
-		static constexpr TimePoint (max)() noexcept
+		static constexpr TimePoint(max)() noexcept
 		{
 			return (TimePoint((Duration::max())));
 		}
 
 		template <class ToDuration, class Clock2, class Duration2>
-		static constexpr auto time_point_cast(const TimePoint<Clock2, Duration2>& t) -> TimePoint<Clock2, ToDuration>;
+		static constexpr auto time_point_cast(const TimePoint<Clock2, Duration2>& t)->TimePoint<Clock2, ToDuration>;
 
 	private:
-		Duration my_dur_{typename Duration::zero()};
+		Duration my_dur_{ typename Duration::zero() };
 	};
 
-	// Ä£°åº¯Êı¶¨Òå·ÅÔÚÉùÃ÷ÍâÃæ£¬»áÏÔµÃ·Ç³£¸´ÔÓ£¬ÕâÀïÖØµãÊÇÀí½âÄ£°åÀàµÄÊ¹ÓÃ¡£
+	// æ¨¡æ¿å‡½æ•°å®šä¹‰æ”¾åœ¨å£°æ˜å¤–é¢ï¼Œä¼šæ˜¾å¾—éå¸¸å¤æ‚ï¼Œè¿™é‡Œé‡ç‚¹æ˜¯ç†è§£æ¨¡æ¿ç±»çš„ä½¿ç”¨ã€‚
 	template <typename Clock, typename Duration>
 	template <class ToDuration, class Clock2, class Duration2>
 	constexpr auto TimePoint<Clock, Duration>::time_point_cast(
@@ -210,7 +225,7 @@ namespace clock_time_point
 		return res;
 	}
 
-	// ÕâĞ©ÄÚÈİÀ´Ô´ÓÚ±ê×¼¿âchrono.hÎÄ¼ş£¬ ¾ßÌåÊµÏÖÄ¿Ç°»¹Ã»×ö¡£
+	// è¿™äº›å†…å®¹æ¥æºäºæ ‡å‡†åº“chrono.hæ–‡ä»¶ï¼Œ å…·ä½“å®ç°ç›®å‰è¿˜æ²¡åšã€‚
 
 	// time_point demo from csdn;
 	using Ms = std::chrono::milliseconds;

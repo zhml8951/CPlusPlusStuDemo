@@ -10,7 +10,7 @@ namespace vec_demo
 	public:
 		explicit Stu(char* name = nullptr, const int age = 0) : name_(name), age_(age)
 		{
-			printf("%s Stu constructor called. \n", name);
+			printf("%s UStu constructor called. \n", name);
 		}
 
 		char* get_name() const

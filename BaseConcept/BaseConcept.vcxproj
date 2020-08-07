@@ -77,6 +77,7 @@
     <ClCompile Include="const_stu.cpp" />
     <ClCompile Include="csdn_demo01.cpp" />
     <ClCompile Include="declspec_demo.cpp" />
+    <ClCompile Include="enum_demo.cpp" />
     <ClCompile Include="extern_demo.cpp" />
     <ClCompile Include="file_demo.cpp" />
     <ClCompile Include="friend_demo.cpp" />
@@ -97,6 +98,7 @@
     <ClCompile Include="str_demo.cpp" />
     <ClCompile Include="template_st.cpp" />
     <ClCompile Include="thread_demo.cpp" />
+    <ClCompile Include="union_demo.cpp" />
     <ClCompile Include="vector_demo.cpp" />
     <ClCompile Include="volatile_demo.cpp" />
     <ClCompile Include="winapi_demo01.cpp" />

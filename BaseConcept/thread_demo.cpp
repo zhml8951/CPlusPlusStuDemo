@@ -20,10 +20,9 @@
  * 线程与进程的处理方式与系统内核有关，Mac， Windows这类采用微内核的操作系统中，进程只是资源的分配单位，真正调度运行的是线程。
  * Linux宏内核对线程和进程并没有特别的区分，线程只不过是一种特殊的进程，多线程编程与多进程编程的主要区别在于有没有共享数据。多进程间的通信较复杂且代价较大，
  * C++ 并没有提供多进程通信的原生支持。
- *
  */
 
-// ReSharper disable CppUseAuto
+ // ReSharper disable CppUseAuto
 
 namespace thread_sample
 {
@@ -221,7 +220,7 @@ namespace thread_sample
 				//condition.wait(locker, [&]()-> bool { return !deque_int.empty(); }); //可使用condition.wait(locker, 条件lambda; 效果相同。
 				data = deque_int.back();
 				deque_int.pop_back();
-				locker.unlock(); // 取得数据后，从这里切回到producer. 
+				locker.unlock(); // 取得数据后，从这里切回到producer.
 				std::cout << "T2 got a value from T1: " << data << "\n";
 			}
 		};
@@ -253,7 +252,7 @@ namespace thread_sample
 			std::this_thread::sleep_for(std::chrono::seconds(1));
 		};
 
-		std::vector<int> numbers = {1, 2, 3, 4, 5, 6};
+		std::vector<int> numbers = { 1, 2, 3, 4, 5, 6 };
 		std::thread work_thread(accumulate_lam, numbers.begin(), numbers.end());
 		std::unique_lock<std::mutex> main_locker(mu);
 		cond.wait(main_locker, [&]() { return rst; });
@@ -261,7 +260,6 @@ namespace thread_sample
 		main_locker.unlock();
 		work_thread.join();
 	}
-
 
 	void AsyncUseFuture()
 	{
@@ -276,7 +274,7 @@ namespace thread_sample
 		};
 
 		Accumulate accumulate01;
-		std::vector<int> numbers = {1, 2, 3, 4, 5, 6, 7};
+		std::vector<int> numbers = { 1, 2, 3, 4, 5, 6, 7 };
 		std::promise<int> accumulate_promise;
 		std::future<int> accumulate_future = accumulate_promise.get_future();
 		std::thread work_thread(accumulate01, numbers.begin(), numbers.end(), std::move(accumulate_promise));
@@ -298,7 +296,7 @@ namespace thread_sample
 		};
 
 		AccumulateCls accumulate_obj;
-		std::vector<int> numbers = {1, 2, 3, 4, 5, 6, 7, 8};
+		std::vector<int> numbers = { 1, 2, 3, 4, 5, 6, 7, 8 };
 		std::packaged_task<int(VecIter, VecIter)> accumulate_task(accumulate_obj);
 		std::future<int> accumulate_future = accumulate_task.get_future();
 		std::thread work_thread(std::move(accumulate_task), numbers.begin(), numbers.end());
@@ -314,7 +312,7 @@ namespace thread_sample
 			return sum;
 		};
 
-		std::vector<int> numbers{1, 2, 3, 4, 5, 6, 7, 8};
+		std::vector<int> numbers{ 1, 2, 3, 4, 5, 6, 7, 8 };
 		//auto accumulate_future = std::async(std::launch::async, accumulate, numbers.begin(), numbers.end());
 		std::future<int> accumulate_future = std::async(std::launch::async, accumulate, numbers.begin(), numbers.end());
 		std::cout << "Rst: " << accumulate_future.get() << "\n";
@@ -327,7 +325,7 @@ namespace thread_sample
 		std::atomic<bool> ready_flag(false);
 		int job_exclusive = 0;
 
-		auto job01 = [&]() ->void {
+		auto job01 = [&]() -> void {
 			auto this_id = std::this_thread::get_id();
 			std::this_thread::sleep_for(interval * 5);
 			job_shared.fetch_add(1);
@@ -335,9 +333,9 @@ namespace thread_sample
 			ready_flag.store(true);
 		};
 
-		auto job02 = [&]()->void {
+		auto job02 = [&]()-> void {
 			while (true) {
-				if(ready_flag.load()) {
+				if (ready_flag.load()) {
 					job_shared.fetch_add(1);
 					std::cout << "job02 shared (" << job_shared.load() << "). \n";
 					return;
@@ -354,6 +352,33 @@ namespace thread_sample
 		std::thread thread02(job02);
 		thread01.join();
 		thread02.join();
+	}
+}
+
+namespace thread_csdn
+{
+	void AdditionDemo01()
+	{
+		const auto func = [&](const double var) -> double {
+			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+			return var;
+		};
+		
+		std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+		double rst = func(1.) + func(2.) + func(3.) + func(4.);
+		std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+		double time_cost = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count() * 1000.;
+		std::cout << std::fixed << "Single-Thread result: " << rst << ", and time cost: " << time_cost << "\n";
+
+		t1 = std::chrono::steady_clock::now();
+		std::future<double> f1(std::async(std::launch::async, func, 1.));
+		auto f2 = std::async(std::launch::async, func, 2.);
+		auto f3 = std::async(std::launch::async, func, 3.);
+		rst = func(4.) + f1.get() + f2.get() + f3.get();
+		t2 = std::chrono::steady_clock::now();
+		time_cost = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count() * 1000.;
+		std::cout << std::fixed << "Multi-Thread result: " << rst << ", and time cost: " << time_cost;
+		std::cout << std::endl;
 	}
 }
 
