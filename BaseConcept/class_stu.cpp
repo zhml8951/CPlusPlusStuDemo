@@ -67,6 +67,7 @@ namespace simple_demo
 	 *  重载时 const函数与非const函数是重载。
 	 */
 
+
 	class ClsConst
 	{
 	public:
@@ -149,6 +150,15 @@ namespace simple_demo
 		t1.func_double(d1);
 	}
 
+	/*
+	 * 重写(覆盖)， 隐藏。  重载 3者的关键区别
+	 * 重载在同一访问区，同class内，namespace内及全局函数，同名函数，参数不同。属静态。
+	 * 重写，和隐藏 发生在类继承关系上。 属动态。 
+	 * 重写要求是函数名，参数等必须相同，基类必须是virtual成员函数。  重写当然也有隐藏属性。
+	 * 重写(覆盖)可实现基类指针指向子类，直接调用子类方法，基类需要virtual函数才能完全满足要求。
+	 * 如果没有virtual， 即使用名称，参数等全部相同，也不能实现重写， 只能算隐藏。 
+	 * 子类与基类 函数名相同，参数相同或不同都是隐藏基类方法， 使用基类指针指向子类，但调用依然是基类方法。
+	 */
 	class Base01
 	{
 	public:
@@ -163,7 +173,7 @@ namespace simple_demo
 	{
 	public:
 		void func(int) { std::cout << "Derive::func(int)" << std::endl; }
-		virtual void f(float f) { std::cout << "Derive f(float)" << "\n"; }
+		void f(float f) { std::cout << "Derive f(float)" << "\n"; }
 		void g(int x) { std::cout << "Derive g(int)" << "\n"; }
 		void h(float x) { std::cout << "Derive h(float)" << "\n"; }
 	};
