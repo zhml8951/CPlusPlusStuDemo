@@ -391,4 +391,5 @@ int main(int argc, char* argv[])
 	//thread_sample::AsyncUseCondition();
 	thread_sample::AsyncUseFuture();
 	thread_sample::AsyncUsePackagedTask();
+	thread_csdn::AdditionDemo01();
 }

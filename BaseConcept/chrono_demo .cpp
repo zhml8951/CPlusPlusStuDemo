@@ -1,23 +1,26 @@
-﻿#include <chrono>
-#include <iostream>
+﻿#include <iostream>
+#include <chrono>
 #include <string>
 #include <ctime>
-#include <type_traits>
 
-// chrono 是C++11引入的时间库，源于boost.
-// 库的关键点： Durations(时间段)chrono::duration ，  TimerPointers(时间点) chrono::time_point， Clock(时钟)
-// 时间转换可隐式向下转换，即hours -> minutes, minutes -> seconds.
-// 向上转换必须显式转换 duration_cast<chrono::hours> minutes_i ..
-// duration_cast 理解方式同static_cast, dynamic_cast, reinterpret_cast, const_cast 这一类的类型转换工具类似。
-// Clock中 steady_clock 一个关键使用则是计算两个时间点差，也就是时间段(duration)
+/*
+ * C-Style 主要定义了4个变量类型： size_t,  clock_t, time_t, struct tm;
+ */
 
-using namespace std;
+/* chrono 是C++11引入的时间库，源于boost.
+   库的关键点： Durations(时间段)chrono::duration ，  TimerPointers(时间点) chrono::time_point， Clock(时钟)
+   时间转换可隐式向下转换，即hours -> minutes, minutes -> seconds.
+   向上转换必须显式转换 duration_cast<chrono::hours> minutes_i ..
+   Clock中 steady_clock 一个关键使用则是计算两个时间点差，也就是时间段(duration)
+   duration_cast 理解方式同static_cast, dynamic_cast, reinterpret_cast, const_cast 这一类的类型转换工具类似。
+*/
 
 namespace chrono_sample
 {
 	void Demo01()
 	{
-		using namespace std::chrono;
+		using std::chrono::duration;
+		using std::chrono::system_clock;
 		const duration<int, std::ratio<60 * 60 * 24, 1>> one_day(1);
 		system_clock::time_point now = system_clock::now();
 		system_clock::time_point tomorrow = now + one_day;
@@ -26,15 +29,26 @@ namespace chrono_sample
 		ctime_s(tm_str, 256, &tm_tomorrow);
 		std::cout << "tomorrow will be: " << tm_str << "\n";
 
-		struct tm* time;
-		auto p = localtime(&tm_tomorrow);
-		//localtime_s(time, &tm_tomorrow);
+		const auto tm_dst = localtime(&tm_tomorrow);
+		printf("%d/%d/%d", 1900 + tm_dst->tm_year, 1 + tm_dst->tm_mon, tm_dst->tm_mday);
+	}
+
+	void CtimeDemo01()
+	{
+		time_t sec01;
+		auto sec02 = time(&sec01);
+		std::cout << "timestamp(sec01): " << sec01 << "\n";
+		std::cout << "ctime(sec02): " << ctime(&sec02) << "\n";
+		auto info = localtime(&sec02);
+		printf_s("info: %d:%d:%d", info->tm_hour, info->tm_min, info->tm_sec);
 	}
 }
 
 // 简单复显标准库chrono的 Duration；  chrono第一关键点: Duration, 时间段
 namespace chrono_duration
 {
+	using namespace std;
+
 	void chrono_demo01()
 	{
 		// chrono 内置了基本常用时间单位，也可自定义时间
@@ -107,7 +121,7 @@ namespace chrono_duration
 		constexpr uint64_t year = 365 * 24 * 60 * 60 + 5 * 60 * 60 + 49 * 60 + 12;
 		using namespace std;
 		using Shakes = chrono::duration<int64_t, ratio<1, 100000000>>;
-		using Weeks = ::chrono::duration<int32_t, std::ratio<7 * 24 * 3600, 1>>;
+		using Weeks = chrono::duration<int32_t, std::ratio<7 * 24 * 3600, 1>>;
 		using Years = chrono::duration<int32_t, ratio<year, 1>>;
 
 		using NanoCentury = chrono::duration<double, std::ratio<100 * year, 1000000000>>; // 每世纪多少纳秒， 这样计算是错误的，应该用下面方式；
@@ -142,6 +156,8 @@ namespace chrono_duration
 
 namespace clock_time_point
 {
+	using namespace std;
+
 	class SystemClock
 	{
 	public:
@@ -203,16 +219,16 @@ namespace clock_time_point
 			return (TimePoint((Duration::min)()));
 		}
 
-		static constexpr TimePoint(max)() noexcept
+		static constexpr TimePoint (max)() noexcept
 		{
 			return (TimePoint((Duration::max())));
 		}
 
 		template <class ToDuration, class Clock2, class Duration2>
-		static constexpr auto time_point_cast(const TimePoint<Clock2, Duration2>& t)->TimePoint<Clock2, ToDuration>;
+		static constexpr auto time_point_cast(const TimePoint<Clock2, Duration2>& t) -> TimePoint<Clock2, ToDuration>;
 
 	private:
-		Duration my_dur_{ typename Duration::zero() };
+		Duration my_dur_{typename Duration::zero()};
 	};
 
 	// 模板函数定义放在声明外面，会显得非常复杂，这里重点是理解模板类的使用。
@@ -237,22 +253,10 @@ namespace clock_time_point
 	{
 		std::cout << t.time_since_epoch().count() << "ms. \n";
 	}
-
-	void ctime_demo01()
-	{
-		time_t sec01;
-		auto sec02 = time(&sec01);
-		std::cout << "timestamp(sec01): " << sec01 << "\n";
-		// ReSharper disable once CppDeprecatedEntity
-		std::cout << "ctime(sec02): " << ctime(&sec02) << "\n";
-		// ReSharper disable once CppDeprecatedEntity
-		auto info = localtime(&sec02);
-		printf_s("info: %d:%d:%d", info->tm_hour, info->tm_min, info->tm_sec);
-	}
 }
 
 int main(int argc, char* argv[])
 {
-	chrono_duration::duration_transform();
-	clock_time_point::ctime_demo01();
+	//chrono_duration::duration_transform();
+	chrono_sample::Demo01();
 }
