@@ -44,12 +44,28 @@ namespace lvalue_rvalue
 			}
 		}
 
+		/*
+		 *    类的几种构造函数：
+		 *    默认构造， 拷贝构造， 拷贝赋值
+		 *    移动构造， 移动赋值， 析构
+		 */
+
 		IntVec(const IntVec& other) : m_size_(other.m_size_), m_data_(new int[m_size_])
 		{
-			log("copy constructor. \n");
+			log("copy constructor const&. \n");
 			for (size_t i = 0; i < m_size_; ++i) {
 				m_data_[i] = other.m_data_[i];
 			}
+		}
+
+		IntVec(IntVec& other) : m_size_(other.m_size_), m_data_(new int[m_size_])
+		{
+			log("copy constructor &. \n");
+		}
+
+		IntVec(IntVec&& other) noexcept : m_size_(other.m_size_)
+		{
+			log("copy constructor &&\n");
 		}
 
 		IntVec& operator=(const IntVec& other)

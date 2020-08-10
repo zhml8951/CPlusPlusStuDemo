@@ -118,7 +118,7 @@ namespace copy_move_demo
 	class Integer
 	{
 	public:
-		explicit Integer(int value) : ptr_(new int(value))
+		explicit Integer(const int value) : ptr_(new int(value))
 		{
 			std::cout << "Call Integer(int value) " << std::endl;
 		}
@@ -128,18 +128,28 @@ namespace copy_move_demo
 			std::cout << "Call ~Integer()" << std::endl;
 		}
 
-	/*
-	 *	Integer(const Integer& src) 与 Integer(Integer& src) const引用 非const引用是不同变量，故可以重载
-	 */
+		/*
+		 *	Integer(const Integer& src) 与 Integer(Integer& src) const引用 非const引用是不同变量，故可以重载
+		 */
+
 		Integer(const Integer& src): ptr_(new int(*src.ptr_))
 		{
-			std::cout << "Call Integer(const Integer& src)" << std::endl;
+			std::cout << "Call Integer(const Integer& src)." << std::endl;
 		}
+
+		//  拷贝构造两的形式，没有本质区别，const Integer& 常量引用。 只是原对象修改与否；
 
 		Integer(Integer& src): ptr_(src.ptr_)
 		{
 			src.ptr_ = nullptr;
-			std::cout << "Call Integer(Integer& src)" << std::endl;
+			std::cout << "Call Integer(Integer& src)." << std::endl;
+		}
+
+		// 移动构造，涉及右值引用， 减少内存复制，提升性能； 
+		Integer(Integer&& src) noexcept : ptr_(src.ptr_)
+		{
+			src.ptr_ = nullptr;
+			std::cout << "Call Integer(Integer&& src)." << std::endl;
 		}
 
 		int GetValue(void) const { return *ptr_; }
