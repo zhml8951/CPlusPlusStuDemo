@@ -10,6 +10,7 @@
 #include <mutex>	// 线程独占式资源访问能力的互斥算法，保证共享资源的同步访问
 #include <condition_variable> // 定量的线程等待被另一线程唤醒，然后继续执行。
 #include <future>		// 异步任务返回值获取及相关异常处理。
+#include <random>
 
 /*
  * 并发： 同一时间段内交替处理多个操作，交替发生。(看起来同时)  相对应： 顺序
@@ -22,7 +23,7 @@
  * C++ 并没有提供多进程通信的原生支持。
  */
 
- // ReSharper disable CppUseAuto
+// ReSharper disable CppUseAuto
 
 namespace thread_sample
 {
@@ -36,7 +37,7 @@ namespace thread_sample
 		}
 	}
 
-	// 类方式创建线程调用，伪函数(重载operator())
+	// 类方式创建线程调用，仿函数(重载operator())
 	class ThreadClsFunc
 	{
 	public:
@@ -214,10 +215,11 @@ namespace thread_sample
 			int data = 0;
 			while (data != 1) {
 				std::unique_lock<std::mutex> locker(mu);
-				while (deque_int.empty()) cv.wait(locker);
-				// 采用while运行，condition.wait一直等到notify_one后才会走到后面。 这里不能使用if。相当于deque.empty条件下，线程一直休眠等待。
+				while (deque_int.empty()) {
+					cv.wait(locker);
+				} // 采用while运行，condition.wait一直等到notify_one后才会走到后面。 这里不能使用if。相当于deque.empty条件下，线程一直休眠等待。
+				//cv.wait(locker, [&]()-> bool { return !deque_int.empty(); }); //可使用condition.wait(locker, 条件lambda; 效果相同。
 
-				//condition.wait(locker, [&]()-> bool { return !deque_int.empty(); }); //可使用condition.wait(locker, 条件lambda; 效果相同。
 				data = deque_int.back();
 				deque_int.pop_back();
 				locker.unlock(); // 取得数据后，从这里切回到producer.
@@ -235,8 +237,7 @@ namespace thread_sample
 
 	typedef std::vector<int>::iterator VecIter;
 
-	//
-	void AsyncUseCondition()
+	void AsyncUseCondition() // 使用condition_variable 实现异步；
 	{
 		using VecIter = std::vector<int>::iterator;
 		int rst = 0;
@@ -252,15 +253,21 @@ namespace thread_sample
 			std::this_thread::sleep_for(std::chrono::seconds(1));
 		};
 
-		std::vector<int> numbers = { 1, 2, 3, 4, 5, 6 };
+		std::vector<int> numbers = {1, 2, 3, 4, 5, 6};
 		std::thread work_thread(accumulate_lam, numbers.begin(), numbers.end());
 		std::unique_lock<std::mutex> main_locker(mu);
-		cond.wait(main_locker, [&]() { return rst; });
+
+		cond.wait(main_locker, [&]() -> bool { return rst; }); // 从thread创建开始异步执行，使用condition_variable.wait等待结果返回。
+
 		std::cout << "Result: " << rst << "\n";
 		main_locker.unlock();
 		work_thread.join();
 	}
 
+	/*
+	 * 使用condition_variable可完成大部分异步任务，最大缺点则是数据耦合度太高，很多全局量需要引入到线程函数；
+	 * 采用Future， promise, future 实现在数据松耦合；从下例可以看到， 使用promise<int> future<int> 可以将全部全局变量去除；
+	 */
 	void AsyncUseFuture()
 	{
 		class Accumulate
@@ -269,16 +276,18 @@ namespace thread_sample
 			void operator()(const VecIter first, const VecIter last, std::promise<int> accumulate_promise) const
 			{
 				const int sum = std::accumulate(first, last, 0);
-				accumulate_promise.set_value(sum);
+				accumulate_promise.set_value(sum); // 将返回值填入promise;
 			}
 		};
 
 		Accumulate accumulate01;
-		std::vector<int> numbers = { 1, 2, 3, 4, 5, 6, 7 };
+		std::vector<int> numbers = {1, 2, 3, 4, 5, 6, 7};
 		std::promise<int> accumulate_promise;
 		std::future<int> accumulate_future = accumulate_promise.get_future();
+		// 创建线程时，需要使用move(future)右值引用，通promise返回。
 		std::thread work_thread(accumulate01, numbers.begin(), numbers.end(), std::move(accumulate_promise));
-		accumulate_future.wait();
+
+		accumulate_future.wait(); // 等待future返回；
 		std::cout << "result: " << accumulate_future.get() << "\n";
 		work_thread.join();
 	}
@@ -296,8 +305,10 @@ namespace thread_sample
 		};
 
 		AccumulateCls accumulate_obj;
-		std::vector<int> numbers = { 1, 2, 3, 4, 5, 6, 7, 8 };
-		std::packaged_task<int(VecIter, VecIter)> accumulate_task(accumulate_obj);
+		std::vector<int> numbers = {1, 2, 3, 4, 5, 6, 7, 8};
+
+		std::packaged_task<int(VecIter, VecIter)> accumulate_task(accumulate_obj); // 同promise方式相似。
+
 		std::future<int> accumulate_future = accumulate_task.get_future();
 		std::thread work_thread(std::move(accumulate_task), numbers.begin(), numbers.end());
 		accumulate_future.wait();
@@ -312,7 +323,7 @@ namespace thread_sample
 			return sum;
 		};
 
-		std::vector<int> numbers{ 1, 2, 3, 4, 5, 6, 7, 8 };
+		std::vector<int> numbers{1, 2, 3, 4, 5, 6, 7, 8};
 		//auto accumulate_future = std::async(std::launch::async, accumulate, numbers.begin(), numbers.end());
 		std::future<int> accumulate_future = std::async(std::launch::async, accumulate, numbers.begin(), numbers.end());
 		std::cout << "Rst: " << accumulate_future.get() << "\n";
@@ -363,22 +374,81 @@ namespace thread_csdn
 			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 			return var;
 		};
-		
-		std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+
+		std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now(); //单线程计时开始
 		double rst = func(1.) + func(2.) + func(3.) + func(4.);
 		std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
 		double time_cost = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count() * 1000.;
 		std::cout << std::fixed << "Single-Thread result: " << rst << ", and time cost: " << time_cost << "\n";
 
-		t1 = std::chrono::steady_clock::now();
+		t1 = std::chrono::steady_clock::now(); //4线程运算 计时开始
 		std::future<double> f1(std::async(std::launch::async, func, 1.));
 		auto f2 = std::async(std::launch::async, func, 2.);
 		auto f3 = std::async(std::launch::async, func, 3.);
 		rst = func(4.) + f1.get() + f2.get() + f3.get();
-		t2 = std::chrono::steady_clock::now();
+		t2 = std::chrono::steady_clock::now(); // 计时结束
+
 		time_cost = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count() * 1000.;
 		std::cout << std::fixed << "Multi-Thread result: " << rst << ", and time cost: " << time_cost;
 		std::cout << std::endl;
+	}
+
+	void FrontBackEnd()
+	{
+		class BackEnd
+		{
+		public:
+			BackEnd()
+			{
+				thread_ptr_ = std::make_unique<std::thread>(&BackEnd::Process, this);
+			}
+
+			void Process()
+			{
+				thread_running_.store(true);
+				while (thread_running_.load()) {
+					int data;
+					{
+						// Wait for data;
+						std::unique_lock<std::mutex> ul(data_queue_mutex_);
+						cond_var_.wait(ul, [this]() { return !data_queue_.empty(); });
+						data = data_queue_.front();
+						data_queue_.pop_front();
+					} // Release lock;
+					std::cout << "[BackEnd]: Receive data: " << data << "\n";
+				}
+			}
+
+			void AddData(const int data)
+			{
+				{
+					std::lock_guard<std::mutex> lg(data_queue_mutex_);
+					data_queue_.push_back(data);
+				}
+				cond_var_.notify_one();
+			}
+
+		private:
+			std::atomic<bool> thread_running_;
+			std::mutex data_queue_mutex_;
+			std::deque<int> data_queue_;
+			std::condition_variable cond_var_;
+			std::unique_ptr<std::thread> thread_ptr_;
+		};
+
+		// Front end  ==> Main()
+		{
+			BackEnd back_end;
+			std::default_random_engine generator;
+			const std::uniform_int_distribution<int> distribution(0, 1000);
+			for(int i =0; i < 10; i++) {
+				const int random_var = distribution(generator);
+				back_end.AddData(random_var);
+
+				std::cout << "[FrontEnd]: Add Var " << random_var << "\n";
+				std::this_thread::sleep_for(std::chrono::milliseconds(500));
+			}
+		}
 	}
 }
 
