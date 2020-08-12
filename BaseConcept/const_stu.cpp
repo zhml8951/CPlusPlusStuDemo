@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <string>
+#include <mutex>
 
 // ReSharper disable CppUseAuto
 
@@ -30,13 +31,9 @@ namespace const_demo
 {
 	const int kA = 100;
 
-	void func(const int* i, const std::string& str)
-	{
-	}
+	void func(const int* i, const std::string& str) { }
 
-	void func2(int* const i1, const int* const i2)
-	{
-	}
+	void func2(int* const i1, const int* const i2) { }
 
 	void Test01()
 	{
@@ -54,7 +51,49 @@ namespace const_demo
 		*p = 200;
 		printf("a=*p: %d", kA);
 
-		func2(p, &c);	//
+		func2(p, &c); //
 		//func2(&c, &c);		//这里是错误的。
 	}
 }
+
+/*
+ * C++ 修饰变量的3个关键词： const, mutable, volatile; 
+ * const 修饰不可变，也有一说const修饰的变量，编译时自动替换为const变量值，也就是常量的概念，但最多的理解则是只读变量。
+ * mutable 则是易变的，主要使用于类成员函数中。 用mutable修饰的变量即使在const成员函数中也可以改变。只能在类中修饰非静态成员，突破const成员的限止；
+ * 在C++文档中有个CV的概念，即const,volatile; 
+ * volatile定义为易变，应该理解为 volatile修饰的变量易变，编译器应忽略对此变量的优化(寄存器优化)，每次都从内存读取值。
+ */
+
+struct St
+{
+	int num;
+	mutable double price;
+};
+
+void StTest()
+{
+	const St t1{1, 1.};
+	St t2{2, 2.};
+	//t1.num = 8;		// 编译错误，t1为const类型；
+	t1.price = 8.; // OK， 虽然t1为const，但price为mutable(可变的)；
+}
+
+// mutable修饰 mutex;
+
+class ThreadSafeCounter
+{
+	mutable std::mutex mutex_; // 互斥锁设置为mutable，在const成员函数内也可修改;
+	int data_ = 0;
+public:
+	int get() const // get 是const 成员函数，只有mutable变量可以变动；
+	{
+		std::lock_guard<std::mutex> lk(mutex_);
+		return data_;
+	}
+
+	void inc()
+	{
+		std::lock_guard<std::mutex> lk(mutex_);
+		++data_;
+	}
+};

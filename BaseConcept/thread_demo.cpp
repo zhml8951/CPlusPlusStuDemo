@@ -4,6 +4,7 @@
 #include <deque>
 #include <vector>
 #include <numeric>
+#include <queue>
 
 #include <thread>  // 程序创建管理主接口
 #include <atomic>	// 细粒度的原子操作
@@ -337,10 +338,10 @@ namespace thread_sample
 		int job_exclusive = 0;
 
 		auto job01 = [&]() -> void {
-			auto this_id = std::this_thread::get_id();
+			const auto this_id = std::this_thread::get_id();
 			std::this_thread::sleep_for(interval * 5);
 			job_shared.fetch_add(1);
-			std::cout << "job01 shared (" << job_shared.load() << "). \n";
+			std::cout << "job01 shared (" << job_shared.load() << "). " << "this_id: " << this_id << '\n';
 			ready_flag.store(true);
 		};
 
@@ -411,7 +412,7 @@ namespace thread_csdn
 					{
 						// Wait for data;
 						std::unique_lock<std::mutex> ul(data_queue_mutex_);
-						cond_var_.wait(ul, [this]() { return !data_queue_.empty(); });
+						cond_var_.wait(ul, [this]()-> bool { return !data_queue_.empty(); });
 						data = data_queue_.front();
 						data_queue_.pop_front();
 					} // Release lock;
@@ -440,16 +441,114 @@ namespace thread_csdn
 		{
 			BackEnd back_end;
 			std::default_random_engine generator;
-			const std::uniform_int_distribution<int> distribution(0, 1000);
-			for(int i =0; i < 10; i++) {
+			std::uniform_int_distribution<int> distribution(0, 1000);
+			for (int i = 0; i < 10; i++) {
 				const int random_var = distribution(generator);
-				back_end.AddData(random_var);
-
 				std::cout << "[FrontEnd]: Add Var " << random_var << "\n";
+
+				back_end.AddData(random_var);
 				std::this_thread::sleep_for(std::chrono::milliseconds(500));
 			}
 		}
+		return;
 	}
+
+	template <typename Data>
+	class ConCurrentQueue
+	{
+	public:
+		void push(const Data& data)
+		{
+			std::unique_lock<std::mutex> ul(mutex_);
+			data_queue_.push(data);
+			ul.unlock();
+			cond_var_.notify_one();
+		}
+
+		bool empty() const
+		{
+			std::lock_guard<std::mutex> lg(mutex_);
+			return data_queue_.empty();
+		}
+
+		Data& front()
+		{
+			std::unique_lock<std::mutex> ul(this->mutex_);
+			return data_queue_.front();
+		}
+
+		Data const& front() const
+		{
+			std::unique_lock<std::mutex> ul(mutex_);
+			return data_queue_.front();
+		}
+
+		void pop()
+		{
+			std::unique_lock<std::mutex> ul(mutex_);
+			data_queue_.pop();
+		}
+
+		void wait_pop(Data& popped_value)
+		{
+			std::unique_lock<std::mutex> ul(mutex_);
+			while (data_queue_.empty()) {
+				cond_var_.wait(ul);
+			}
+			popped_value = data_queue_.front();
+			data_queue_.pop();
+		}
+
+		bool try_pop(Data& popped_value)
+		{
+			std::unique_lock<std::mutex> ul(mutex_);
+			if (data_queue_.empty())return false;
+			popped_value = data_queue_.front();
+			data_queue_.pop();
+			return true;
+		}
+
+	private:
+		std::queue<Data> data_queue_;
+		mutable std::mutex mutex_;
+		std::condition_variable cond_var_;
+	};
+
+	template <typename Type>
+	class BlockingStream
+	{
+	public:
+		explicit BlockingStream(const size_t max_buff) : max_buffer_size_(max_buff) {}
+
+		BlockingStream& operator<<(Type& other)
+		{
+			std::unique_lock<std::mutex> ul(mutex_);
+			while (buffer_.size() >= max_buffer_size_)
+				stop_if_full_.wait(ul);
+			buffer_.push(std::move(other));
+			ul.unlock();
+			stop_if_empty_.notify_one();
+			return *this;
+		}
+
+		BlockingStream& operator>>(Type& other)
+		{
+			std::unique_lock<std::mutex> ul(mutex_);
+			stop_if_empty_.wait(ul, [this]()-> bool { return this->buffer_.empty(); });
+			std::swap(other, buffer_.front());
+			buffer_.pop();
+			ul.unlock();
+			stop_if_full_.notify_one();
+			return *this;
+		}
+
+	private:
+		size_t max_buffer_size_;
+		std::queue<Type> buffer_;
+		std::mutex mutex_;
+		std::condition_variable stop_if_empty_, stop_if_full_;
+		bool eof_ = false;
+	};
 }
 
 int main(int argc, char* argv[])
@@ -459,7 +558,8 @@ int main(int argc, char* argv[])
 	//thread_sample::ConditionMutex01();
 	//thread_sample::ConditionVarMutex02();
 	//thread_sample::AsyncUseCondition();
-	thread_sample::AsyncUseFuture();
-	thread_sample::AsyncUsePackagedTask();
-	thread_csdn::AdditionDemo01();
+	//thread_sample::AsyncUseFuture();
+	//thread_sample::AsyncUsePackagedTask();
+	//thread_csdn::AdditionDemo01();
+	thread_csdn::FrontBackEnd();
 }
