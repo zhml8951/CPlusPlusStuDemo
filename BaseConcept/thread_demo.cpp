@@ -24,6 +24,9 @@
  * C++ 并没有提供多进程通信的原生支持。
  */
 
+// RAII ==> Resource Acquisition Is Initialization 即 资源获取即初始化，主要实现方式即采用智能指针，资源采用类的方式管理，
+// 
+
 // ReSharper disable CppUseAuto
 
 namespace thread_sample
