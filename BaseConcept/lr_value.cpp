@@ -16,13 +16,14 @@
 
 void Stu01()
 {
-	int arr01[]{ 1, 2, 3 };
+	int arr01[]{1, 2, 3};
 	int* p01 = arr01; //int  *p =
 	// 一元运算符(*) 解引用, 拿一个右值作为参数可得左值。
 	*(p01 + 1) = 30; // * 解引用。
 	// 一元取地址符'&'， 拿一个左值作为参数可得右值  ==> 左值引用。
 	int num = 30;
-	int* num_p = &num; // 左值引用. 引用一个左值可得右值。
+	int* num_ptr = &num; // 左值引用. 引用一个左值可得右值。&取值运算；int* 声明指针
+	printf("ptr: %p\n", num_ptr);
 }
 
 namespace lvalue_rvalue
@@ -208,12 +209,12 @@ namespace lvalue_rvalue
 	void AcceptRef(const Copyable& a) { printf("AcceptRef. ref.address: %p\n", &a); }
 
 	void TestCopyable()
-		// 这里为了说明右值引用， 无论传值或传引用，这里return Copyable()返回的都是右值，按理论来说，下面会调用两次拷贝构造，但实际运行则都没有调用，
-		// 说明直接传右值， 这是编译器默认都使用了优化技术，自动进行了右值引用。
-		// 左值引用, 使用T& 只能绑定左值。
-		// 右值引用, 使用T&& 只能绑定右值。
-		// 常量左值, 使用const T& 即可绑定左值也可以绑定右值。
-		// 已命名的<右值引用>，编译器会认为其是左值。
+	// 这里为了说明右值引用， 无论传值或传引用，这里return Copyable()返回的都是右值，按理论来说，下面会调用两次拷贝构造，但实际运行则都没有调用，
+	// 说明直接传右值， 这是编译器默认都使用了优化技术，自动进行了右值引用。
+	// 左值引用, 使用T& 只能绑定左值。
+	// 右值引用, 使用T&& 只能绑定右值。
+	// 常量左值, 使用const T& 即可绑定左值也可以绑定右值。
+	// 已命名的<右值引用>，编译器会认为其是左值。
 	{
 		printf("pass by value. \n");
 		AcceptVal(ReturnValue()); //
@@ -315,7 +316,7 @@ namespace lvalue_rvalue
 		CustomStrMove::assign_move_counter_ = 0;
 		vec_str.clear();
 		for (auto i = 0; i < total_elem; i++) {
-			CustomStrMove tmp{ "custom_str_copy" };
+			CustomStrMove tmp{"custom_str_copy"};
 			vec_str.push_back(tmp);
 		}
 		printf("copy constructor counter: %lld\n", CustomStrMove::copy_counter_);
@@ -330,7 +331,7 @@ namespace lvalue_rvalue
 		CustomStrMove::assign_move_counter_ = 0;
 		vec_str.clear();
 		for (auto i = 0; i < total_elem; ++i) {
-			CustomStrMove tmp{ "custom_string emplace_back." };
+			CustomStrMove tmp{"custom_string emplace_back."};
 			vec_str.emplace_back(tmp);
 		}
 		printf("copy constructor counter: %lld\n", CustomStrMove::copy_counter_);
@@ -345,13 +346,47 @@ namespace lvalue_rvalue
 		CustomStrMove::assign_move_counter_ = 0;
 		vec_str.clear();
 		for (auto i = 0; i < total_elem; i++) {
-			CustomStrMove tmp{ "custom_string std::move." };
+			CustomStrMove tmp{"custom_string std::move."};
 			vec_str.push_back(std::move(tmp));
 		}
 		printf("copy constructor counter: %lld\n", CustomStrMove::copy_counter_);
 		printf("move constructor counter: %lld\n", CustomStrMove::move_counter_);
 		printf("copy assign counter: %lld\n", CustomStrMove::assign_copy_counter_);
 		printf("move assign counter: %lld	\n", CustomStrMove::assign_move_counter_);
+	}
+
+	/*
+	 *  修饰类的4个关键字:   const, &, &&, volatile; 这些关键字写函数后面，其本质修饰的就是this;
+	 *  如下(PText)： string GetText() const& ==> GetText(const PText&) ==> GetText(const& this);
+	 */
+	struct PText
+	{
+		std::string text;
+
+		std::string& GetText() & //  相当于std::string& GetText()  {....}
+		{
+			return text;
+		}
+
+		std::string GetText() &&
+		{
+			return std::move(text);
+		}
+
+		std::string GetText() const & // 这里必须写 const&, 其它样式都无法编译
+		{
+			return text;
+		}
+	};
+
+	void TestText()
+	{
+		auto t1 = PText{"Test t1"};
+		auto str1 = std::move(t1).GetText(); // move右值引用会调用 string GetText()&&; 如果没有定义, 则实际调用GetText()&
+		std::cout << "str1:  " << str1 << "\n";
+		str1 = PText{"Test rvalue t1"}.GetText(); // 这里直接创建右值，调用GetText()&&, 如果没有定义，则调用GetText()&, 右值&&引用减少拷贝；
+		std::cout << "str1:  " << str1 << "\n";
+		std::cout << "t1.GetValue: " << t1.GetText() << "\n";
 	}
 }
 
@@ -367,4 +402,7 @@ int main(int argc, char* argv[])
 	printf("\n--------------------\n");
 
 	lvalue_rvalue::TestCustomStrMove();
+	printf("\n--------------------\n");
+
+	lvalue_rvalue::TestText();
 }

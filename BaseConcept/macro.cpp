@@ -1,6 +1,9 @@
-﻿#include <functional>
-#ifndef MACRO_HPP_
+﻿#ifndef MACRO_HPP_
 #define MACRO_HPP_
+
+#include <iostream>
+#include <functional>
+
 // #ifndef ...  #define .... #endif 为了避免同一文件被多次#include;
 // #pragma once		// 功能 #ifndef .... #define ....#endif;
 /*
@@ -35,12 +38,13 @@
  * 常见内置宏： (以 __ 起头 属C++内置，  以 _ 起头则表示 编译器内置)
  *		__FILE__,   __DATE__,  __FUNCTION__, __LINE__,  __TIME__, __TIMESTAMP__;
  */
+
 namespace macro_demo
 {
 	void Demo01()
 	{
 		auto r = 3.3f;
-		auto area = AREA(r); // ==> PI*r*r ==> 3.1415 * 3.3 * 3.3;
+		const auto area = AREA(r); // ==> PI*r*r ==> 3.1415 * 3.3 * 3.3;
 		printf("r: %.2f,  area: %.2f\n", r, area);
 		auto b = 4.4f;
 		printf("max(a,b): %f\n", MAX(b, r));
@@ -51,8 +55,8 @@ namespace macro_demo
 
 	void Demo02()
 	{
-		const char* sz = "user";
-		const char* zh = "Zh";
+		auto sz = "user";
+		auto zh = "Zh";
 
 		const auto LINK_NAME(user) = "define";
 		std::cout << LINK_NAME(user) << "\n";
@@ -64,19 +68,21 @@ namespace macro_demo
 	void Demo03()
 	{
 #define FILE(a) {a, #a}
-		enum IDD { OPEN, CLOSE };
-		typedef struct MSG
+		enum Idd { OPEN, CLOSE };
+		typedef struct Msg
 		{
-			IDD id;
+			Idd id;
 			const char* msg;
 		} Msg;
 
-		MSG msg_arr[] = { FILE(OPEN), FILE(CLOSE) }; //展开后:  msg_arr = { {OPEN, "OPEN"}, {CLOSE, "CLOSE"} };
+		Msg msg_arr[] = { FILE(OPEN), FILE(CLOSE) }; //展开后:  msg_arr = { {OPEN, "OPEN"}, {CLOSE, "CLOSE"} };
+		std::cout << msg_arr << "\n";
 	}
 
 	void Demo04()
 	{
 		// 这里都用到一个中间转换宏。 涉及多层展开；
+
 		// 创建合并匿名变量
 #define ANONYMOUS2(type, var, line) type var##line
 #define ANONYMOUS1(type, line) ANONYMOUS2(type, anonymous_, line)
@@ -106,7 +112,7 @@ namespace macro_demo
 	}
 
 	// 这里使用内置宏__LINE__; 一级宏不会展__LINE__实际值， 通过一层宏再调用二级宏展开__LINE__值。
-
+	// 这里涉及宏内部部分拼接，ON_SCOPE_EXIT(callback)  ==> ScopeGuard cls_obj_name(...)
 #define SCOPE_GUARD_LINE_NAME_CAT(name, line) name_##line
 #define SCOPE_GUARD_LINE_NAME(name, line) SCOPE_GUARD_LINE_NAME_CAT(name, line)
 #define ON_SCOPE_EXIT(callback) ScopeGuard SCOPE_GUARD_LINE_NAME(EXIT, __LINE__)(callback)
@@ -127,14 +133,14 @@ namespace macro_demo
 		std::function<void()> on_exit_scope_;
 		bool dismissed_;
 
-	private: // 禁止执行拷贝构造和拷贝赋值。
-		ScopeGuard(ScopeGuard const&);
-		ScopeGuard& operator=(ScopeGuard const&);
+	private: //设置private,禁止执行拷贝构造和拷贝赋值，等同于：  ScopeGuard(ScopeGuard const&)=delete;
+		ScopeGuard(ScopeGuard const&); // 拷贝构造
+		ScopeGuard& operator=(ScopeGuard const&) = delete; // 拷贝赋值,设置成private，后delete可去掉。
 	};
 
 	void Demo05()
 	{
-		auto cb = [&]()-> void { printf("ok"); };
+		const auto cb = [&]()-> void { printf("ok"); };
 		ScopeGuard sc01([&] { printf("Ok"); });
 		ScopeGuard sc02([&]()-> void { printf("ScopeGuard"); });
 
@@ -151,5 +157,7 @@ int main(int argc, char* argv[])
 	macro_demo::Demo01();
 	printf("\n--------------------------\n");
 	macro_demo::Demo02();
+	printf("\n--------------------------\n");
+	macro_demo::Demo03();
 	return 1;
 }

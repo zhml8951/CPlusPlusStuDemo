@@ -25,7 +25,7 @@
  */
 
 // RAII ==> Resource Acquisition Is Initialization 即 资源获取即初始化，主要实现方式即采用智能指针，资源采用类的方式管理，
-// 
+// 最典型的RAII使用如：  std::lock_guard<std::mutex>
 
 // ReSharper disable CppUseAuto
 
@@ -38,6 +38,7 @@ namespace thread_sample
 		for (int i = 0; i < 5; i++) {
 			std::cout << "Child function thread:" << this_id << " running: " << i + 1 << "\n";
 			std::this_thread::sleep_for(std::chrono::seconds(n));
+
 		}
 	}
 
@@ -391,7 +392,6 @@ namespace thread_csdn
 		auto f3 = std::async(std::launch::async, func, 3.);
 		rst = func(4.) + f1.get() + f2.get() + f3.get();
 		t2 = std::chrono::steady_clock::now(); // 计时结束
-
 		time_cost = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count() * 1000.;
 		std::cout << std::fixed << "Multi-Thread result: " << rst << ", and time cost: " << time_cost;
 		std::cout << std::endl;
@@ -407,6 +407,14 @@ namespace thread_csdn
 				thread_ptr_ = std::make_unique<std::thread>(&BackEnd::Process, this);
 			}
 
+			~BackEnd()
+			{
+				if (this->thread_ptr_->joinable()) thread_ptr_->join();
+			}
+
+			BackEnd(const BackEnd&) = delete; // 禁止拷贝构造; 也可将此设置成private,效果相同
+			BackEnd& operator=(const BackEnd&) = delete; // 禁卡拷贝赋值
+
 			void Process()
 			{
 				thread_running_.store(true);
@@ -415,19 +423,26 @@ namespace thread_csdn
 					{
 						// Wait for data;
 						std::unique_lock<std::mutex> ul(data_queue_mutex_);
-						cond_var_.wait(ul, [this]()-> bool { return !data_queue_.empty(); });
+						cond_var_.wait(ul, [this] { return !data_queue_.empty(); });
 						data = data_queue_.front();
 						data_queue_.pop_front();
+						ul.unlock();
 					} // Release lock;
 					std::cout << "[BackEnd]: Receive data: " << data << "\n";
+					cond_var_.notify_one();
 				}
 			}
 
 			void AddData(const int data)
 			{
 				{
-					std::lock_guard<std::mutex> lg(data_queue_mutex_);
+					//std::lock_guard<std::mutex> lg(data_queue_mutex_);
+					std::unique_lock<std::mutex> ul(this->data_queue_mutex_);
+					//cond_var_.wait(ul, [this] { return !data_queue_.empty(); });
+					while (!data_queue_.empty()) cond_var_.wait(ul);
 					data_queue_.push_back(data);
+					std::cout << "[FrontEnd]: Add Var " << data << "\n";
+					ul.unlock();
 				}
 				cond_var_.notify_one();
 			}
@@ -444,11 +459,10 @@ namespace thread_csdn
 		{
 			BackEnd back_end;
 			std::default_random_engine generator;
+			// ReSharper disable once CppLocalVariableMayBeConst
 			std::uniform_int_distribution<int> distribution(0, 1000);
 			for (int i = 0; i < 10; i++) {
 				const int random_var = distribution(generator);
-				std::cout << "[FrontEnd]: Add Var " << random_var << "\n";
-
 				back_end.AddData(random_var);
 				std::this_thread::sleep_for(std::chrono::milliseconds(500));
 			}
@@ -523,6 +537,9 @@ namespace thread_csdn
 	public:
 		explicit BlockingStream(const size_t max_buff) : max_buffer_size_(max_buff) {}
 
+		BlockingStream(BlockingStream const&) = delete;
+		BlockingStream& operator=(const BlockingStream&) = delete;
+
 		BlockingStream& operator<<(Type& other)
 		{
 			std::unique_lock<std::mutex> ul(mutex_);
@@ -551,6 +568,77 @@ namespace thread_csdn
 		std::mutex mutex_;
 		std::condition_variable stop_if_empty_, stop_if_full_;
 		bool eof_ = false;
+	};
+}
+
+namespace thread_github
+{
+	/*
+	 *	Code 来源于book <<C++ Concurrency in Action 2ed>> 
+	 *	url:   https://downdemo.gitbook.io/cpp-concurrency-in-action-2ed/
+	 *	https://github.com/downdemo/Cpp-Concurrency-in-Action-2ed
+	 */
+
+	void Func01()
+	{
+		std::cout << "Func01 first cout." << std::endl;
+	}
+
+	struct S01
+	{
+		// 重载operator() 实现仿函数
+		void operator()() const
+		{
+			std::cout << "struct S01:  " << 1 << "\n";
+		}
+	};
+
+	void TestMain01()
+	{
+		S01 s1;
+		std::thread t1(s1);
+		std::thread t2{S01()};
+		std::thread t3((S01())); // 注意(()) 解决 most vexing parse ;
+		std::thread t4([] { std::cout << "lambda call t4" << "\n"; });
+		t1.join();
+		t2.join();
+		t3.join();
+		t4.join();
+	}
+
+	struct S02
+	{
+		int& i;
+		explicit S02(int& x): i(x) { std::cout << "S2(int&) called.\n" << "\n"; }
+		void operator()()const
+		{
+			for (int j=0;j< 1000000; j++) {
+				std::cout << "j:  " << j << ",  i: " << i << " ";
+				// something... ;这里存在安全隐患，对象析构后i会成  空悬
+			}
+		}
+	};
+
+	void TestS02()
+	{
+		int x = 0;
+		S02 s02{x};
+		std::thread	t1(s02);	//调用仿函数operator()()const;
+		t1.detach();//主程序直接结束不等待
+	}
+
+	/*
+	 * 创建线程守护类， 防止线程出现异常时不进行join操作，当然可以采用try...catch...操作，但结构性更差
+	 */
+	class ThreadGuard
+	{
+	public:
+		explicit ThreadGuard(std::thread& t): t_(t) {}
+		~ThreadGuard() { if (t_.joinable()) t_.join(); }
+		ThreadGuard(ThreadGuard const&) = delete;
+		ThreadGuard& operator=(ThreadGuard const&) = delete;
+	private:
+		std::thread& t_;
 	};
 }
 
