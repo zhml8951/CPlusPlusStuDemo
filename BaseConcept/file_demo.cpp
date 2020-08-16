@@ -95,6 +95,11 @@ namespace file_operator
 			cout << "bad()=" << stream.bad() << "\n";
 		};
 
+		void(*print_point)(const std::ios&) ;// = [](const std::ios& stream) -> void {
+			
+		//}
+
+
 		std::string content;
 		std::ifstream ifs("d:\\temp\\csdn.sql");
 		if (ifs.is_open()) {

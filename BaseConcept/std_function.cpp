@@ -101,7 +101,7 @@ namespace simple_demo
 		const auto display = [](const int val)-> void { std::cout << val << "  "; };
 		auto display_v = [](const Person& p) -> void { std::cout << p.age << ", " << p.name << std::endl; };
 
-		int arr[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+		int arr[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 		using namespace std;
 		vector<int> vec;
 		copy_if(begin(arr), end(arr), back_inserter(vec), std::bind1st(less<int>(), 6));
@@ -126,18 +126,18 @@ namespace simple_demo
 		//std::unary_function<class Arg, class Result>
 		//std::binary_function<class arg1, class arg2, class result>;
 		std::vector<Person> vec_person;
-		vec_person.push_back(Person{1, "Jack"});
-		vec_person.push_back(Person{2, "Rose"});
-		vec_person.push_back(Person{3, "Jane"});
-		vec_person.push_back(Person{4, "Sony"});
+		vec_person.push_back(Person{ 1, "Jack" });
+		vec_person.push_back(Person{ 2, "Rose" });
+		vec_person.push_back(Person{ 3, "Jane" });
+		vec_person.push_back(Person{ 4, "Sony" });
 
 		std::vector<Person> vec_ret;
 		std::copy_if(vec_person.begin(), vec_person.end(), std::back_inserter(vec_ret),
-		             std::bind2nd(PersonFilterFunc(), "Ja"));
+			std::bind2nd(PersonFilterFunc(), "Ja"));
 		std::for_each(vec_ret.begin(), vec_ret.end(), display_v);
 	}
 
-	// 自定义仿函数， 比较两个数大小。这个同标准库std::greater相似的。 
+	// 自定义仿函数， 比较两个数大小。这个同标准库std::greater相似的。
 	template <typename T>
 	struct Comp
 	{
@@ -175,6 +175,6 @@ int main(int argc, char* argv[])
  * 配置(Allocator)
  */
 
-/*
- * 仿函数(Functor) 根据参数不同，分为两大类｛ unary_function(两个参数),  binary_function(一个参数)
- */
+ /*
+  * 仿函数(Functor) 根据参数不同，分为两大类｛ unary_function(两个参数),  binary_function(一个参数)
+  */

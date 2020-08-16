@@ -627,6 +627,10 @@ namespace thread_github
 		t1.detach();//主程序直接结束不等待
 	}
 
+	void TestS03()
+	{
+	}
+
 	/*
 	 * 创建线程守护类， 防止线程出现异常时不进行join操作，当然可以采用try...catch...操作，但结构性更差
 	 */

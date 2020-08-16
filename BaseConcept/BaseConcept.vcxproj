@@ -78,6 +78,7 @@
     <ClCompile Include="csdn_demo01.cpp" />
     <ClCompile Include="declspec_demo.cpp" />
     <ClCompile Include="enum_demo.cpp" />
+    <ClCompile Include="exception_demo.cpp" />
     <ClCompile Include="extern_demo.cpp" />
     <ClCompile Include="file_demo.cpp" />
     <ClCompile Include="friend_demo.cpp" />
