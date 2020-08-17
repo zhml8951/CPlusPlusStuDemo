@@ -1,5 +1,6 @@
 ﻿#ifndef MACRO_HPP_
 #define MACRO_HPP_
+//#pragma once
 
 #include <iostream>
 #include <functional>
@@ -12,7 +13,7 @@
  */
 #include <iostream>
 
- // 简单字符串替换
+// 简单字符串替换
 #define PI 3.1415
 #define NAME "arnni"
 #define AREA(r) PI*r*r
@@ -75,7 +76,7 @@ namespace macro_demo
 			const char* msg;
 		} Msg;
 
-		Msg msg_arr[] = { FILE(OPEN), FILE(CLOSE) }; //展开后:  msg_arr = { {OPEN, "OPEN"}, {CLOSE, "CLOSE"} };
+		Msg msg_arr[] = {FILE(OPEN), FILE(CLOSE)}; //展开后:  msg_arr = { {OPEN, "OPEN"}, {CLOSE, "CLOSE"} };
 		std::cout << msg_arr << "\n";
 	}
 
@@ -100,7 +101,7 @@ namespace macro_demo
 		 *           经过3层解开，得到最终的匿名变量，类型const char* 变量名 anonymous_82：
 		 */
 
-		 // 记录文件名 *** 在宏引用宏定义或内置宏，必要经过多层展开，才能得最终值；
+		// 记录文件名 *** 在宏引用宏定义或内置宏，必要经过多层展开，才能得最终值；
 #define GET_FILE_NAME1(f) #f
 #define GET_FILE_NAME(f) GET_FILE_NAME1(f)
 		static char FILE_NAMES[] = GET_FILE_NAME(__FILE__);
@@ -147,6 +148,37 @@ namespace macro_demo
 		ON_SCOPE_EXIT([&] {printf("ON_Scope_exit"); }); // ScopeGuard EXIT_140([&]{printf("ON_Scope_exit");});
 		ON_SCOPE_EXIT(cb); //ScopeGuard EXIT_141(cb);
 	}
+
+	// C++/C macro
+	void Demo06()
+	{
+		using std::cout;
+		//cout << "Standard Clib: " << __STDC_HOSTED__ << "\n";
+		//cout << "Standard C: " << __STDC__ << "\n";
+#if defined(WIN32)
+		cout << "WIN32: " << WIN32 << "\n";
+#endif
+#if defined(WIN64)
+		cout << "WIN64: " << WIN64 << "\n";
+#endif
+#if defined(WINDOWS) || defined(_WINDOWS)
+		cout << "WINDOWS: " << WINDOWS << '\n';
+#endif
+#if defined(__cplusplus)
+		cout << "__cplusplus: " << __cplusplus << "\n";
+#endif
+	}
+
+	// 判断C++， extern "C" 按C的方式来编译。
+#if defined(__cplusplus)
+	extern "C" {
+#endif
+
+	// some extern c++ code.....
+
+#if defined(__cplusplus)
+	}
+#endif
 }
 #endif
 
@@ -159,5 +191,8 @@ int main(int argc, char* argv[])
 	macro_demo::Demo02();
 	printf("\n--------------------------\n");
 	macro_demo::Demo03();
+	printf("\n--------------------------\n");
+	macro_demo::Demo06();
+
 	return 1;
 }

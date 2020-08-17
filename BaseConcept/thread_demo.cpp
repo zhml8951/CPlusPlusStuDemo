@@ -24,10 +24,10 @@
  * C++ 并没有提供多进程通信的原生支持。
  */
 
-// RAII ==> Resource Acquisition Is Initialization 即 资源获取即初始化，主要实现方式即采用智能指针，资源采用类的方式管理，
-// 最典型的RAII使用如：  std::lock_guard<std::mutex>
+ // RAII ==> Resource Acquisition Is Initialization 即 资源获取即初始化，主要实现方式即采用智能指针，资源采用类的方式管理，
+ // 最典型的RAII使用如：  std::lock_guard<std::mutex>
 
-// ReSharper disable CppUseAuto
+ // ReSharper disable CppUseAuto
 
 namespace thread_sample
 {
@@ -38,7 +38,6 @@ namespace thread_sample
 		for (int i = 0; i < 5; i++) {
 			std::cout << "Child function thread:" << this_id << " running: " << i + 1 << "\n";
 			std::this_thread::sleep_for(std::chrono::seconds(n));
-
 		}
 	}
 
@@ -258,7 +257,7 @@ namespace thread_sample
 			std::this_thread::sleep_for(std::chrono::seconds(1));
 		};
 
-		std::vector<int> numbers = {1, 2, 3, 4, 5, 6};
+		std::vector<int> numbers = { 1, 2, 3, 4, 5, 6 };
 		std::thread work_thread(accumulate_lam, numbers.begin(), numbers.end());
 		std::unique_lock<std::mutex> main_locker(mu);
 
@@ -286,7 +285,7 @@ namespace thread_sample
 		};
 
 		Accumulate accumulate01;
-		std::vector<int> numbers = {1, 2, 3, 4, 5, 6, 7};
+		std::vector<int> numbers = { 1, 2, 3, 4, 5, 6, 7 };
 		std::promise<int> accumulate_promise;
 		std::future<int> accumulate_future = accumulate_promise.get_future();
 		// 创建线程时，需要使用move(future)右值引用，通promise返回。
@@ -310,7 +309,7 @@ namespace thread_sample
 		};
 
 		AccumulateCls accumulate_obj;
-		std::vector<int> numbers = {1, 2, 3, 4, 5, 6, 7, 8};
+		std::vector<int> numbers = { 1, 2, 3, 4, 5, 6, 7, 8 };
 
 		std::packaged_task<int(VecIter, VecIter)> accumulate_task(accumulate_obj); // 同promise方式相似。
 
@@ -328,7 +327,7 @@ namespace thread_sample
 			return sum;
 		};
 
-		std::vector<int> numbers{1, 2, 3, 4, 5, 6, 7, 8};
+		std::vector<int> numbers{ 1, 2, 3, 4, 5, 6, 7, 8 };
 		//auto accumulate_future = std::async(std::launch::async, accumulate, numbers.begin(), numbers.end());
 		std::future<int> accumulate_future = std::async(std::launch::async, accumulate, numbers.begin(), numbers.end());
 		std::cout << "Rst: " << accumulate_future.get() << "\n";
@@ -574,7 +573,7 @@ namespace thread_csdn
 namespace thread_github
 {
 	/*
-	 *	Code 来源于book <<C++ Concurrency in Action 2ed>> 
+	 *	Code 来源于book <<C++ Concurrency in Action 2ed>>
 	 *	url:   https://downdemo.gitbook.io/cpp-concurrency-in-action-2ed/
 	 *	https://github.com/downdemo/Cpp-Concurrency-in-Action-2ed
 	 */
@@ -597,7 +596,7 @@ namespace thread_github
 	{
 		S01 s1;
 		std::thread t1(s1);
-		std::thread t2{S01()};
+		std::thread t2{ S01() };
 		std::thread t3((S01())); // 注意(()) 解决 most vexing parse ;
 		std::thread t4([] { std::cout << "lambda call t4" << "\n"; });
 		t1.join();
@@ -609,10 +608,11 @@ namespace thread_github
 	struct S02
 	{
 		int& i;
-		explicit S02(int& x): i(x) { std::cout << "S2(int&) called.\n" << "\n"; }
-		void operator()()const
+		explicit S02(int& x) : i(x) { std::cout << "S2(int&) called.\n" << "\n"; }
+
+		void operator()() const
 		{
-			for (int j=0;j< 1000000; j++) {
+			for (int j = 0; j < 1000000; j++) {
 				std::cout << "j:  " << j << ",  i: " << i << " ";
 				// something... ;这里存在安全隐患，对象析构后i会成  空悬
 			}
@@ -622,13 +622,30 @@ namespace thread_github
 	void TestS02()
 	{
 		int x = 0;
-		S02 s02{x};
-		std::thread	t1(s02);	//调用仿函数operator()()const;
-		t1.detach();//主程序直接结束不等待
+		S02 s02{ x };
+		std::thread t1(s02); //调用仿函数operator()()const;
+		t1.detach(); //主程序直接结束不等待
 	}
 
 	void TestS03()
 	{
+		int x = 0;
+		S02 s02{ x };
+		std::thread t(s02);
+		/*
+			try{ 主线程操作， 如果发生异常，会导致线程没能执行join(); 故需要在catch(...){ 执行 t.join(); }；
+		 同时也要保证在主线程没发生异常时执行catch(...)后续语句时，也需要join(); 这样的代码在结构、性能方面需要改进。
+		 解决此类问题，后面的  ThreadGuard 比较优雅；
+		*/
+		try {
+			printf("Here do some thing...\n");
+			/* some coding...*/
+		}
+		catch (...) {
+			t.join();
+			throw;
+		}
+		t.join();
 	}
 
 	/*
@@ -637,13 +654,61 @@ namespace thread_github
 	class ThreadGuard
 	{
 	public:
-		explicit ThreadGuard(std::thread& t): t_(t) {}
+		explicit ThreadGuard(std::thread& t) : t_(t) {}
 		~ThreadGuard() { if (t_.joinable()) t_.join(); }
 		ThreadGuard(ThreadGuard const&) = delete;
 		ThreadGuard& operator=(ThreadGuard const&) = delete;
 	private:
 		std::thread& t_;
 	};
+
+	void Func02(int& n) { ++n; }
+	// std::thread 默认情况下不能传引用的，这里需要使用std::ref(...)将参数值传递变成引用传递；
+
+	void ThreadGuardTest01()
+	{
+		auto x = 0;
+		S02 s2{ x };
+		std::thread t2{ s2 };
+		ThreadGuard tg2{ t2 };
+
+		std::thread t1(Func02, std::ref(x)); // Func02 传递int&; 引用传递；
+		ThreadGuard tg1(t1);
+
+		std::unique_ptr<std::thread> t3 = std::make_unique<std::thread>(Func02, std::ref(x));
+		auto func03 = [](const std::unique_ptr<int> p) -> void { (*p)++; };
+		t3->join();
+
+		std::unique_ptr<int> num{ new int(8) };
+		std::unique_ptr<std::thread> t4 = std::make_unique<std::thread>(func03, std::move(num));
+		t4->join();
+
+		/*
+		 * some code....;
+		 */
+		 // 这里使用类管理线程，函数结束时自动调用析构函数，实现自动线程join; 避免了try...catch(...){...}；
+	}
+
+	class ScopedThread
+	{
+	public:
+		explicit ScopedThread(std::thread t) : t_(std::move(t))
+		{
+			if (t_.joinable()) {
+				throw std::logic_error("no thread");
+			}
+		}
+
+		~ScopedThread() { this->t_.join(); }
+
+		ScopedThread(ScopedThread const&) = delete;
+		ScopedThread& operator=(const ScopedThread&) = delete;
+
+	private:
+		std::thread t_;
+	};
+
+
 }
 
 int main(int argc, char* argv[])
@@ -656,5 +721,6 @@ int main(int argc, char* argv[])
 	//thread_sample::AsyncUseFuture();
 	//thread_sample::AsyncUsePackagedTask();
 	//thread_csdn::AdditionDemo01();
-	thread_csdn::FrontBackEnd();
+	//thread_csdn::FrontBackEnd();
+	thread_github::ThreadGuardTest01();
 }

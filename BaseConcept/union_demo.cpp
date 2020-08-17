@@ -103,20 +103,41 @@ namespace union_sample
 	{
 		std::string str;
 		std::vector<int> vec;
-		~S2(){}
+		~S2() {}
 	};
 
 	void TestS02()
 	{
-		S2 s2 = {"TestS02 String"};
+		S2 s2 = { "TestS02 String" };
 		std::cout << "S.str:  " << s2.str << "\n";
 		s2.str.~basic_string();
 		// vector union new 特殊用法。
-		new (&s2.vec) std::vector<int>;
+		new(&s2.vec) std::vector<int>;
 		//s2.vec = {10};
 		s2.vec.push_back(10);
 		std::cout << "S2.vec: " << *(s2.vec.begin()) << "\n";
-		s2.vec.~vector();
+		s2.vec.~vector();	// 需要手动调用析构
+	}
+}
+
+namespace struct_simple
+{
+	struct StructA
+	{
+		/*
+		 * 这是struct特殊用法， 这里int num:3， int本来4字节， 这里:3表明num占用3个字节。
+		 *	struct 本身需要内在对齐的。这里的拆分需要考虑其实元素的字节对齐情况的；
+		*/
+		int num: 1;
+		int sec: 3;
+	};
+
+	void StructTest01()
+	{
+		StructA a;
+		std::cout << "StructA class size:  " << sizeof(StructA) << "\n";
+		std::cout << "StructA object size: " << sizeof(a) << "\n";
+		std::cout << "StructA align of: " << alignof(StructA) << "\n";
 	}
 }
 
@@ -126,4 +147,6 @@ int main(int argc, char* argv[])
 	union_sample::LittleEndSystem();
 	union_sample::TestS();
 	union_sample::TestS02();
+	printf("\n-----------------------\n");
+	struct_simple::StructTest01();
 }

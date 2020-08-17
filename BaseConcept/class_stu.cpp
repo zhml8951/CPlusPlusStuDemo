@@ -38,18 +38,18 @@ namespace simple_demo
 		ClsTest02(const ClsTest02&) = delete; // delete 删除函数， 也就是不可以使用拷贝构造函数
 
 	private:
-		int num_{101}; // 定义成员变量，并设置初始值。
+		int num_{ 101 }; // 定义成员变量，并设置初始值。
 	};
 
 	void DemoMain01()
 	{
 		ClsTest cls01; // 调用无参构造，创建对象在栈中。
 		ClsTest cls02{}; // 等同于上面什么都不写。
-		ClsTest cls04{3}; //C++11 新写法 ==> ClsTest cls04(3) .
+		ClsTest cls04{ 3 }; //C++11 新写法 ==> ClsTest cls04(3) .
 		ClsTest cls03(); //	可理解为返回值为ClsTest类型的函数cls03, cls03无参; 这里直接警告。
 		auto cls05 = new ClsTest();
 		ClsTest* cls06 = new ClsTest;
-		ClsTest* cls07 = new ClsTest{88};
+		ClsTest* cls07 = new ClsTest{ 88 };
 		std::cout << "get_num: " << cls07->get_num() << "\n";
 
 		delete cls05;
@@ -66,7 +66,6 @@ namespace simple_demo
 	 *  重载时 const引用与普通引用是不同参数，可以进行重载。
 	 *  重载时 const函数与非const函数是重载。
 	 */
-
 
 	class ClsConst
 	{
@@ -153,10 +152,10 @@ namespace simple_demo
 	/*
 	 * 重写(覆盖)， 隐藏。  重载 3者的关键区别
 	 * 重载在同一访问区，同class内，namespace内及全局函数，同名函数，参数不同。属静态。
-	 * 重写，和隐藏 发生在类继承关系上。 属动态。 
+	 * 重写，和隐藏 发生在类继承关系上。 属动态。
 	 * 重写要求是函数名，参数等必须相同，基类必须是virtual成员函数。  重写当然也有隐藏属性。
 	 * 重写(覆盖)可实现基类指针指向子类，直接调用子类方法，基类需要virtual函数才能完全满足要求。
-	 * 如果没有virtual， 即使用名称，参数等全部相同，也不能实现重写， 只能算隐藏。 
+	 * 如果没有virtual， 即使用名称，参数等全部相同，也不能实现重写， 只能算隐藏。
 	 * 子类与基类 函数名相同，参数相同或不同都是隐藏基类方法， 使用基类指针指向子类，但调用依然是基类方法。
 	 */
 	class Base01
