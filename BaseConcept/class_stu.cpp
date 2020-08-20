@@ -38,18 +38,18 @@ namespace simple_demo
 		ClsTest02(const ClsTest02&) = delete; // delete 删除函数， 也就是不可以使用拷贝构造函数
 
 	private:
-		int num_{ 101 }; // 定义成员变量，并设置初始值。
+		int num_{101}; // 定义成员变量，并设置初始值。
 	};
 
 	void DemoMain01()
 	{
 		ClsTest cls01; // 调用无参构造，创建对象在栈中。
 		ClsTest cls02{}; // 等同于上面什么都不写。
-		ClsTest cls04{ 3 }; //C++11 新写法 ==> ClsTest cls04(3) .
+		ClsTest cls04{3}; //C++11 新写法 ==> ClsTest cls04(3) .
 		ClsTest cls03(); //	可理解为返回值为ClsTest类型的函数cls03, cls03无参; 这里直接警告。
 		auto cls05 = new ClsTest();
 		ClsTest* cls06 = new ClsTest;
-		ClsTest* cls07 = new ClsTest{ 88 };
+		ClsTest* cls07 = new ClsTest{88};
 		std::cout << "get_num: " << cls07->get_num() << "\n";
 
 		delete cls05;
@@ -192,9 +192,33 @@ namespace simple_demo
 		bs01->f(3.14f);
 		df->f(3.14f);
 	}
+
+	/*
+	 * C++ 有4个特殊成员函数(默认): 构造函数、析构函数、拷贝构造、拷贝赋值；如果程序没显示创建，则编译器自动隐式创建这些函数；
+	 * 但是如果程序创建了其它参数的构建函数，则隐式的默认构建函数则不会自动产生，创建对象就必须显式调用有参构建函数，
+	 * 如果需要编译器生成默认构建函数， 就在函数后 =default, 实现内容由编译器自动产生；如下: Student()=default;
+	 * 
+	 *  有时候程序需要禁用某成员函数，过去的方式则是将成员成成private, C++11直接提供delete; 
+	 *  Student& operator=(const Student&)=delete; 显式提示禁用些operator=
+	 */
+
+	class Student
+	{
+	public:
+		Student() = default;
+		explicit Student(const std::string name): name_(name), sex_('M'), age_(0) {};
+
+		Student(Student const& stu) { this->name_ = stu.name_, sex_ = stu.sex_, age_ = stu.age_; }
+		Student& operator=(const Student&) = delete;
+	private:
+		std::string name_;
+		char sex_;
+		uint8_t age_;
+	};
 }
 
 int main(int argc, char* argv[])
 {
-	simple_demo::DemoMain01();
+	//simple_demo::DemoMain01();
+	simple_demo::Student stu01;
 }

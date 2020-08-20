@@ -24,10 +24,10 @@
  * C++ 并没有提供多进程通信的原生支持。
  */
 
- // RAII ==> Resource Acquisition Is Initialization 即 资源获取即初始化，主要实现方式即采用智能指针，资源采用类的方式管理，
- // 最典型的RAII使用如：  std::lock_guard<std::mutex>
+// RAII ==> Resource Acquisition Is Initialization 即 资源获取即初始化，主要实现方式即采用智能指针，资源采用类的方式管理，
+// 最典型的RAII使用如：  std::lock_guard<std::mutex>
 
- // ReSharper disable CppUseAuto
+// ReSharper disable CppUseAuto
 
 namespace thread_sample
 {
@@ -257,7 +257,7 @@ namespace thread_sample
 			std::this_thread::sleep_for(std::chrono::seconds(1));
 		};
 
-		std::vector<int> numbers = { 1, 2, 3, 4, 5, 6 };
+		std::vector<int> numbers = {1, 2, 3, 4, 5, 6};
 		std::thread work_thread(accumulate_lam, numbers.begin(), numbers.end());
 		std::unique_lock<std::mutex> main_locker(mu);
 
@@ -285,7 +285,7 @@ namespace thread_sample
 		};
 
 		Accumulate accumulate01;
-		std::vector<int> numbers = { 1, 2, 3, 4, 5, 6, 7 };
+		std::vector<int> numbers = {1, 2, 3, 4, 5, 6, 7};
 		std::promise<int> accumulate_promise;
 		std::future<int> accumulate_future = accumulate_promise.get_future();
 		// 创建线程时，需要使用move(future)右值引用，通promise返回。
@@ -309,7 +309,7 @@ namespace thread_sample
 		};
 
 		AccumulateCls accumulate_obj;
-		std::vector<int> numbers = { 1, 2, 3, 4, 5, 6, 7, 8 };
+		std::vector<int> numbers = {1, 2, 3, 4, 5, 6, 7, 8};
 
 		std::packaged_task<int(VecIter, VecIter)> accumulate_task(accumulate_obj); // 同promise方式相似。
 
@@ -327,7 +327,7 @@ namespace thread_sample
 			return sum;
 		};
 
-		std::vector<int> numbers{ 1, 2, 3, 4, 5, 6, 7, 8 };
+		std::vector<int> numbers{1, 2, 3, 4, 5, 6, 7, 8};
 		//auto accumulate_future = std::async(std::launch::async, accumulate, numbers.begin(), numbers.end());
 		std::future<int> accumulate_future = std::async(std::launch::async, accumulate, numbers.begin(), numbers.end());
 		std::cout << "Rst: " << accumulate_future.get() << "\n";
@@ -596,7 +596,7 @@ namespace thread_github
 	{
 		S01 s1;
 		std::thread t1(s1);
-		std::thread t2{ S01() };
+		std::thread t2{S01()};
 		std::thread t3((S01())); // 注意(()) 解决 most vexing parse ;
 		std::thread t4([] { std::cout << "lambda call t4" << "\n"; });
 		t1.join();
@@ -622,7 +622,7 @@ namespace thread_github
 	void TestS02()
 	{
 		int x = 0;
-		S02 s02{ x };
+		S02 s02{x};
 		std::thread t1(s02); //调用仿函数operator()()const;
 		t1.detach(); //主程序直接结束不等待
 	}
@@ -630,7 +630,7 @@ namespace thread_github
 	void TestS03()
 	{
 		int x = 0;
-		S02 s02{ x };
+		S02 s02{x};
 		std::thread t(s02);
 		/*
 			try{ 主线程操作， 如果发生异常，会导致线程没能执行join(); 故需要在catch(...){ 执行 t.join(); }；
@@ -668,9 +668,9 @@ namespace thread_github
 	void ThreadGuardTest01()
 	{
 		auto x = 0;
-		S02 s2{ x };
-		std::thread t2{ s2 };
-		ThreadGuard tg2{ t2 };
+		S02 s2{x};
+		std::thread t2{s2};
+		ThreadGuard tg2{t2};
 
 		std::thread t1(Func02, std::ref(x)); // Func02 传递int&; 引用传递；
 		ThreadGuard tg1(t1);
@@ -679,14 +679,14 @@ namespace thread_github
 		auto func03 = [](const std::unique_ptr<int> p) -> void { (*p)++; };
 		t3->join();
 
-		std::unique_ptr<int> num{ new int(8) };
+		std::unique_ptr<int> num{new int(8)};
 		std::unique_ptr<std::thread> t4 = std::make_unique<std::thread>(func03, std::move(num));
 		t4->join();
 
 		/*
 		 * some code....;
 		 */
-		 // 这里使用类管理线程，函数结束时自动调用析构函数，实现自动线程join; 避免了try...catch(...){...}；
+		// 这里使用类管理线程，函数结束时自动调用析构函数，实现自动线程join; 避免了try...catch(...){...}；
 	}
 
 	class ScopedThread
@@ -708,7 +708,72 @@ namespace thread_github
 		std::thread t_;
 	};
 
+	void ScopedThreadTest()
+	{
+		// 直接将线程传入类中，由类对象进行自动管理线程
+		ScopedThread st(std::thread{S01()});
+	}
 
+	/*
+	 * 完备的线程管理类
+	 */
+	class ThreadMgr
+	{
+	public:
+		ThreadMgr() noexcept = default;
+
+		/*
+		 * std::forward<T> 完美转发; 函数模板在向其它函数传递自身形参时，保留其自身左右值属性，
+		 * 这里使用了可变参数模板(参数包)
+		 */
+		template <typename Func, typename... Ts>
+		explicit ThreadMgr(Func&& f, Ts&&... args): t_(std::forward<Func>(f), std::forward<Ts>(args)...) {}
+
+		explicit ThreadMgr(std::thread t) noexcept : t_(std::move(t)) {}
+		// 移动构造(右值引用)
+		ThreadMgr(ThreadMgr&& rhs) noexcept: t_(std::move(rhs.t_)) {}
+
+		ThreadMgr& operator=(ThreadMgr&& rhs) noexcept
+		{
+			if (JoinAble()) Join();
+			t_ = std::move(rhs.t_);
+			return *this;
+		}
+
+		ThreadMgr& operator=(std::thread rhs) noexcept
+		{
+			if (JoinAble()) Join();
+			t_ = std::move(rhs);
+			return *this;
+		}
+
+		~ThreadMgr() noexcept
+		{
+			if (JoinAble()) Join();
+		}
+
+		void Swap(ThreadMgr&& rhs) noexcept { t_.swap(rhs.t_); }
+
+		std::thread::id GetId() const noexcept { return this->t_.get_id(); }
+
+		void Detach() { this->t_.detach(); }
+
+		std::thread& AsThread() noexcept { return t_; }
+
+		const std::thread& AsThread() const noexcept { return this->t_; }
+
+		bool JoinAble() const noexcept { return t_.joinable(); }
+
+		void Join() { t_.join(); }
+
+		// 拷贝构造(左值引用)
+		ThreadMgr(ThreadMgr const&) = delete;
+		// 拷贝赋值(左值引用)
+		ThreadMgr& operator=(ThreadMgr const&) = delete;
+
+	private:
+		std::thread t_;
+	};
 }
 
 int main(int argc, char* argv[])
