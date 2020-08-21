@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <mutex>
+#include <functional>
 
 /*
  *  反射(reflect)是指程序在运行时动态获取对象属性与方法的一种机制，Java
@@ -20,12 +21,14 @@ const ReflectHelper ref_##name = ReflectHelper(this, &this->name, #type, #name)
 #define REFLECT_BOOL(name) REFLECT_ATTR(bool, name)
 #define REFLECT_FLOAT(name) REFLECT_ATTR(float, name)
 #define REFLECT_DOUBLE(name) REFLECT_ATTR(double, name)
-#define REFLECT_STRING(name) REFLECT_ATTR(string, name)
+#define REFLECT_STRING(name) REFLECT_ATTR(std::string, name)
 
 namespace reflect_stu
 {
 	using std::string;
 	constexpr int kBuffSize = 16;
+
+	enum class OpType { };
 
 	class Object
 	{
@@ -51,6 +54,38 @@ namespace reflect_stu
 		}
 	};
 
+	// 字符串计算hash值,  C++ switch... case... 只支持整型常量或enum类型， 可采用将字符串转hash方式，可采用标准库std::hash(不能做常量)
+	//-------------------------------------------------------------------------------------------------------
+
+	constexpr uint64_t kPrime = 0x100000001B3ull;
+	constexpr uint64_t kBasis = 0xCBF29CE484222325ull;
+
+	static constexpr uint64_t Hash(char const* str)
+	{
+		auto rst{kBasis};
+		while (*str) {
+			rst ^= *str; // 位异或运算;
+			rst *= kPrime;
+			str++;
+		}
+		return rst;
+	}
+
+	//采用递归调用产生字符串的Hash值, 这里主要用switch... case 的整型常量；
+	static constexpr uint64_t HashCompileRecur(char const* str, const uint64_t last_value = kBasis)
+	{
+		return *str ? HashCompileRecur(str + 1, (*str ^ last_value) * kPrime) : last_value;
+		// 这里的递归调用需要注意理解, 通过last_value保存最后hash值. 使用方法妙; 在当前轮次进行*str^las)*kP保存至last_va,传指针str+1,循环调用;
+	}
+
+	// operator""_hash 重载 operator""_hash, 后面size_t不能少
+
+	static constexpr uint64_t operator""_hash(char const* str, size_t)
+	{
+		return Hash(str);
+	}
+
+	// -------------------------------------------------------------------------------------------------------
 
 	class ReflectItem
 	{
@@ -104,11 +139,61 @@ namespace reflect_stu
 
 		bool Set(void* obj, const double val) const
 		{
+			const auto dest = static_cast<char*>(obj) + offset_;
+			if (type_ == nullptr || type_ == "object") return false;
+
+			switch (Hash(type_)) {
+			case Hash("int"):
+				*reinterpret_cast<int*>(dest) = val;
+				break;
+			case "double"_hash:
+				*reinterpret_cast<double*>(dest) = val;
+				break;
+			case "bool"_hash:
+				*reinterpret_cast<bool*>(dest) = val < -0.00001 || val > 0.00001;
+				break;
+			case "float"_hash:
+				*reinterpret_cast<float*>(dest) = val;
+				break;
+			case "std::string"_hash:
+				*reinterpret_cast<string*>(dest) = std::to_string(val);
+				break;
+			case "string"_hash:
+				*reinterpret_cast<string*>(dest) = std::to_string(val);
+				break;
+			default:
+				return false;
+			}
 			return true;
 		}
 
 		bool Set(void* obj, const char* val) const
 		{
+			const auto dest = static_cast<char*>(obj) + offset_;
+			if (val == nullptr || type_ == nullptr || type_ == "object") return false;
+
+			if (type_ == "string" || type_ == "std::string")
+				*reinterpret_cast<string*>(dest) = val;
+			else {
+				if (*val == 0) return true;
+
+				switch (Hash(type_)) {
+				case "int"_hash:
+					*reinterpret_cast<int*>(dest) = atoi(val);
+					break;
+				case "bool"_hash:
+					*reinterpret_cast<bool*>(dest) = (string{val} == "true");
+					break;
+				case "float"_hash:
+					*reinterpret_cast<float*>(dest) = atof(val);
+					break;
+				case "double"_hash:
+					*reinterpret_cast<double*>(dest) = atof(val);
+					break;
+				default:
+					printf("Unknown type or value.\n");
+				}
+			}
 			return true;
 		}
 
@@ -181,12 +266,47 @@ namespace reflect_stu
 		}
 	};
 
-
 	class Json final : public Object
 	{
 	private:
 		REFLECT_INT(intval_);
 		REFLECT_BOOL(boolval_);
 		REFLECT_STRING(stringval_);
+
+	public:
+		string ToString() const
+		{
+			string msg;
+			std::vector<ReflectItem> vec = ReflectHelper::GetList(this->GetClassName());
+
+			for (auto& item : vec) {
+				if (item.GetType() == "string") {
+					msg += ".\"" + item.GetName() + "\":\"" + item.Get(this) + "\"";
+				}
+				else {
+					msg += ",\"" + item.GetName() + "\":" + item.Get(this);
+				}
+			}
+			if (msg.empty()) return "{}";
+			return "{" + msg.substr(1) + "}";
+		}
 	};
+
+	void reflect_test_main()
+	{
+		//std::unique_ptr<Object> obj(new Json());
+		Object* obj = new Json;
+		std::vector<ReflectItem> vec = ReflectHelper::GetList(obj->GetClassName());
+		puts("Class member variables defined: ");
+		puts("------------------------------------------");
+		for(auto& item: vec)
+			std::cout << " " << item.GetType() << "  " << item.GetName() << ";" << "\n";
+
+		ReflectHelper::GetItem("Json", "intval_").Set(obj, 100);
+		ReflectHelper::GetItem("Json", "boolval_").Set(obj, true );
+
+		delete obj;
+	}
 }
+
+int main(int argc, char* argv[]) {}
