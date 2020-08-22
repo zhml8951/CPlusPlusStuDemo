@@ -179,6 +179,40 @@ namespace macro_demo
 #if defined(__cplusplus)
 	}
 #endif
+
+	/*
+	 * #define只是文本替换工具，typedef可替代大部分#define作用，且功能更强大,
+	 *	typedef [originType] [newType]  
+	 *	任何声明变量的语句前加上typedef之后，原来是变量的都变成一种类型，不管这个声明中的标识符号出现在中间还是最后.
+	 */
+
+	typedef int Num;
+	typedef int* PtrInt;		/// 定义int* 类型
+	typedef int IntArray[];		/// 定义int array 类型
+
+	typedef struct
+	{
+		int a;
+	} IntStruct;				/// 定义struct类型
+
+	typedef double FuncP(std::string&);		/// 定义一个函数类型,参数string, 返回类型double
+
+	typedef void FuncQ(int* p, const std::string& s1, const std::string& s2, size_t size, bool is_true);
+	/// 定义FuncQ
+
+	FuncP(func01);		/// => double func01(std::string&); ==> FuncP func01;
+	FuncP func02;
+
+	FuncQ(func03);		/// => void func03(int* p,....);  ==> FuncQ func04;
+	FuncQ func04;
+
+	//// 再看几个复杂的例子:
+	typedef int*(*A[10])(int, char*); /// 从右向左理解： A是一个包含10个函数指针的数组，这些函数的参数列表是(int, char*) 返回值是int*;
+
+	typedef int(*(*Fb())[10])();	
+	/// 从Fb开始，从右向左，()说明Fb是函数，左边*说明返回值指针，往外层右边[10]说明函数返回值是指向数组的指针，向左*说明数组元素是指针，
+	/// 再向外右边()说明无参参数列表，说明数组中包含的元素是函数指针，这些函数没的参数，返回值是int;
+	/// 总括：Fb是一个返回指针的函数，指针指向含有10个函数指针的数组，这些函数不接受参数，返回值是int;
 }
 #endif
 

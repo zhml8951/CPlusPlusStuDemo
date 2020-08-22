@@ -28,8 +28,6 @@ namespace reflect_stu
 	using std::string;
 	constexpr int kBuffSize = 16;
 
-	enum class OpType { };
-
 	class Object
 	{
 	public:
@@ -294,18 +292,17 @@ namespace reflect_stu
 
 	void reflect_test_main()
 	{
-		//std::unique_ptr<Object> obj(new Json());
-		Object* obj = new Json;
+		std::unique_ptr<Object> obj(new Json());
+		//Object* obj = new Json;
 		std::vector<ReflectItem> vec = ReflectHelper::GetList(obj->GetClassName());
 		puts("Class member variables defined: ");
 		puts("------------------------------------------");
 		for(auto& item: vec)
 			std::cout << " " << item.GetType() << "  " << item.GetName() << ";" << "\n";
 
-		ReflectHelper::GetItem("Json", "intval_").Set(obj, 100);
-		ReflectHelper::GetItem("Json", "boolval_").Set(obj, true );
+		ReflectHelper::GetItem("Json", "intval_").Set(obj.get(), 100);
+		ReflectHelper::GetItem("Json", "boolval_").Set(obj.get(), true );
 
-		delete obj;
 	}
 }
 

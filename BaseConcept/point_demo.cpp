@@ -657,6 +657,20 @@ namespace intelligent_point
 		const auto pair_ptr = std::make_shared<std::pair<int, double>>(33, 33.0);
 		printf("pair_ptr->data(first, second): %d, %lf", pair_ptr->first, pair_ptr->second);
 	}
+	/*
+	 * C++ RAII技术(Resource Acquisition Is Initialization)资源获取即初始化。也就是(在构造函数中申请分配资源在析构中释放资源)
+	 * 智能指针(shared_ptr, unique_ptr)是RAII最佳实现代表；
+	 * RAII实现基础是(对象生命周期来管理资源)，管理资源就创建对应的对象，将资源的生命周期同对象的生命周期相关联。
+	 * 智能指针管理内存(内存的自动释放，释放时机，防止多次释放)，智能指针还可以把一个值语义转换成引用语义
+	 */ 
+
+	/*
+	 *	值语义(对象的拷贝与原对象无关),内置类型(int/double/bool/float/char)都是值语义，标准库(pair, vector, map, string...)也是值语义 
+	 *	值语义	===> 对象拷贝后与原对象脱离关系.
+	 *		1. 值语义生命周管理简单，它们是 (stack object)或是(对象成员),不用担心生命周期. 对象语义是(heap object)只能通过指针或引用使用它。不能拷贝
+	 *		
+	 *	引用语义	===> 禁止拷贝(Java内的对象都是引用语义，也称对象语义)
+	 */
 }
 
 int main(int argc, char* argv[])
@@ -668,7 +682,7 @@ int main(int argc, char* argv[])
 	//intelligent_point::UniquePtrTest();
 	//printf("\n----------------------\n");
 	//const auto str = intelligent_point::UniquePtrString();
-	//printf("str: %s, address: %p", str->c_str(), str);
+	//printf("str: %s, address: %p", str->c_str(), str);`
 	//delete str;
 
 	printf("\n----------------------\n");
