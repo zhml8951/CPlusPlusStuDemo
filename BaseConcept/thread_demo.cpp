@@ -534,7 +534,9 @@ namespace thread_csdn
 	class BlockingStream
 	{
 	public:
-		explicit BlockingStream(const size_t max_buff) : max_buffer_size_(max_buff) {}
+		explicit BlockingStream(const size_t max_buff) : max_buffer_size_(max_buff)
+		{
+		}
 
 		BlockingStream(BlockingStream const&) = delete;
 		BlockingStream& operator=(const BlockingStream&) = delete;
@@ -654,7 +656,10 @@ namespace thread_github
 	class ThreadGuard
 	{
 	public:
-		explicit ThreadGuard(std::thread& t) : t_(t) {}
+		explicit ThreadGuard(std::thread& t) : t_(t)
+		{
+		}
+
 		~ThreadGuard() { if (t_.joinable()) t_.join(); }
 		ThreadGuard(ThreadGuard const&) = delete;
 		ThreadGuard& operator=(ThreadGuard const&) = delete;
@@ -727,11 +732,18 @@ namespace thread_github
 		 * 这里使用了可变参数模板(参数包)
 		 */
 		template <typename Func, typename... Ts>
-		explicit ThreadMgr(Func&& f, Ts&&... args): t_(std::forward<Func>(f), std::forward<Ts>(args)...) {}
+		explicit ThreadMgr(Func&& f, Ts&&... args): t_(std::forward<Func>(f), std::forward<Ts>(args)...)
+		{
+		}
 
-		explicit ThreadMgr(std::thread t) noexcept : t_(std::move(t)) {}
+		explicit ThreadMgr(std::thread t) noexcept : t_(std::move(t))
+		{
+		}
+
 		// 移动构造(右值引用)
-		ThreadMgr(ThreadMgr&& rhs) noexcept: t_(std::move(rhs.t_)) {}
+		ThreadMgr(ThreadMgr&& rhs) noexcept: t_(std::move(rhs.t_))
+		{
+		}
 
 		ThreadMgr& operator=(ThreadMgr&& rhs) noexcept
 		{
@@ -773,6 +785,32 @@ namespace thread_github
 
 	private:
 		std::thread t_;
+	};
+
+	class ClsArgs
+	{
+	public:
+		ClsArgs() = default;
+
+		ClsArgs(const int i = 0): num_(i)
+		{
+		}
+
+		void func(const int i)
+		{
+			this->num_ = i;
+			std::cout << i << "\n";
+		}
+
+		void func(int& i)
+		{
+			this->num_ = i;
+			i++;
+			std::cout << "num: " << this->num_ << ", i: " << i << "\n";
+		}
+
+	private:
+		int num_;
 	};
 }
 

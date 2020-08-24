@@ -34,7 +34,7 @@ namespace simple_demo
 	class ClsTest02
 	{
 	public:
-		ClsTest02() = default; // default定义默认初始函数，用处不大
+		ClsTest02() = default; // default定义默认初始函数，表明由编译器自动生成构造函数(合成构造)
 		ClsTest02(const ClsTest02&) = delete; // delete 删除函数， 也就是不可以使用拷贝构造函数
 
 	private:
