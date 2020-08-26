@@ -146,6 +146,12 @@
     <ClCompile Include="keyword_demo01.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="regex_demo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stl_coding_stu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stl01.h">

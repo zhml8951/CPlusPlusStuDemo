@@ -35,7 +35,7 @@ namespace template_simple
 		static bool Comp(const int x, const double y) { return (x < y) ? true : false; }
 	};
 
-	//模板函数， 模板类 偏特化
+	//模板函数不支持偏特化, 这里是模板函数重载，只有1个模板参数
 	template <typename Ty>
 	void Func(int x, Ty y)
 	{
@@ -48,6 +48,57 @@ namespace template_simple
 	public:
 		static bool Comp(Tx x, double y) { return (x < y) ? true : false; }
 	};
+
+	/*---------------------------------------------------------------------------------------------------------*/
+	/// 模板类型区分{
+	template <typename T>
+	class CompoundT /// 基本模板类型
+	{
+	public:
+		enum { kIsPtrT = 0, kIsRefT = 0, kIsArrayT = 0, kIsFuncT = 0, kIsPtrMemT = 0 };
+
+		typedef T BaseT;
+		typedef T BottomT;
+		typedef CompoundT<void> ClassT;
+	};
+
+	template <typename T>
+	class CompoundT<T&> ///引用特化
+	{
+	public:
+		enum { kIsPtrT = 0, kIsRefT = 1, kIsArrayT = 0, kIsFuncT = 0, kIsPtrMemT = 0 };
+
+		typedef T BaseT;
+		typedef typename CompoundT<T>::BottomT BottomT;
+		typedef CompoundT<void> ClassT;
+	};
+
+	template <typename T>
+	class CompoundT<T*> /// 指针特化(局部特化，也是特化的一种)
+	{
+	public:
+		enum { kIsPtrT = 1, kIsRefT = 0, kIsArrayT = 0, kIsFuncT = 0, kIsPtrMemT = 0 };
+
+		typedef T BaseT;
+		typedef typename CompoundT<T>::BottomT BottomT;
+		typedef CompoundT<void> ClassT;
+	};
+
+	template <typename T, size_t N>
+	class CompoundT<T[N]>			// => class CompoundT<T[]>{....}
+	{
+	public:
+		enum { kIsPtrT = 0, kIsRefT = 0, kIsArrayT = 1, kIsFuncT = 0, kIsPtrMemT = 0 };
+
+		typedef T BaseT;
+		typedef typename CompoundT<T>::BottomT BottomT;
+		typedef CompoundT<void> ClassT;
+	};
+
+	//template<typename T>
+	//class CompoundT<T C::*>		/// C::* ==> C的成员变量和成员函数
+
+	/*---------------------------------------------------------------------------------------------------------*/
 
 	// typename... 参数包，
 	template <typename T, typename... Args>
@@ -70,7 +121,7 @@ namespace template_struct
 		// 重载 operator<ValueType> (参数void). 这种对类型的重载用法特殊，但很有用。
 		explicit constexpr operator ValueType(void) const { return (value); }
 
-		constexpr auto operator()(void)->ValueType;
+		constexpr auto operator()(void) -> ValueType;
 	};
 
 	// 这里重载operator() 参数(void) 返回ValueType值。
@@ -216,7 +267,7 @@ namespace template_struct
 	template <class... Tys>
 	void Expand(Tys ... rest)
 	{
-		int arr[] = { (PrintArg(rest), 1)... };
+		int arr[] = {(PrintArg(rest), 1)...};
 		for (auto i = 0; i < sizeof(arr) / sizeof(arr[0]); i++) {
 			printf("i: %d  ", arr[i]);
 		}
@@ -228,8 +279,8 @@ namespace template_struct
 		// C++ "一致性初始化", 旧样式int a=3; 列表样式: int a{3}; vector<int> vec; 引入列表初始化后可直接vector<int> vec{1,2,3};
 		// {列表初始化} 引入实现由 initializer_list 体现.
 		//列表初始化时使用auto 可见db_list即std::initializer_list<double> 类型， 这里 = 号必可少的
-		auto db_list_auto = { 1.1, 2., 3.0, 4., 5.1 };
-		std::initializer_list<double> db_list_init{ 3.2, 4, 5, 5 };
+		auto db_list_auto = {1.1, 2., 3.0, 4., 5.1};
+		std::initializer_list<double> db_list_init{3.2, 4, 5, 5};
 
 		// initializer_list 奇特用法,需要结合前面{(PrintArg(... 来更解。这里传回调函数会很有用处。
 		std::initializer_list<int>{(func(std::forward<Tys>(args)), 0)...};
@@ -265,13 +316,13 @@ namespace template_struct
 		 *	(cls_ptr_->*func_ptr_)(std::forward<Args>(args)...)
 		 *		函数指针调用时方式(*func_p)(args...), 这里添加class限定，格式只能是(class_ptr->*func_ptr)(args)
 		 *		或者  (*class_ptr.*func_ptr)(args);   原理相通
-		 *		
+		 *
 		 *	(std::forward<Args>(args)...)即参数包 解开时的标准样式, 同类样式如下：
 		 *		initializer_list<int>{func(forward<Tys>(args), 0)...}
 		 *		arr[] = {(print(rest),1)...}
 		 */
 	public:
-		DelegateFun(Ty* cls, R(Ty::*pf)(Args ...)) : cls_ptr_(cls), func_ptr_(pf) {}
+		DelegateFun(Ty* cls, R (Ty::*pf)(Args ...)) : cls_ptr_(cls), func_ptr_(pf) {}
 
 		R operator()(Args&&... args)
 		{
@@ -280,12 +331,12 @@ namespace template_struct
 		}
 
 	private:
-		Ty* cls_ptr_{ nullptr };
-		R(Ty::*func_ptr_)(Args ...) { nullptr };
+		Ty* cls_ptr_{nullptr};
+		R (Ty::*func_ptr_)(Args ...){nullptr};
 	};
 
 	template <typename T, typename R, typename... Args>
-	DelegateFun<T, R, Args...> CreateDelegate(T* t, R(T::*f)(Args ...))
+	DelegateFun<T, R, Args...> CreateDelegate(T* t, R (T::*f)(Args ...))
 	{
 		return DelegateFun<T, R, Args...>(t, f);
 	}

@@ -19,6 +19,9 @@ namespace ini_file
 
 	const char kDelimit[] = "\n";
 
+	/*
+	 *  ini 项目。单项item由key, value构成，注释可以在value后面(right_comment)，也可独立成行，注释采用#开头
+	 */
 	struct IniItem
 	{
 		string key;
@@ -27,6 +30,10 @@ namespace ini_file
 		string right_comment;
 	};
 
+	/*
+	 *  Section(章节)，ini文件里以[Section], 独立成行. 一个Section包含1个或多个item; 
+	 *  采用vector<IniItem> 存储为items;
+	 */
 	struct IniSection
 	{
 		typedef std::vector<IniItem>::iterator IniItemIter;
@@ -81,11 +88,6 @@ namespace ini_file
 		bool HasKey(const string& section, const string& key);
 
 		IniSection* GetSection(const string& section = "");
-
-		void test()
-		{
-			Print();
-		}
 
 	private:
 		static void Trim(string& str);

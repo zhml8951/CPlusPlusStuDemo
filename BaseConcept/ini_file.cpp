@@ -5,9 +5,7 @@
 
 namespace ini_file
 {
-	IniFile::IniFile() : comment_delimiter_("#")
-	{
-	}
+	IniFile::IniFile() : comment_delimiter_("#") { }
 
 	int IniFile::Load(const string& file_name)
 	{
@@ -138,7 +136,7 @@ namespace ini_file
 	int IniFile::GetBoolValue(const string& section, const string& key, bool* value)
 	{
 		string str_value;
-		auto err = GetValue(section, key, &str_value);
+		const auto err = GetValue(section, key, &str_value);
 
 		if (StrCmpIgnoreCase(str_value, "true") || StrCmpIgnoreCase(str_value, "1")) *value = true;
 
@@ -394,7 +392,9 @@ namespace ini_file
 		printf("\n\n################# print start ################\n");
 	}
 
-	// string 两端空格去除，实现方式比较复杂，两次创建string. 这里不再使用，
+	// string 两端空格去除，实现方式：从0坐标开始while循环，使用isspace判断是否是空格，直到不是空格，从不是空格处创建新的str, string(str, i, len-i);
+	// 新的str再次从尾部开始for循环，直到不是空格，得到尾部非空格i的偏移位置，再次创建新string， 这里涉及两次拷贝。
+
 	void TrimComplex(string& str)
 	{
 		auto len = str.length();
@@ -420,7 +420,6 @@ int main(int argc, char* argv[])
 	auto ini_config = ini_file::IniFile();
 	ini_file::IniFile config_ini;
 	ini_config.Load(config_file);
-	ini_config.test();
 	auto sect = ini_config.GetSection("HotKey");
 	for (auto it = sect->begin(); it != sect->end(); ++it) {
 		printf("item: [%s = %s]\n", it->key.c_str(), it->value.c_str());
