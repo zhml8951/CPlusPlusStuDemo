@@ -10,16 +10,19 @@
  *	explicit 不需要添加默认构造，多参构造(总是显示构造)。只需要添加单参构造，目的是防止不必要的隐式类型转换
  *	需要注意单参构造（多参构造但只有一个参数没有默认值）时，采用赋值时会产生隐式类型转换，这类转换有时并不是我们需要的。 explicit阻止隐式类型转换；
  */
- /* ReSharper 可提供最佳代码实践， 如下： NonExplicitConvertingConstructor, NonExplicitConversionOperator, UseAuto... 这里先禁用这些*/
+/* ReSharper 可提供最佳代码实践， 如下： NonExplicitConvertingConstructor, NonExplicitConversionOperator, UseAuto... 这里先禁用这些*/
 
- // ReSharper disable CppNonExplicitConvertingConstructor
- // ReSharper disable CppNonExplicitConversionOperator
- // ReSharper disable CppUseAuto
+// ReSharper disable CppNonExplicitConvertingConstructor
+// ReSharper disable CppNonExplicitConversionOperator
+// ReSharper disable CppUseAuto
 
 using namespace std;
 
 namespace keywords_simple
 {
+	/*
+	 *	本例主演示explicit 在class的作用.  总括一句话，explicit防止不必要的隐式类型转换
+	 */
 	class FractionNoExplicit
 	{
 	public:
@@ -81,7 +84,9 @@ namespace keywords_simple
 	 *	标准转换: int 转char, long 转double..
 	 */
 
-	 /* C++ 一致初始化， 早期C++初始化有多种方式，很容易混淆。故引用列表初始化(一致初始化)｛..｝列表初始化内部实现的实质上initializer_list<T> ... */
+	/* C++ 一致初始化， 早期C++初始化有多种方式，很容易混淆。故引用列表初始化(一致初始化)｛..｝
+	 * C++11 列表初始化(一致初始化) 内部实现的本质是用 initializer_list<T>来实现，而initializer_list<>实质也就是array 
+	 */
 
 	void Print(const std::initializer_list<int> values)
 	{
@@ -95,7 +100,7 @@ namespace keywords_simple
 		 * 使用auto时，默认是copy构造的，尽量使用reference( auto& )，如果需需要常量引用则const auto&;
 		 *
 		 */
-		vector<int> vec{ 16, 26, 36, 46, 56 };
+		vector<int> vec{16, 26, 36, 46, 56};
 		for (auto& elem : vec) {
 			elem += 3;
 		}
@@ -125,19 +130,35 @@ namespace keywords_simple
 		C() = default;
 		explicit C(const string& s) : str_(s) {};
 		//C(const string& s): str_(s) {}
-		string GetElem()const { return this->str_; }
+		string GetElem() const { return this->str_; }
 	private:
 		string str_;
 	};
 
 	void test_class()
 	{
-		vector<string> vs{ "first", "second", "three" };
+		vector<string> vs{"first", "second", "three"};
 
 		for (const auto& el : vs) {
 			cout << "el.size: " << el.size() << "el.type: " << typeid(el).name() << "\n";
 			auto c1 = static_cast<C>(el);
 			cout << c1.GetElem() << "\n";
+		}
+	}
+
+	/*
+	 * Type Trait
+	 * C++ STL以template为根基，为减少template编程的重载数，引用TypeTrait， 它是template在编译期根据TypeTrait产出一个type和value;
+	 */
+	template <typename T>
+	void TraitsFoo(const T& val)
+	{
+		// is_pointer<T>产出类型true_type或false_type; 而value只有两种结果： true, false; 
+		if (std::is_pointer<T>::value) {
+			std::cout << "TraitFoo() called for a pointer." << "\n";
+		}
+		else {
+			std::cout << "TraitFoo() called for a pointer. " << "\n";
 		}
 	}
 }
