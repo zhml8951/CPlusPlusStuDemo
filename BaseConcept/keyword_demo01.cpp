@@ -10,11 +10,11 @@
  *	explicit 不需要添加默认构造，多参构造(总是显示构造)。只需要添加单参构造，目的是防止不必要的隐式类型转换
  *	需要注意单参构造（多参构造但只有一个参数没有默认值）时，采用赋值时会产生隐式类型转换，这类转换有时并不是我们需要的。 explicit阻止隐式类型转换；
  */
-/* ReSharper 可提供最佳代码实践， 如下： NonExplicitConvertingConstructor, NonExplicitConversionOperator, UseAuto... 这里先禁用这些*/
+ /* ReSharper 可提供最佳代码实践， 如下： NonExplicitConvertingConstructor, NonExplicitConversionOperator, UseAuto... 这里先禁用这些*/
 
-// ReSharper disable CppNonExplicitConvertingConstructor
-// ReSharper disable CppNonExplicitConversionOperator
-// ReSharper disable CppUseAuto
+ // ReSharper disable CppNonExplicitConvertingConstructor
+ // ReSharper disable CppNonExplicitConversionOperator
+ // ReSharper disable CppUseAuto
 
 using namespace std;
 
@@ -84,9 +84,9 @@ namespace keywords_simple
 	 *	标准转换: int 转char, long 转double..
 	 */
 
-	/* C++ 一致初始化， 早期C++初始化有多种方式，很容易混淆。故引用列表初始化(一致初始化)｛..｝
-	 * C++11 列表初始化(一致初始化) 内部实现的本质是用 initializer_list<T>来实现，而initializer_list<>实质也就是array 
-	 */
+	 /* C++ 一致初始化， 早期C++初始化有多种方式，很容易混淆。故引用列表初始化(一致初始化)｛..｝
+	  * C++11 列表初始化(一致初始化) 内部实现的本质是用 initializer_list<T>来实现，而initializer_list<>实质也就是array
+	  */
 
 	void Print(const std::initializer_list<int> values)
 	{
@@ -100,7 +100,7 @@ namespace keywords_simple
 		 * 使用auto时，默认是copy构造的，尽量使用reference( auto& )，如果需需要常量引用则const auto&;
 		 *
 		 */
-		vector<int> vec{16, 26, 36, 46, 56};
+		vector<int> vec{ 16, 26, 36, 46, 56 };
 		for (auto& elem : vec) {
 			elem += 3;
 		}
@@ -137,7 +137,7 @@ namespace keywords_simple
 
 	void test_class()
 	{
-		vector<string> vs{"first", "second", "three"};
+		vector<string> vs{ "first", "second", "three" };
 
 		for (const auto& el : vs) {
 			cout << "el.size: " << el.size() << "el.type: " << typeid(el).name() << "\n";
@@ -153,7 +153,7 @@ namespace keywords_simple
 	template <typename T>
 	void TraitsFoo(const T& val)
 	{
-		// is_pointer<T>产出类型true_type或false_type; 而value只有两种结果： true, false; 
+		// is_pointer<T>产出类型true_type或false_type; 而value只有两种结果： true, false;
 		if (std::is_pointer<T>::value) {
 			std::cout << "TraitFoo() called for a pointer." << "\n";
 		}
@@ -161,6 +161,41 @@ namespace keywords_simple
 			std::cout << "TraitFoo() called for a pointer. " << "\n";
 		}
 	}
+
+	/*
+	 *	内部实现FooImpl有多个重载, 而外部统一调用Foo,降低调用复杂性, 初步体现TypeTraits作用，TypeTraits的关键作用就在根据template<class T>里的T类型来调用相应重载，
+	 *	这里的关键在于对template<class T>进行判断，
+	 *	TypeTrait是泛型代码(Generic Code)的基石
+	 */
+	//--------------------------------------------------------------------------------------------//
+
+	template <typename T>
+	void FooImpl(const T& val, std::true_type)
+	{
+		std::cout << "FooImpl() Called for pointer to: " << *val << ", Address: " << val << "\n";
+	}
+
+	template <typename T>
+	void FooImpl(const T& val, std::false_type)
+	{
+		std::cout << "FooImpl() Called for value to: " << val << ", Address: " << &val << "\n";
+	}
+
+	template <typename T>
+	void Foo(const T& val)
+	{
+		FooImpl(val, std::is_pointer<T>());
+	}
+
+	template<typename T1, typename T2>
+	struct CommonType
+	{
+		typedef decltype(true ? declval<T1>(): declval<T2>()) Type;
+	};
+
+	// std::reference_wrapper?
+
+	//--------------------------------------------------------------------------------------------//
 }
 
 int main(int argc, char* argv[])

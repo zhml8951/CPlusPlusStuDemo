@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <cmath>
+#include <functional>
 
 namespace template_simple
 {
