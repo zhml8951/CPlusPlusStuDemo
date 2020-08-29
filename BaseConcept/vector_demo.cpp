@@ -10,6 +10,10 @@ namespace vec_demo
 	public:
 		explicit Stu(char* name = nullptr, const int age = 0) : name_(name), age_(age)
 		{
+			std::vector<std::reference_wrapper<int>> vec;
+			auto i = 888;
+			vec.push_back(std::ref<int>(i));
+			vec.emplace_back(std::ref(i));
 			printf("%s UStu constructor called. \n", name);
 		}
 

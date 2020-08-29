@@ -167,7 +167,7 @@ namespace keywords_simple
 	 *	这里的关键在于对template<class T>进行判断，
 	 *	TypeTrait是泛型代码(Generic Code)的基石
 	 */
-	//--------------------------------------------------------------------------------------------//
+	 //--------------------------------------------------------------------------------------------//
 
 	template <typename T>
 	void FooImpl(const T& val, std::true_type)
@@ -187,18 +187,94 @@ namespace keywords_simple
 		FooImpl(val, std::is_pointer<T>());
 	}
 
-	template<typename T1, typename T2>
+	template <typename T1, typename T2>
 	struct CommonType
 	{
-		typedef decltype(true ? declval<T1>(): declval<T2>()) Type;
+		typedef decltype(true ? declval<T1>() : declval<T2>()) Type;
 	};
 
-	// std::reference_wrapper?
-
 	//--------------------------------------------------------------------------------------------//
+
+	/*
+	 *  #include <type_traits> 包含大量类型相关的工具
+	 *		1. 类型判断工具:	is_void<T>, is_integral<T>, is_floating_point<T>, is_enum<T>, is_array<T>, is_function<T>, is_pointer<T>, is_class<T>, is_const<T>...
+	 *		2. 类型检验关系:	is_same<T1, T2>, is_base_of<T, D>, is_convertible<T1, T2>, is_assignable<T1, T2>, uses_allocator<T, Alloc>
+	 *		3. 类型修饰符:	add_const<T>::type, add_lvalue_reference<T>, add_rvalue_reference<T>, add_pointer<T>::type,... remove_const<T>, remove_reference<T>...
+	 *		4. 特殊查询:		rank<T>, extent<T, I=0>, remove_extent<T>, decay<T>, enable_if<B, T=void>, conditional<B,T,F>, alignment_of<T>
+	 *	type_traits使用方法与其它普通函数调用方法不同， type_traits泛化非常彻底， 常用成员变量有 ::value, ::type
+	 *		typedef std::add_pointer<decltype(i)>::type IntPtr;	//i 是int，定义了IntPtr，即int pointer类型，
+	 *		std::cout << std::boolalpha << std::is_pointer<IntPtr>::value << '\n';
+	 *		std::cout << std::boolalpha << std::is_same<IntPtr, int*>::value << '\n';
+	 *		using IntAgain = std::remove_pointer<IntPtr>::type;	// IntAgain即int;
+	 *
+	 */
+	 // std::reference_wrapper? 引用包装器, 主要与模板结合,通常使用std::ref(value), std::cref(value) 来创建reference_wrapper对象。
+	 //	reference_wrapper在STL标准库使用非常多，如： make_pair() 就是创建pair<> of reference, make_tuple()创建tuple<>的reference,
+	 //	通常使用std::ref, std::cref创建reference_wrapper对象，但在定义时必须使用reference_wrapper如：
+	 //		vector<MyClass&> vec_my; /// 创建vec,存入MyClass对象引用，这样定义不能通过编译， 必须使用如下格式：
+	 //		vector<std::reference_wrapper<MyClass>> vec_my;   // 变量声明和定义时必须使用reference_wrapper<T>
+	 //		MyClass obj1; vec_my.push_back(std::ref(obj1)); vec_my.emplace_back(std::ref<MyClass>(obj2));
+
+	 // Substitution Failure Is Not An Error ==> SFINAE, 匹配失败不是错误. 典型的使用std::enable_if<bool, T>
+	template <typename T>
+	typename std::enable_if<std::is_trivial<T>::value>::type SfinaeT1(T value)
+	{
+		std::cout << "T is Trivial" << ", value: " << value << "\n";
+	}
+
+	/// SfinaeT1如果是普通函数(模板函数)都是不能通过编译的， 但使用enable_if<T> 则可以使用，因为在推导过程中，只有一个是合法。这样就不会出现二义性
+	/// enable_if<bool B, typename T=void>, enable_if 结合type_traits内的类型判断来定义模板，bool B为true时，则进行类型定义，否则不处理
+	template <typename T>
+	typename std::enable_if<!std::is_trivial<T>::value>::type SfinaeT1(T value)
+	{
+		std::cout << "T is not trivial. " << ", value: " << value << "\n";
+	}
+
+	struct T1
+	{
+		enum { kIntT, kFloatT } m_type;
+
+		template <typename Integer, std::enable_if_t<std::is_integral<Integer>::value, int> = 0>
+		T1(Integer) : m_type(kIntT) {}
+
+		template <typename Floating, typename std::enable_if<std::is_floating_point<Floating>::value, int>::type = 0>
+		T1(Floating) : m_type(kFloatT) {}
+	};
+
+	void test_sfinae()
+	{
+		SfinaeT1(std::string("string is not trivial value type."));
+		SfinaeT1(888); // int is a trivial value type.
+	}
+
+	void test_type_traits()
+	{
+		struct Foo
+		{
+			void m() { std::cout << "Non-CV" << "\n"; }
+			void m() const { std::cout << "Const func." << "\n"; }
+			void m() volatile { std::cout << "Volatile func. " << "\n"; }
+			void m() const volatile { std::cout << "Const-Volatile func. " << "\n"; }
+		};
+
+		const auto foo_main = []()-> void {
+			Foo{}.m();
+			std::add_const<Foo>::type{}.m(); //type_traits调用方式,相当于const Foo tmp; tmp.m();
+			std::add_volatile<Foo>::type{}.m();
+			std::add_cv<Foo>::type{}.m();
+		};
+		foo_main();
+	}
+
+	/*
+	 * decltype 是关键词， declval<T> 是模板函数，它的作用是将T替换成T&&， 并将T&&作为返回对象， 目的是绕过一个对象的构造函数，直接使用这个对象的成员函数.
+	 * declval<T>不能作为常规模板函数使用，必须配合decltype使用， 可以在编译期获得这个对象的成员函数的返回类型。
+	 */
 }
 
 int main(int argc, char* argv[])
 {
-	keywords_simple::no_explicit_test();
+	//keywords_simple::no_explicit_test();
+	keywords_simple::test_type_traits();
+	keywords_simple::test_sfinae();
 }
