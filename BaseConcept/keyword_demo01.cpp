@@ -1,6 +1,8 @@
 ﻿#include <iostream>
 #include <vector>
 #include <string>
+#include <functional>
+#include <algorithm>
 
 // C++ 关键词及关键技术点记录
 
@@ -10,11 +12,11 @@
  *	explicit 不需要添加默认构造，多参构造(总是显示构造)。只需要添加单参构造，目的是防止不必要的隐式类型转换
  *	需要注意单参构造（多参构造但只有一个参数没有默认值）时，采用赋值时会产生隐式类型转换，这类转换有时并不是我们需要的。 explicit阻止隐式类型转换；
  */
- /* ReSharper 可提供最佳代码实践， 如下： NonExplicitConvertingConstructor, NonExplicitConversionOperator, UseAuto... 这里先禁用这些*/
+/* ReSharper 可提供最佳代码实践， 如下： NonExplicitConvertingConstructor, NonExplicitConversionOperator, UseAuto... 这里先禁用这些*/
 
- // ReSharper disable CppNonExplicitConvertingConstructor
- // ReSharper disable CppNonExplicitConversionOperator
- // ReSharper disable CppUseAuto
+// ReSharper disable CppNonExplicitConvertingConstructor
+// ReSharper disable CppNonExplicitConversionOperator
+// ReSharper disable CppUseAuto
 
 using namespace std;
 
@@ -84,9 +86,9 @@ namespace keywords_simple
 	 *	标准转换: int 转char, long 转double..
 	 */
 
-	 /* C++ 一致初始化， 早期C++初始化有多种方式，很容易混淆。故引用列表初始化(一致初始化)｛..｝
-	  * C++11 列表初始化(一致初始化) 内部实现的本质是用 initializer_list<T>来实现，而initializer_list<>实质也就是array
-	  */
+	/* C++ 一致初始化， 早期C++初始化有多种方式，很容易混淆。故引用列表初始化(一致初始化)｛..｝
+	 * C++11 列表初始化(一致初始化) 内部实现的本质是用 initializer_list<T>来实现，而initializer_list<>实质也就是array
+	 */
 
 	void Print(const std::initializer_list<int> values)
 	{
@@ -100,7 +102,7 @@ namespace keywords_simple
 		 * 使用auto时，默认是copy构造的，尽量使用reference( auto& )，如果需需要常量引用则const auto&;
 		 *
 		 */
-		vector<int> vec{ 16, 26, 36, 46, 56 };
+		vector<int> vec{16, 26, 36, 46, 56};
 		for (auto& elem : vec) {
 			elem += 3;
 		}
@@ -137,7 +139,7 @@ namespace keywords_simple
 
 	void test_class()
 	{
-		vector<string> vs{ "first", "second", "three" };
+		vector<string> vs{"first", "second", "three"};
 
 		for (const auto& el : vs) {
 			cout << "el.size: " << el.size() << "el.type: " << typeid(el).name() << "\n";
@@ -167,7 +169,7 @@ namespace keywords_simple
 	 *	这里的关键在于对template<class T>进行判断，
 	 *	TypeTrait是泛型代码(Generic Code)的基石
 	 */
-	 //--------------------------------------------------------------------------------------------//
+	//--------------------------------------------------------------------------------------------//
 
 	template <typename T>
 	void FooImpl(const T& val, std::true_type)
@@ -187,6 +189,10 @@ namespace keywords_simple
 		FooImpl(val, std::is_pointer<T>());
 	}
 
+	/*
+	 * decltype 是关键词， declval<T> 是模板函数，它的作用是将T替换成T&&， 并将T&&作为返回对象， 目的是绕过一个对象的构造函数，直接使用这个对象的成员函数.
+	 * declval<T>不能作为常规模板函数使用，必须配合decltype使用， 可以在编译期获得这个对象的成员函数的返回类型。
+	 */
 	template <typename T1, typename T2>
 	struct CommonType
 	{
@@ -208,14 +214,14 @@ namespace keywords_simple
 	 *		using IntAgain = std::remove_pointer<IntPtr>::type;	// IntAgain即int;
 	 *
 	 */
-	 // std::reference_wrapper? 引用包装器, 主要与模板结合,通常使用std::ref(value), std::cref(value) 来创建reference_wrapper对象。
-	 //	reference_wrapper在STL标准库使用非常多，如： make_pair() 就是创建pair<> of reference, make_tuple()创建tuple<>的reference,
-	 //	通常使用std::ref, std::cref创建reference_wrapper对象，但在定义时必须使用reference_wrapper如：
-	 //		vector<MyClass&> vec_my; /// 创建vec,存入MyClass对象引用，这样定义不能通过编译， 必须使用如下格式：
-	 //		vector<std::reference_wrapper<MyClass>> vec_my;   // 变量声明和定义时必须使用reference_wrapper<T>
-	 //		MyClass obj1; vec_my.push_back(std::ref(obj1)); vec_my.emplace_back(std::ref<MyClass>(obj2));
+	// std::reference_wrapper? 引用包装器, 主要与模板结合,通常使用std::ref(value), std::cref(value) 来创建reference_wrapper对象。
+	//	reference_wrapper在STL标准库使用非常多，如： make_pair() 就是创建pair<> of reference, make_tuple()创建tuple<>的reference,
+	//	通常使用std::ref, std::cref创建reference_wrapper对象，但在定义时必须使用reference_wrapper如：
+	//		vector<MyClass&> vec_my; /// 创建vec,存入MyClass对象引用，这样定义不能通过编译， 必须使用如下格式：
+	//		vector<std::reference_wrapper<MyClass>> vec_my;   // 变量声明和定义时必须使用reference_wrapper<T>
+	//		MyClass obj1; vec_my.push_back(std::ref(obj1)); vec_my.emplace_back(std::ref<MyClass>(obj2));
 
-	 // Substitution Failure Is Not An Error ==> SFINAE, 匹配失败不是错误. 典型的使用std::enable_if<bool, T>
+	// Substitution Failure Is Not An Error ==> SFINAE, 匹配失败不是错误. 典型的使用std::enable_if<bool, T>
 	template <typename T>
 	typename std::enable_if<std::is_trivial<T>::value>::type SfinaeT1(T value)
 	{
@@ -234,7 +240,7 @@ namespace keywords_simple
 	{
 		enum { kIntT, kFloatT } m_type;
 
-		template <typename Integer, std::enable_if_t<std::is_integral<Integer>::value, int> = 0>
+		template <typename Integer, std::enable_if_t<std::is_integral<Integer>::value, int>  = 0>
 		T1(Integer) : m_type(kIntT) {}
 
 		template <typename Floating, typename std::enable_if<std::is_floating_point<Floating>::value, int>::type = 0>
@@ -267,9 +273,56 @@ namespace keywords_simple
 	}
 
 	/*
-	 * decltype 是关键词， declval<T> 是模板函数，它的作用是将T替换成T&&， 并将T&&作为返回对象， 目的是绕过一个对象的构造函数，直接使用这个对象的成员函数.
-	 * declval<T>不能作为常规模板函数使用，必须配合decltype使用， 可以在编译期获得这个对象的成员函数的返回类型。
+	 * Function Type Wrapper(函数包装器), std::function<...>; 可以理解为把可调用对象callable_object(function, member_function, function_obj, lambda)当作最高级对象；
+	 * std::function 同函数指针类似；
 	 */
+
+	void FuncObject()
+	{
+		std::vector<function<void(int, int)>> some_tasks; // vector保存函数对象(返回void, 参数为(int, int));
+		typedef void (*FuncPtr)(int, int); // 定义函数指针类型
+		std::vector<FuncPtr> some_jobs; // 函数指针做为vector， 即将函数对象做为vector成员
+		// std::function<void(int, int)>, 当将类成员函数定义成调用对象时，类对象必须作第一参数
+		class C
+		{
+		public:
+			void MemberFunc(int x, int y) const;
+		};
+
+		// const C& 相当于成员函数调用时的传递this；因为成员函数调用时实质进行了自动this传递，只是隐藏在传递中
+		const std::function<void(const C&, int, int)> member_func = &C::MemberFunc;
+		member_func(C(), 88, 88);
+
+		// 成员函数指针，声明方式： return_val(Class::*func)(arg1, arg2...) = &Class::member_func;
+		void (C::*mem_func)(int x, int y) const = &C::MemberFunc;
+		C c1;
+		(c1.*mem_func)(89, 99); //调用方式，涉及运算符优先级:  (obj.*func)(arg...); 
+
+		C* c2 = new C;
+		(c2->*mem_func)(11, 22); // obj调用方式(obj->*func)(arg...); 总体还是使用std::function<void(const Class&, arg...)> 更优。
+		delete c2;
+	}
+}
+
+namespace stl_simple
+{
+	/*
+	 * STL 组件:  Container(容器),  Iterator(迭代器),  Algorithm(算法), 仿函数(FunctionObject),  Adapter(适配器);
+	 * 
+	 *	SequenceContainer(序列容器): 有序(Ordered)容器，每个元素都有确定位置,位置与插入容器的时机有关，与元素本身无关。 array, vector, deque, list, forward_list;
+	 *	AssociativeContainer(关联容器): 已排序(Sorted)容器, 元素位置取决于value, 如果元素key/value pair,则位置取决于key,与插入顺序无关. set, multiset, map, multimap;
+	 *	Unordered{associative}Container(无序容器): 无序集合，元素位置无关紧要，元素值与元素值都不会影响排序，而且它位的次序有可能随时间发生变化。
+	 *		unordered_set, unordered_multiset, unordered_map, unordered_multimap;   STL含4个预定义无序容器；
+	 *	
+	 *	Adapter(适配器):  Stack(采用LIFO,栈模式)， Queue(FIFO),  PriorityQueue; 对于开发者，它们和普通容器没有区别
+	 *	Iterator，实质是一智能指针， 支持*ptr取值，++， --操作。 
+	 *	
+	 */
+
+	void Demo01()
+	{
+
+	}
 }
 
 int main(int argc, char* argv[])
