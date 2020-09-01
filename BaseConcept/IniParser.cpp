@@ -249,6 +249,7 @@ bool IniParser::write_ini(const string& path)
 
 void IniParser::set_value(const string& root, const string& key, const string& value)
 {
+	// ReSharper disable CppUseAuto
 	map<string, map<string, string>>::iterator it = this->map_ini_.find(root);
 	if (map_ini_.end() != it) {
 		map<string, string>::iterator sub_it = it->second.find(key);

@@ -6,7 +6,6 @@ namespace ini_file
 {
 	using std::string;
 	using std::vector;
-
 	constexpr auto kRetOk = 0;
 	constexpr auto kErrorUnmatchedBrackets = 2; // 没有匹配[,]
 	constexpr auto kErrorSectionEmpty = 3; // 段为空
@@ -17,7 +16,7 @@ namespace ini_file
 	constexpr auto kErrorNotFoundKey = 8; // 没有找到对应的key
 	constexpr auto kErrorNotFoundSection = 9; // 没有找到对应section(段)
 
-	const char kDelimit[] = "\n";
+	const char kDelimit[] = "\r\n";
 
 	/*
 	 *  ini 项目。单项item由key, value构成，注释可以在value后面(right_comment)，也可独立成行，注释采用#开头
@@ -31,7 +30,7 @@ namespace ini_file
 	};
 
 	/*
-	 *  Section(章节)，ini文件里以[Section], 独立成行. 一个Section包含1个或多个item; 
+	 *  Section(章节)，ini文件里以[Section], 独立成行. 一个Section包含1个或多个item;
 	 *  采用vector<IniItem> 存储为items;
 	 */
 	struct IniSection
@@ -58,6 +57,8 @@ namespace ini_file
 	{
 	public:
 		IniFile();
+		explicit IniFile(string& file_name);
+
 		~IniFile() { Release(); }
 
 		int Load(const string& file_name);
@@ -81,13 +82,15 @@ namespace ini_file
 
 		int GetSections(vector<string>* sections);
 
-		int GetSectionCount();
+		int GetSectionCount() const ;
 
 		bool HasSection(const string& section);
 
 		bool HasKey(const string& section, const string& key);
 
 		IniSection* GetSection(const string& section = "");
+
+		void test_output();
 
 	private:
 		static void Trim(string& str);

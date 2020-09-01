@@ -2,10 +2,12 @@
 #include <fstream>
 #include <cstring>
 #include <algorithm>
+#include <iostream>
 
 namespace ini_file
 {
 	IniFile::IniFile() : comment_delimiter_("#") { }
+	IniFile::IniFile(string& file_name): comment_delimiter_("#") { Load(file_name); }
 
 	int IniFile::Load(const string& file_name)
 	{
@@ -31,12 +33,14 @@ namespace ini_file
 
 		while (std::getline(ifs, line)) {
 			Trim(line);
+			std::cout << "Load: " << line << "\n";
 
 			// step 0,
 			if (line.length() <= 0) {
 				comment += kDelimit;
 				continue;
 			}
+				std::cout << comment << "\n";
 
 			// step 1,
 			if (IsCommentLine(line)) {
@@ -50,6 +54,9 @@ namespace ini_file
 			// step 2.
 			if (clean_line[0] == '[') {
 				error_no = UpdateSection(clean_line, comment, right_comment, &cur_section);
+				if(error_no) {
+					std::cout << "error:  " << this->err_msg_ << "\n";
+				}
 			}
 			else {
 				error_no = AddKeyValuePair(clean_line, comment, right_comment, cur_section);
@@ -58,6 +65,8 @@ namespace ini_file
 				ifs.close();
 				return error_no;
 			}
+			comment = "";
+			right_comment = "";
 		}
 		ifs.close();
 		return kRetOk;
@@ -170,6 +179,7 @@ namespace ini_file
 
 	int IniFile::GetRightComment(const string& section, const string& key, string* right_comment)
 	{
+		// ReSharper disable once CppUseAuto
 		IniSection* sect = GetSection(section);
 		if (sect == nullptr) {
 			err_msg_ = string("not found the section.") + section;
@@ -195,9 +205,30 @@ namespace ini_file
 	{
 		for (auto it = this->sections_vec_.begin(); it != this->sections_vec_.end(); ++it) {
 			sections->push_back((*it)->name);
-			//*(*it)->name
 		}
-		// TODO ADD Sections.
+		return sections->size();
+	}
+
+	int IniFile::GetSectionCount() const
+	{
+		return this->sections_vec_.size();
+	}
+
+	bool IniFile::HasSection(const string& section)
+	{
+		return (GetSection(section) != nullptr);
+	}
+
+	bool IniFile::HasKey(const string& section, const string& key)
+	{
+		const auto sect = GetSection(section);
+		if (sect != nullptr) {
+			for (auto it = sect->begin(); it != sect->end(); ++it) {
+				if (it->key == key)
+					return true;
+			}
+		}
+		return false;
 	}
 
 	IniSection* IniFile::GetSection(const string& section)
@@ -206,6 +237,11 @@ namespace ini_file
 			if ((*it)->name == section) { return *it; }
 		}
 		return nullptr;
+	}
+
+	void IniFile::test_output()
+	{
+		Print();
 	}
 
 	// 使用string::erase 去除两端空格
@@ -220,6 +256,7 @@ namespace ini_file
 		return StartWith(str, comment_delimiter_);
 	}
 
+	/// 判断str行开头字符，prefix: "#"则定义为注释，"["定义为Section, 
 	bool IniFile::StartWith(const string& str, const string& prefix)
 	{
 		if (strncmp(str.c_str(), prefix.c_str(), prefix.size()) == 0)
@@ -252,8 +289,8 @@ namespace ini_file
 
 	bool IniFile::StrCmpIgnoreCase(const string& str1, const string& str2)
 	{
-		auto first_str{ str1 };
-		auto last_str{ str2 };
+		auto first_str{str1};
+		auto last_str{str2};
 		std::transform(first_str.begin(), first_str.end(), first_str.begin(), tolower);
 		std::transform(last_str.begin(), last_str.end(), last_str.begin(), tolower);
 
@@ -261,7 +298,7 @@ namespace ini_file
 	}
 
 	int IniFile::UpdateSection(const string& clean_line, const string& comment, const string& right_comment,
-		IniSection** section)
+	                           IniSection** section)
 	{
 		const auto pos = clean_line.find_first_of(']');
 		if (pos == string::npos) {
@@ -292,7 +329,7 @@ namespace ini_file
 	}
 
 	int IniFile::AddKeyValuePair(const string& clean_line, const string& comment, const string& right_comment,
-		IniSection* section)
+	                             IniSection* section)
 	{
 		string key, value;
 		if (!Parse(clean_line, &key, &value)) {
@@ -370,12 +407,12 @@ namespace ini_file
 
 	void IniFile::Print()
 	{
-		printf("\n################# print start ################\n\n");
+		printf("\n################# print start ################\n");
 		printf("file path: [%s] \n", this->ini_filepath_.c_str());
 		printf("comment delimiter: [%s]\n", this->comment_delimiter_.c_str());
 
 		for (auto it = sections_vec_.begin(); it != sections_vec_.end(); ++it) {
-			printf("comment:  [%s]\n", (*it)->comment.data());
+			printf("comment:  [%s]\n", (*it)->comment.c_str());
 			printf("section:  [%s]\n", (*it)->name.c_str());
 			if ((*it)->right_comment != "") {
 				printf("right comment: [%s]\n", (*it)->right_comment.c_str());
@@ -389,7 +426,7 @@ namespace ini_file
 				}
 			}
 		}
-		printf("\n\n################# print start ################\n");
+		printf("\n################# print end ################\n");
 	}
 
 	// string 两端空格去除，实现方式：从0坐标开始while循环，使用isspace判断是否是空格，直到不是空格，从不是空格处创建新的str, string(str, i, len-i);
@@ -412,6 +449,7 @@ namespace ini_file
 		}
 		str = string(str, 0, i + 1);
 	}
+
 }
 
 int main(int argc, char* argv[])
@@ -420,6 +458,11 @@ int main(int argc, char* argv[])
 	auto ini_config = ini_file::IniFile();
 	ini_file::IniFile config_ini;
 	ini_config.Load(config_file);
+
+	std::cout << "Section_count: " << ini_config.GetSectionCount() << "\n";
+	
+	ini_config.test_output();
+
 	auto sect = ini_config.GetSection("HotKey");
 	for (auto it = sect->begin(); it != sect->end(); ++it) {
 		printf("item: [%s = %s]\n", it->key.c_str(), it->value.c_str());

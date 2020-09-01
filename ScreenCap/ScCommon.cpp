@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "ScCommon.h"
 #include <vector>
 #include <algorithm>
@@ -24,10 +24,8 @@ namespace sc
 		static const size_t bits_per_block_ = sizeof(Block) * 8;
 
 	public:
-		BitMap(const size_t width, const size_t height) :
-			width_(width), height_(height), blocks_((width * height) / bits_per_block_ + 1, 0)
-		{
-		}
+		BitMap(const size_t width, const size_t height) : width_(width), height_(height),
+			blocks_((width * height) / bits_per_block_ + 1, 0) { }
 
 		bool get(size_t x, size_t y) const;
 		void set(size_t x, size_t y);
@@ -45,7 +43,7 @@ namespace sc
 		friend std::string get_info(const BitMap<Block>& b)
 		{
 			auto block_size = b.blocks_.size();
-			std::string ret{"bit_map info: <block_size>="};
+			std::string ret{ "bit_map info: <block_size>=" };
 			ret += std::to_string(block_size) + ", <bits_per_block>" + std::to_string(bits_per_block_);
 			return ret;
 		}
@@ -97,10 +95,9 @@ namespace sc
 		}
 		rects.clear();
 		for (auto& ot : out_rects) {
-			auto found = std::find_if(rects.rbegin(), rects.rend(), [=](const ImageRect& rect)
-			{
+			auto found = std::find_if(rects.rbegin(), rects.rend(), [=](const ImageRect& rect) {
 				return rect.bottom_i == ot.top_i && rect.left_i == ot.left_i && rect.right_i == ot.right_i;
-			});
+				});
 
 			if (found == rects.rend()) {
 				rects.push_back(ot);
@@ -144,10 +141,9 @@ namespace sc
 		const auto line_rem = width % kMaxDist;
 		const auto bottom_rem = height % kMaxDist;
 
-		BitMap<uint64_t> changes{static_cast<size_t>(width_chunks) + 1, static_cast<size_t>(height_chunks) + 1};
+		BitMap<uint64_t> changes{ static_cast<size_t>(width_chunks) + 1, static_cast<size_t>(height_chunks) + 1 };
 
-		const auto compare = [&](size_t x, size_t y, size_t n_pixels)
-		{
+		const auto compare = [&](size_t x, size_t y, size_t n_pixels) {
 			if (!changes.get(x, y)) {
 				if (memcmp(old_ptr, new_ptr, n_pixels * sizeof(int))) {
 					changes.set(x, y);
@@ -179,12 +175,12 @@ namespace sc
 	}
 
 	Monitor create_monitor(const int index, const int id, const int h, const int w, const int ox, const int oy,
-	                       const std::string& s, const float scaling)
+		const std::string& s, const float scaling)
 	{
 		Monitor ret{};
 		ret.index_i = index;
 		ret.id_i = id;
-		assert(s.size() +1 < sizeof(ret.name_c));
+		assert(s.size() + 1 < sizeof(ret.name_c));
 		memcpy(ret.name_c, s.c_str(), s.size() + 1);
 		ret.original_offset_x_i = ret.offset_x_i = ox;
 		ret.original_offset_y_i = ret.offset_y_i = oy;
@@ -194,7 +190,7 @@ namespace sc
 	}
 
 	Monitor create_monitor(const int index, const int id, const int adapter, const int h, const int w, const int ox,
-	                       const int oy, const std::string& n, const float scaling)
+		const int oy, const std::string& n, const float scaling)
 	{
 		auto ret = create_monitor(index, id, h, w, ox, oy, n, scaling);
 		ret.adapter_i = adapter;
@@ -210,7 +206,6 @@ namespace sc
 		return ret;
 	}
 }
-
 
 //int main(int argc, char* argv[])
 //{
