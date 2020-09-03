@@ -2,6 +2,9 @@
 #include <iostream>
 #include <memory>
 #include <cstring>
+#include <algorithm>
+
+// ReSharper disable CppUseAuto
 
 namespace vec_demo
 {
@@ -60,7 +63,7 @@ namespace vec_demo
 			printf("~Ts()... called.\n");
 		}
 
-		Ts(const Ts& ts)
+		Ts(const Ts& ts): num_(ts.num_), c_str_(ts.c_str_)
 		{
 			printf("Ts(const Ts& ts, copy constructor called.\n");
 		}
@@ -124,7 +127,7 @@ namespace vec_demo
 	}
 
 	void TsStoreVecEmplace()
-		// vector使用emplace_back添加对象时，可减少每次的拷贝构造过程，方式是不要emplace_back(....)直接构造，见下：
+	// vector使用emplace_back添加对象时，可减少每次的拷贝构造过程，方式是不要emplace_back(....)直接构造，见下：
 	{
 		std::vector<Ts> vec_ts;
 		vec_ts.reserve(kDefaultCapacity); // 指定容量Capacity，减少不必要的整块内存移动
@@ -267,6 +270,67 @@ namespace vec_demo
 		printf("data.size: %zu, data.capacity: %zu\n", data.size(), data.capacity());
 		printf("elem0: %s\n", elem0);
 		printf("elem1: %s\n", elem1);
+	}
+
+	/*
+	 * remove_if 同 remove是一样，并不会真正删除对象，这里remove可解释为移动，即将不匹配条件对象移动到左侧，返回最后匹配对象下一迭代器；
+	 * remove只简单定量匹配，remove_if可使用lambda或函数定义匹配条件。 
+	 * 常用删除对象采用erase(std::remove(beginIt, endIt, conf), endIt); 拆分为
+	 *	iter = remove(vec.begin(), vec.end(), 88);
+	 *	vec.erase(iter, vec.end());
+	 *	
+	 *	iter = std::remove_if(vec.begin(), vec.end(), [](int n)->bool{ return bool};);
+	 *	vec.erase(iter, vec.end()); 
+	 *	合并后:
+	 *		vec.erase(std::remove_if(vec.begin(), vec.end(), [](int n)->bool{return ...bool};), vec.end());
+	 */
+
+	void RemoveT3()
+	{
+		using namespace std;
+		vector<char> vec_char{'a', 'a', 'a', 'b', 'c', 'b', 'c', 'c', 'b', 'a', 'a', 'b', 'a', 'a'};
+		for (auto ch : vec_char) {
+			cout << ch << "  ";
+		}
+		cout << endl;
+
+		auto p = vec_char.erase(remove(vec_char.begin(), vec_char.end(), 'a'), vec_char.end());
+		cout << "remove count: " << (vec_char.end() - p) << "\n";
+		for (auto ch : vec_char) {
+			cout << ch << "  ";
+		}
+		cout << endl;
+	}
+
+	void RemoveSome()
+	{
+		using namespace std;
+		vector<int> vec_int;
+		for (int i = 100; i < 200; i++) {
+			vec_int.emplace_back(i);
+		}
+		for (int i = 0; i < vec_int.size(); i++) {
+			cout << vec_int[i] << "  ";
+		}
+		cout << endl;
+
+
+		const vector<int>::iterator iter = remove_if(vec_int.begin(), vec_int.end(),
+		                                             [](const int n) -> bool { return n % 2 == 0; });
+		for (auto n : vec_int) {
+			cout << n << "  ";
+		}
+
+		cout << endl;
+		for (auto it = vec_int.begin(); it != iter; ++it) {
+			cout << *it << "  ";
+		}
+
+		cout << "\n";
+		vec_int.erase(iter, vec_int.end());
+		for (auto n : vec_int) {
+			cout << n << "  ";
+		}
 	}
 }
 

@@ -6,6 +6,7 @@
 #include <cstring>
 #include <algorithm>
 
+// ReSharper disable CppUseAuto
 static void trim_string(string& str)
 {
 	str.erase(0, str.find_first_not_of(' '));
@@ -15,8 +16,7 @@ static void trim_string(string& str)
 string& IniParser::replace_all(string& str, const string& old_value, const string& new_value)
 {
 	while (true) {
-		string::size_type pos = 0;
-		pos = str.find(old_value);
+		auto const pos = str.find(old_value);
 		if (pos == string::npos) { break; }
 		str.replace(pos, old_value.length(), new_value);
 	}
@@ -71,6 +71,7 @@ void IniParser::ReplaceAllDistinct(string& content, const string& old_val, const
 	}
 }
 
+/* C方式读取文件，使用FILE*, fopen_s, fseek, malloc fread_s, */
 string IniParser::get_string_from_file(const string& ini_file)
 {
 	FILE* fp = nullptr;
@@ -81,10 +82,9 @@ string IniParser::get_string_from_file(const string& ini_file)
 	fseek(fp, 0, SEEK_END);
 	const auto size = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
-	uint8_t* buffer = nullptr;
 	const auto buff_size = sizeof(uint8_t) * (size + 1);
 	std::cout << "buff_size: " << buff_size << "\n";
-	buffer = static_cast<uint8_t*>(malloc(buff_size));
+	auto const buffer = static_cast<uint8_t*>(malloc(buff_size));
 	memset(buffer, 0, buff_size);
 	buffer[size] = '\0';
 	const auto read_size = fread_s(buffer, buff_size, sizeof(uint8_t), buff_size, fp);
@@ -96,6 +96,7 @@ string IniParser::get_string_from_file(const string& ini_file)
 	std::cout << "str:  " << str << "\n";
 	free(buffer);
 	return str;
+	// 采用return string方式是不合理的， 最优的方式应该是将需要接收的string传引用或指针方式，可以减少拷贝
 }
 
 bool IniParser::read_ini(const std::string& filename)
@@ -113,6 +114,7 @@ bool IniParser::read_ini(const std::string& filename)
 		}
 
 		// 主要目的确保文件换行符为\r\n(CRLF), 当文本由mac导出时，换行符是\r(CR),读取文档是最长文档叠加到一起。
+		// 直接这样调用 逻辑是不通的.
 		if (!(replace_all_distinct(*content, "\r", "\r\n"))) {
 			return false;
 		}
@@ -178,9 +180,9 @@ void IniParser::view() const
 
 string IniParser::get_string(const string& root, const string& key, const string& def) const
 {
-	auto iter = this->map_ini_.find(root);
+	const auto iter = this->map_ini_.find(root);
 	if (iter == map_ini_.end()) return "";
-	auto sub_iter = iter->second.find(key);
+	const auto sub_iter = iter->second.find(key);
 	if (sub_iter == iter->second.end()) return "";
 	if (!(sub_iter->second).empty())
 		return sub_iter->second;
@@ -249,7 +251,6 @@ bool IniParser::write_ini(const string& path)
 
 void IniParser::set_value(const string& root, const string& key, const string& value)
 {
-	// ReSharper disable CppUseAuto
 	map<string, map<string, string>>::iterator it = this->map_ini_.find(root);
 	if (map_ini_.end() != it) {
 		map<string, string>::iterator sub_it = it->second.find(key);

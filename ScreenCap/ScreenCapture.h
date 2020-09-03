@@ -1,6 +1,7 @@
-#pragma once
+﻿#pragma once
 #include <cstdint>
-#include <cstdlib>
+//#include <cstdlib>
+
 #include "ScCommon.h"
 
 #ifdef __cplusplus
@@ -17,8 +18,8 @@ namespace sc
 {
 	struct SC_EXTERN Point
 	{
-		int x_i;
-		int y_i;
+		int x;
+		int y;
 	};
 
 	struct SC_EXTERN MousePoint
@@ -37,19 +38,19 @@ namespace sc
 
 	struct SC_EXTERN Monitor
 	{
-		int id_i = INT32_MAX;
-		int index_i = INT32_MAX;
-		int adapter_i = INT32_MAX;
-		int height_i = 0;
-		int width_i = 0;
-		int original_height_i = 0;
-		int original_width_i = 0;
-		int offset_x_i = 0;
-		int offset_y_i = 0;
-		int original_offset_x_i = 0;
-		int original_offset_y_i = 0;
-		char name_c[128]{0};
-		float scaling_x{1.0f};
+		int id = INT32_MAX;
+		int index = INT32_MAX;
+		int adapter = INT32_MAX;
+		int height = 0;
+		int width = 0;
+		int original_height = 0;
+		int original_width = 0;
+		int offset_x = 0;
+		int offset_y = 0;
+		int original_offset_x = 0;
+		int original_offset_y = 0;
+		char name[128]{0};
+		float scaling{1.0f};
 	};
 
 	struct SC_EXTERN Image;
@@ -59,45 +60,44 @@ namespace sc
 		unsigned char b, g, r, a;
 	};
 
+	inline SC_EXTERN int Index(const Monitor& monitor) { return monitor.index; }
 
-	inline SC_EXTERN int index(const Monitor& monitor) { return monitor.index_i; }
+	inline SC_EXTERN int Id(const Monitor& monitor) { return monitor.id; }
 
-	inline SC_EXTERN int id(const Monitor& monitor) { return monitor.id_i; }
+	inline SC_EXTERN int Adapter(const Monitor& monitor) { return monitor.adapter; }
 
-	inline SC_EXTERN int adapter(const Monitor& monitor) { return monitor.adapter_i; }
+	inline SC_EXTERN int OffsetX(const Monitor& monitor) { return monitor.offset_x; }
+	inline SC_EXTERN int OffsetY(const Monitor& monitor) { return monitor.offset_y; }
+	inline SC_EXTERN int OffsetX(const Window& window) { return window.position_point.x; }
+	inline SC_EXTERN int OffsetY(const Window& window) { return window.position_point.y; }
+	inline SC_EXTERN void OffsetX(Monitor& monitor, const int x_i) { monitor.offset_x = x_i; }
+	inline SC_EXTERN void OffsetY(Monitor& monitor, const int y_i) { monitor.offset_y = y_i; }
+	inline SC_EXTERN void OffsetX(Window& window, const int x_i) { window.position_point.x = x_i; }
+	inline SC_EXTERN void OffsetY(Window& window, const int y_i) { window.position_point.y = y_i; }
 
-	inline SC_EXTERN int offset_x(const Monitor& monitor) { return monitor.offset_x_i; }
-	inline SC_EXTERN int offset_y(const Monitor& monitor) { return monitor.offset_y_i; }
-	inline SC_EXTERN int offset_x(const Window& window) { return window.position_point.x_i; }
-	inline SC_EXTERN int offset_y(const Window& window) { return window.position_point.y_i; }
-	inline SC_EXTERN void offset_x(Monitor& monitor, const int x_i) { monitor.offset_x_i = x_i; }
-	inline SC_EXTERN void offset_y(Monitor& monitor, const int y_i) { monitor.offset_y_i = y_i; }
-	inline SC_EXTERN void offset_x(Window& window, const int x_i) { window.position_point.x_i = x_i; }
-	inline SC_EXTERN void offset_y(Window& window, const int y_i) { window.position_point.y_i = y_i; }
+	inline SC_EXTERN const char* Name(const Monitor& monitor) { return monitor.name; }
+	inline SC_EXTERN const char* Name(const Window& window) { return window.name_c; }
 
-	inline SC_EXTERN const char* name(const Monitor& monitor) { return monitor.name_c; }
-	inline SC_EXTERN const char* name(const Window& window) { return window.name_c; }
+	inline SC_EXTERN int Height(const Monitor& monitor) { return monitor.height; }
+	inline SC_EXTERN int Width(const Monitor& monitor) { return monitor.width; }
+	inline SC_EXTERN int Height(const Window& window) { return window.size_point.y; }
+	inline SC_EXTERN int Width(const Window& window) { return window.size_point.x; }
+	inline SC_EXTERN void Height(Monitor& monitor, const int h_i) { monitor.height = h_i; }
+	inline SC_EXTERN void Width(Monitor& monitor, const int w_i) { monitor.width = w_i; }
+	inline SC_EXTERN void Height(Window& window, const int h_i) { window.size_point.y = h_i; }
+	inline SC_EXTERN void Width(Window& window, const int w_i) { window.size_point.x = w_i; }
+	inline SC_EXTERN int Height(const ImageRect& rect) { return rect.left_top - rect.left_bottom; }
+	inline SC_EXTERN int Width(const ImageRect& rect) { return rect.right_top - rect.left_top; }
+	inline SC_EXTERN int Height(const Image& img) { return Height(img.bounds); }
+	inline SC_EXTERN int Width(const Image& img) { return Width(img.bounds); }
 
-	inline SC_EXTERN int height(const Monitor& monitor) { return monitor.height_i; }
-	inline SC_EXTERN int width(const Monitor& monitor) { return monitor.width_i; }
-	inline SC_EXTERN int height(const Window& window) { return window.size_point.y_i; }
-	inline SC_EXTERN int width(const Window& window) { return window.size_point.x_i; }
-	inline SC_EXTERN void height(Monitor& monitor, const int h_i) { monitor.height_i = h_i; }
-	inline SC_EXTERN void width(Monitor& monitor, const int w_i) { monitor.width_i = w_i; }
-	inline SC_EXTERN void height(Window& window, const int h_i) { window.size_point.y_i = h_i; }
-	inline SC_EXTERN void width(Window& window, const int w_i) { window.size_point.x_i = w_i; }
-	inline SC_EXTERN int height(const ImageRect& rect) { return rect.top_i - rect.bottom_i; }
-	inline SC_EXTERN int width(const ImageRect& rect) { return rect.right_i - rect.left_i; }
-	inline SC_EXTERN int height(const Image& img) { return height(img.bounds); }
-	inline SC_EXTERN int width(const Image& img) { return width(img.bounds); }
+	inline SC_EXTERN int X(const Point& point) { return point.x; }
+	inline SC_EXTERN int Y(const Point& point) { return point.y; }
+	inline SC_EXTERN const ImageBgra* StartSrc(const Image& img) { return img.data; }
 
-	inline SC_EXTERN int x(const Point& point) { return point.x_i; }
-	inline SC_EXTERN int y(const Point& point) { return point.y_i; }
-	inline SC_EXTERN const ImageBgra* start_src(const Image& img) { return img.data; }
+	inline SC_EXTERN bool IsDataContiguous(const Image& img) { return img.is_contiguous; }
 
-	inline SC_EXTERN bool is_data_contiguous(const Image& img) { return img.is_contiguous; }
-
-	inline SC_EXTERN const ImageBgra* goto_next_row(const Image& img, const ImageBgra* current)
+	inline SC_EXTERN const ImageBgra* GotoNextRow(const Image& img, const ImageBgra* current)
 	{
 		const auto c = reinterpret_cast<const unsigned char*>(current);
 		return reinterpret_cast<const ImageBgra*>(c + img.bytes_to_next_row);

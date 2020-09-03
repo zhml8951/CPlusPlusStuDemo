@@ -7,6 +7,10 @@ using std::string;
 using std::map;
 using std::vector;
 
+/*
+ * ini文件解析, C++ string 操作的学习， 里面有C方式操作(读写, 判断文件大小... )文本文件，
+ */
+
 class IniParser
 {
 private:

@@ -10,7 +10,7 @@ namespace string_stu
 		using namespace std;
 		string s1("dada4994befb934493e8f6f70128c0df");
 		string flag = "e8";
-		auto pos = s1.find("e8");
+		auto pos = s1.find(flag);
 		if (pos != string::npos) {
 			cout << "find flags at:  " << pos << "\n";
 		}
@@ -48,7 +48,6 @@ namespace string_stu
 			std::cout << str << "\n";
 		}
 
-		found = 0;
 		found = str2.find_first_of(find_str);
 		printf("str2_data:  %s", str2.data());
 		if (found != string::npos) {
