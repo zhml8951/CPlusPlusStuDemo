@@ -10,25 +10,46 @@
 
 namespace sc
 {
+	/*
+	 *		绘图时左下角为原点(0,0), 而显示器里表示图像时的座标为:左上角为(0，0)
+	 *			       top=y1	
+	 *	  (x1,y1)-------------------(x2,y1)		      (0.0)---------------> X轴
+	 *			|					|                     |
+	 *			|					|                     |
+	 *  left=x1 |					| right=x2            |   
+	 *			|					|					  |
+	 *			|					|					  v
+	 *	  (x1,y2)-------------------(x2,y2)              Y轴
+	 *			      bottom=y2
+	 *			      
+	 *	定义ImageRect时， left时X轴不变, Y轴变化，故left相当于左边的x轴值(x1)，同理top=y1, right=x2, bottom=y2;
+	 *	使用left,top,right,bottom,容易误解成边长， 正确理解应为left表示左边轴位置，right左边轴位置... 
+	 *	后续height=top-bottom, width=right-left就好理解了。 左上角point=(left, top), 右下角point=(right, bottom);
+	 */
+
+	// 图像边框, 包含4条边定位
 	struct ImageRect
 	{
-		int left_bottom;
-		int left_top;
-		int right_top;
-		int right_bottom;
+		int left;
+		int top;
+		int right;
+		int bottom;
 
 		ImageRect() : ImageRect(0, 0, 0, 0) { };
 
-		ImageRect(const int l_b, const int l_t, const int r_t, const int r_b) : left_bottom(l_b), left_top(l_t),
-		                                                                        right_top(r_t), right_bottom(r_b) { }
+		ImageRect(const int l, const int t, const int r, const int b) : left(l), top(t), right(r), bottom(b) { }
 
-		bool contains(const ImageRect& rect) const
+		/* 判断另一rect是否在image_rect内，图像以左上角为原点，图像left越小越靠左，top越小越靠上,这样图像越大，right越大越靠右，bottom越大越靠下，这样图像越大。 */
+		bool Contains(const ImageRect& rect) const
 		{
-			return left_bottom <= rect.left_bottom && left_top <= rect.left_top && right_top >= rect.right_top &&
-				right_bottom >= rect.right_bottom;
+			return left <= rect.left && top <= rect.top && right >= rect.right &&
+				bottom >= rect.bottom;
 		}
 	};
 
+	/*
+	 * Image类，由ImageRect(边框)， ImageBgra*(颜色data)
+	 */
 	struct Image
 	{
 		ImageRect bounds;
@@ -39,12 +60,14 @@ namespace sc
 
 	inline bool operator==(const ImageRect& img_rect1, const ImageRect& img_rect2)
 	{
-		return img_rect1.left_bottom == img_rect2.left_bottom && img_rect1.left_top == img_rect2.left_top &&
-			img_rect1.right_top == img_rect2.right_top && img_rect1.right_bottom == img_rect2.right_bottom;
+		return img_rect1.left == img_rect2.left && img_rect1.top == img_rect2.top &&
+			img_rect1.right == img_rect2.right && img_rect1.bottom == img_rect2.bottom;
 	}
 
+	/* 行跨度, 获取行的象素(字节数)，不包含边框填充 */
 	inline int RowStride(const Image& img) { return sizeof(ImageBgra) * Width(img); }
 
+	//  
 	inline void Extract(const Image& img, unsigned char* dst, size_t dst_size)
 	{
 		auto img_size = Width(img) * Height(img) * sizeof(ImageBgra);
@@ -157,16 +180,16 @@ namespace sc
 	void ProcessCapture(const F& data, T& base, const C& monitor, const unsigned char* start_src, int src_rows_stride)
 	{
 		ImageRect image_rect;
-		image_rect.left_bottom = 0;
-		image_rect.left_top = 0;
-		image_rect.right_bottom = Height(monitor);
-		image_rect.right_top = Width(monitor);
+		image_rect.left = 0;
+		image_rect.top = 0;
+		image_rect.bottom = Height(monitor);
+		image_rect.right = Width(monitor);
 
 		const auto size_img_bgra = static_cast<int>(sizeof(ImageBgra));
 		const auto start_img_src = reinterpret_cast<const ImageBgra*>(start_src);
 		auto dst_row_stride = size_img_bgra * Width(monitor);
 
-		if(data.OnNewFrame) {
+		if (data.OnNewFrame) {
 			// TODO 自动推导, 这里成员方法怎么确定?......	
 		}
 	}

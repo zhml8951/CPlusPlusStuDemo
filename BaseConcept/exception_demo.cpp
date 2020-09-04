@@ -49,6 +49,43 @@ namespace exception_simple
 			std::cout << "some error.\n";
 		}
 	}
+
+	/*
+	 * C++ Assert分为动态assert和静态static_assert， C方式的#error; 
+	 *	static_assert 在C++0x引入，在编译期间断言，占用的是编译期，不产生目标代码，不会带来运行期性能损失。
+	 *	assert 属动态断言，在运行器进行检查，在函数内部使用，若函数没调用，则不会进行检查及断言
+	 *		static_assert(bool(condition), "Information"); 当条件不成立时,则停止编译并抛出错误信息。
+	 *		在vs2017,有些static_assert直接由ide提示出来, static_assert主要使用于template时，编译时模板实例化时进行判断
+	 */
+
+	template <typename T, typename U, typename V>
+	class MyTemplateClass
+	{
+		static_assert(!std::is_empty<T>::value, "T should be non-empty class.");
+		static_assert(std::is_empty<U>::value, "U should be an empty class.");
+		static_assert(std::is_base_of<std::allocator<T>, V>::value, "V should inherit from std::alloctor<T>");
+	};
+
+	void AssertDemo01()
+	{
+		// msdn demo: 这里如果不是 ==8，直接由IDE提示错误；
+		static_assert(sizeof(void*) == 8, "Must 64-bit code generation supported.");
+
+		struct MyStruct
+		{
+			char value;
+		};
+		struct MyEmptyStruct
+		{
+			//double value;
+			void func();
+		};
+
+		// 确保MyEmptyStruct是空类，在IDE环境，直接就提示出"断言失败"
+		static_assert(std::is_empty<MyEmptyStruct>::value, "Empty class needed.");
+		// 确保MyStruct非空;
+		static_assert(!std::is_empty<MyStruct>::value, "Non-empty struct needed.");
+	}
 }
 
 int main(int argc, char* argv[])

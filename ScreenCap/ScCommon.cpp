@@ -10,10 +10,10 @@ namespace sc
 	void SanitizeRects(std::vector<ImageRect>& rects, const Image& img)
 	{
 		for (auto& r : rects) {
-			if (r.right_top > Width(img))
-				r.right_top = Width(img);
-			if (r.right_bottom > Height(img))
-				r.right_bottom = Height(img);
+			if (r.right > Width(img))
+				r.right = Width(img);
+			if (r.bottom > Height(img))
+				r.bottom = Height(img);
 		}
 	}
 
@@ -138,9 +138,9 @@ namespace sc
 		out_rects.reserve(rects.size());
 		out_rects.push_back(rects[0]);
 		for (size_t i = 1; i < rects.size(); i++) {
-			if (out_rects.back().right_top == rects[i].left_bottom && out_rects.back().right_bottom == rects[i].
-				right_bottom) {
-				out_rects.back().right_top = rects[i].right_top;
+			if (out_rects.back().right == rects[i].left &&
+				out_rects.back().bottom == rects[i].bottom) {
+				out_rects.back().right = rects[i].right;
 			}
 			else {
 				out_rects.push_back(rects[i]);
@@ -153,14 +153,14 @@ namespace sc
 		rects.clear();
 		for (auto& ot : out_rects) {
 			auto found = std::find_if(rects.rbegin(), rects.rend(), [=](const ImageRect& rect) {
-				return rect.right_bottom == ot.left_top && rect.left_bottom == ot.left_bottom && rect.right_top == ot.
-					right_top;
+				return rect.bottom == ot.top && rect.left == ot.left &&
+					rect.right == ot.right;
 			});
 
 			if (found == rects.rend()) {
 				rects.push_back(ot);
 			}
-			else { found->right_bottom = ot.right_bottom; }
+			else { found->bottom = ot.bottom; }
 		}
 	}
 
@@ -174,10 +174,10 @@ namespace sc
 			for (decltype(map.width()) x = 0; x < map.width(); ++x) {
 				if (map.get(y, x)) {
 					ImageRect rect;
-					rect.left_top = y * kMaxDist;
-					rect.right_bottom = (y + 1) * kMaxDist;
-					rect.left_bottom = x * kMaxDist;
-					rect.right_top = (x + 1) * kMaxDist;
+					rect.top = y * kMaxDist;
+					rect.bottom = (y + 1) * kMaxDist;
+					rect.left = x * kMaxDist;
+					rect.right = (x + 1) * kMaxDist;
 
 					rects.push_back(rect);
 				}

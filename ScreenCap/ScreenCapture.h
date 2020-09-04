@@ -86,13 +86,15 @@ namespace sc
 	inline SC_EXTERN void Width(Monitor& monitor, const int w_i) { monitor.width = w_i; }
 	inline SC_EXTERN void Height(Window& window, const int h_i) { window.size_point.y = h_i; }
 	inline SC_EXTERN void Width(Window& window, const int w_i) { window.size_point.x = w_i; }
-	inline SC_EXTERN int Height(const ImageRect& rect) { return rect.left_top - rect.left_bottom; }
-	inline SC_EXTERN int Width(const ImageRect& rect) { return rect.right_top - rect.left_top; }
+	inline SC_EXTERN int Height(const ImageRect& rect) { return rect.top - rect.left; }
+	inline SC_EXTERN int Width(const ImageRect& rect) { return rect.right - rect.top; }
 	inline SC_EXTERN int Height(const Image& img) { return Height(img.bounds); }
 	inline SC_EXTERN int Width(const Image& img) { return Width(img.bounds); }
 
 	inline SC_EXTERN int X(const Point& point) { return point.x; }
 	inline SC_EXTERN int Y(const Point& point) { return point.y; }
+
+	//获取image的rgba信息 
 	inline SC_EXTERN const ImageBgra* StartSrc(const Image& img) { return img.data; }
 
 	inline SC_EXTERN bool IsDataContiguous(const Image& img) { return img.is_contiguous; }
