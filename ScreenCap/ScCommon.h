@@ -12,18 +12,18 @@ namespace sc
 {
 	/*
 	 *		绘图时左下角为原点(0,0), 而显示器里表示图像时的座标为:左上角为(0，0)
-	 *			       top=y1	
+	 *			       top=y1
 	 *	  (x1,y1)-------------------(x2,y1)		      (0.0)---------------> X轴
 	 *			|					|                     |
 	 *			|					|                     |
-	 *  left=x1 |					| right=x2            |   
+	 *  left=x1 |					| right=x2            |
 	 *			|					|					  |
 	 *			|					|					  v
 	 *	  (x1,y2)-------------------(x2,y2)              Y轴
 	 *			      bottom=y2
-	 *			      
+	 *
 	 *	定义ImageRect时， left时X轴不变, Y轴变化，故left相当于左边的x轴值(x1)，同理top=y1, right=x2, bottom=y2;
-	 *	使用left,top,right,bottom,容易误解成边长， 正确理解应为left表示左边轴位置，right左边轴位置... 
+	 *	使用left,top,right,bottom,容易误解成边长， 正确理解应为left表示左边轴位置，right左边轴位置...
 	 *	后续height=top-bottom, width=right-left就好理解了。 左上角point=(left, top), 右下角point=(right, bottom);
 	 */
 
@@ -67,7 +67,7 @@ namespace sc
 	/* 行跨度, 获取行的象素(字节数)，不包含边框填充 */
 	inline int RowStride(const Image& img) { return sizeof(ImageBgra) * Width(img); }
 
-	//  
+	// 展开源img到dst, TODO 这里到底是个啥用途,还不清楚?
 	inline void Extract(const Image& img, unsigned char* dst, size_t dst_size)
 	{
 		auto img_size = Width(img) * Height(img) * sizeof(ImageBgra);
@@ -87,15 +87,15 @@ namespace sc
 		}
 	}
 
-
-	using std::chrono::duration;
+	namespace chrono = std::chrono;
 	using std::chrono::duration_cast;
+	using std::chrono::duration;
 
 	class Timer
 	{
-		using Clock = std::conditional<std::chrono::high_resolution_clock::is_steady,
-		                               std::chrono::high_resolution_clock, std::chrono::steady_clock>::type;
-		using MicroSec = std::chrono::microseconds;
+		using Clock = std::conditional<chrono::high_resolution_clock::is_steady,
+		                               chrono::high_resolution_clock, chrono::steady_clock>::type;
+		using MicroSec = chrono::microseconds;
 
 	public:
 		template <typename Rep, typename Period>
@@ -112,27 +112,31 @@ namespace sc
 			}
 		}
 
-		MicroSec Duration() const { return this->Duration(); }
+		MicroSec Duration() const { return this->duration_; }
 
 	private:
-		std::chrono::microseconds duration_;
+		chrono::microseconds duration_;
 		Clock::time_point dead_line_;
 	}; // end class Timer;
 
+	// 清理无效的图像边框,判断条件是img.right<rect.right, img.bottom<rect.bottom;
 	void SanitizeRects(std::vector<ImageRect>& rects, const Image& img);
 
+	// 获取image边框矩形
 	inline const ImageRect& Rect(const Image& img) { return img.bounds; }
 
-	template <typename F, typename M, typename W>
-	struct CaptureData
-	{
-		std::shared_ptr<Timer> frame_timer;
-		F on_new_frame;
-		F on_frame_changed;
-		std::shared_ptr<Timer> mouse_timer;
-		M on_mouse_changed;
-		M get_things_to_watch;
-	};
+	enum CodeReturn { SUCCESS_CODE = 0, ERROR_EXPECTED_CODE = 1, ERROR_UNEXPECTED_CODE = 2 };
+
+	Monitor CreateMonitor(int index, int id, int h, int w, int ox, int oy, const std::string& n, float scale);
+
+	Monitor CreateMonitor(int index, int id, int adapter, int h,
+	                      int w, int ox, int oy, const std::string& n, float scale);
+
+	bool IsMonitorInsideBounds(const std::vector<Monitor>& monitors, const Monitor& monitor);
+
+	Image CreateImage(const ImageRect& img_rect, int row_padding, const ImageBgra* data);
+
+	std::vector<ImageRect> GetDifs(const Image& old_img, const Image& new_img);
 
 	struct CommonData
 	{
@@ -147,6 +151,17 @@ namespace sc
 	typedef std::function<void(const Image&, const MousePoint&)> MouseCallback;
 	typedef std::function<std::vector<Monitor>()> MonitorCallback;
 	typedef std::function<std::vector<Window>()> WindowCallback;
+
+	template <typename F, typename M, typename W>
+	struct CaptureData
+	{
+		std::shared_ptr<Timer> frame_timer;
+		F on_new_frame;
+		F on_frame_changed;
+		std::shared_ptr<Timer> mouse_timer;
+		M on_mouse_changed;
+		M get_things_to_watch;
+	};
 
 	struct ThreadData
 	{
@@ -164,18 +179,6 @@ namespace sc
 		bool first_run_ = true;
 	};
 
-	enum CodeReturn { SUCCESS_CODE = 0, ERROR_EXPECTED_CODE = 1, ERROR_UNEXPECTED_CODE = 2 };
-
-	Monitor CreateMonitor(int index, int id, int h, int w, int ox, int oy, const std::string& n, float scale);
-	Monitor CreateMonitor(int index, int id, int adapter, int h,
-	                      int w, int ox, int oy, const std::string& n, float scale);
-
-	bool IsMonitorInsideBounds(const std::vector<Monitor>& monitors, const Monitor& monitor);
-
-	Image CreateImage(const ImageRect& img_rect, int row_padding, const ImageBgra* data);
-
-	std::vector<ImageRect> GetDifs(const Image& old_img, const Image& new_img);
-
 	template <typename F, typename T, typename C>
 	void ProcessCapture(const F& data, T& base, const C& monitor, const unsigned char* start_src, int src_rows_stride)
 	{
@@ -187,10 +190,45 @@ namespace sc
 
 		const auto size_img_bgra = static_cast<int>(sizeof(ImageBgra));
 		const auto start_img_src = reinterpret_cast<const ImageBgra*>(start_src);
-		auto dst_row_stride = size_img_bgra * Width(monitor);
+		int dst_row_stride = size_img_bgra * Width(monitor);
 
-		if (data.OnNewFrame) {
-			// TODO 自动推导, 这里成员方法怎么确定?......	
+		// Sc库这里做了很多抽象, 为后面的GDI, DX, X11共用
+
+		if (data.on_new_frame) {
+			auto whole_img = CreateImage(image_rect, src_rows_stride, start_img_src);
+			whole_img.is_contiguous = dst_row_stride == src_rows_stride;
+			data.on_new_frame(whole_img, monitor);
+		}
+		if (data.on_frame_changed) {
+			if (base.first_run_) {
+				auto whole_img = CreateImage(image_rect, src_rows_stride - dst_row_stride, start_img_src);
+				whole_img.is_contiguous = (dst_row_stride == src_rows_stride);
+				data.on_frame_changed(whole_img, monitor);
+				base.first_run_ = false;
+			}
+			else {
+				auto new_img = CreateImage(image_rect, src_rows_stride - dst_row_stride, start_img_src);
+				auto old_img =
+					CreateImage(image_rect, 0, reinterpret_cast<const ImageBgra*>(base.image_buffer_.get()));
+				auto img_difs = GetDifs(old_img, new_img);
+
+				for (auto& r : img_difs) {
+					auto left_offset = r.left * size_img_bgra;
+					auto this_start_src = start_src + left_offset + (r.top + src_rows_stride);
+					auto dif_img = CreateImage(r, src_rows_stride, reinterpret_cast<const ImageBgra*>(this_start_src));
+					dif_img.is_contiguous = false;
+					data.on_frame_changed(dif_img, monitor);
+				}
+			}
+			auto start_dst = base.image_buffer_.get();
+			if (dst_row_stride == src_rows_stride) {
+				memcpy(start_dst, start_src, dst_row_stride * Height(monitor));
+			}
+			else {
+				for (auto i = 0; i < Height(monitor); i++) {
+					memccpy(start_dst + (i * dst_row_stride), start_src + (i * src_rows_stride), dst_row_stride);
+				}
+			}
 		}
 	}
 }

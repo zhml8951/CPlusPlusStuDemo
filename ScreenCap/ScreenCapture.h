@@ -1,7 +1,5 @@
 ﻿#pragma once
 #include <cstdint>
-//#include <cstdlib>
-
 #include "ScCommon.h"
 
 #ifdef __cplusplus
@@ -104,4 +102,36 @@ namespace sc
 		const auto c = reinterpret_cast<const unsigned char*>(current);
 		return reinterpret_cast<const ImageBgra*>(c + img.bytes_to_next_row);
 	}
+
+	bool IsMonitorInSideBounds(const std::vector<Monitor>& monitors, const Monitor& monitor);
+
+	std::vector<Monitor> GetMonitors();
+
+	std::vector<Window> GetWindows();
+
+	static bool screen_capture_manager_exists = false;
+
+	class SC_EXTERN IScreenCaptureManager
+	{
+	public:
+		virtual ~IScreenCaptureManager() {}
+
+		template <typename Rep, typename Period>
+		void SetFrameChangeInterval(const std::chrono::duration<Rep, Period>& real_time)
+		{
+			SetFrameChangeInterval(std::make_shared<Timer>(real_time));
+		}
+
+		virtual void SetFrameChangeInterval(const std::shared_ptr<Timer>& timer) = 0;
+
+		template <typename Rep, typename Period>
+		void SetMouseChangeInterval(const std::chrono::duration<Rep, Period>& real_time)
+		{
+			SetMouseChangeInterval(std::make_shared<Timer>(real_time));
+		}
+
+		virtual void SetMouseChangeInterval(const std::shared_ptr<Timer>& timer) = 0;
+	};
+
+	//class ScreenCaptureManager: public { }
 }

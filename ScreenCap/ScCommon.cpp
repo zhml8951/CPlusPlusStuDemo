@@ -17,8 +17,8 @@ namespace sc
 		}
 	}
 
-	Monitor CreateMonitor(const int index, const int id, const int h, const int w, const int ox, const int oy,
-	                      const std::string& n, const float scale)
+	Monitor CreateMonitor(const int index, const int id, const int h, const int w, const int ox,
+	                      const int oy, const std::string& n, const float scale)
 	{
 		Monitor ret{};
 		ret.index = index;
@@ -33,8 +33,8 @@ namespace sc
 		return ret;
 	}
 
-	Monitor CreateMonitor(const int index, const int id, const int adapter, const int h, int const w,
-	                      int const ox, int const oy, const std::string& n, float const scale)
+	Monitor CreateMonitor(const int index, const int id, const int adapter, const int h, int const w, int const ox,
+	                      int const oy, const std::string& n, float const scale)
 	{
 		auto ret = CreateMonitor(index, id, h, w, ox, oy, n, scale);
 		ret.adapter = adapter;
@@ -65,7 +65,7 @@ namespace sc
 		return true;
 	}
 
-	Image CreateImage(const ImageRect& img_rect, int row_padding, const ImageBgra* data)
+	Image CreateImage(const ImageRect& img_rect, const int row_padding, const ImageBgra* data)
 	{
 		Image img;
 		img.bounds = img_rect;

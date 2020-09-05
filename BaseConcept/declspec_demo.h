@@ -16,21 +16,24 @@
 // HMODULE hDll = LoadLibrary("\\..\\dynamic.dll");
 // ReSharper disable CppInconsistentNaming
 
-struct SC_LITE_EXTERN Monitor
+namespace type_auto
 {
-	int Id = INT32_MAX;
-	int Index = INT32_MAX;
-	int Adapter = INT32_MAX;
-	int Height = 0;
-	int Width = 0;
-	int OriginalHeight = 0;
-	int OriginalWidth = 0;
-	int OffsetX = 0;
-	int OffsetY = 0;
-	int OriginalOffsetX = 0;
-	int OriginalOffsetY = 0;
-	char Name[20]{0};
-	float Scaling{1.0f};
-};
+	struct SC_LITE_EXTERN Monitor
+	{
+		int Id = INT32_MAX;
+		int Index = INT32_MAX;
+		int Adapter = INT32_MAX;
+		int Height = 0;
+		int Width = 0;
+		int OriginalHeight = 0;
+		int OriginalWidth = 0;
+		int OffsetX = 0;
+		int OffsetY = 0;
+		int OriginalOffsetX = 0;
+		int OriginalOffsetY = 0;
+		char Name[20] = {0};
+		float Scaling{1.0f};
+	};
 
-SC_LITE_EXTERN int Index(const Monitor& monitor);
+	SC_LITE_EXTERN inline int Index(const Monitor& monitor) { return 1; }
+}
