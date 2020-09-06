@@ -1,5 +1,10 @@
 ﻿#include <iostream>
 
+// ReSharper disable CppUseAuto
+// ReSharper disable CppMemberFunctionMayBeStatic
+// ReSharper disable CppMemberFunctionMayBeConst
+// ReSharper disable CppDeclaratorNeverUsed
+
 namespace simple_demo
 {
 	class ClsTest
@@ -46,8 +51,11 @@ namespace simple_demo
 		ClsTest cls01; // 调用无参构造，创建对象在栈中。
 		ClsTest cls02{}; // 等同于上面什么都不写。
 		ClsTest cls04{3}; //C++11 新写法 ==> ClsTest cls04(3) .
+
+		// ClsTest cls03(); 有二义性 问题， 可以理解为 声明cls03函数， 返回值 ClsTest类型；
 		ClsTest cls03(); //	可理解为返回值为ClsTest类型的函数cls03, cls03无参; 这里直接警告。
-		auto cls05 = new ClsTest();
+
+		const auto cls05 = new ClsTest();
 		ClsTest* cls06 = new ClsTest;
 		ClsTest* cls07 = new ClsTest{88};
 		std::cout << "get_num: " << cls07->get_num() << "\n";
@@ -157,22 +165,32 @@ namespace simple_demo
 	 * 重写(覆盖)可实现基类指针指向子类，直接调用子类方法，基类需要virtual函数才能完全满足要求。
 	 * 如果没有virtual， 即使用名称，参数等全部相同，也不能实现重写， 只能算隐藏。
 	 * 子类与基类 函数名相同，参数相同或不同都是隐藏基类方法， 使用基类指针指向子类，但调用依然是基类方法。
+	 * 纯虚函数，格式 virtual T1 Func(T2 args,...)=0; 包含纯虚函数的类不能实例化， 即抽象类；
 	 */
 	class Base01
 	{
 	public:
 		virtual ~Base01() = default;
 		void func(double, int) const { std::cout << "Base::func(double,int)" << "\n"; }
-		virtual void f(const float f) { std::cout << "Base::f(float f)" << f << "\n"; }
+		virtual void Fn(const float f) { std::cout << "Base::Fn(float f)" << f << "\n"; }
 		void g(const float f) { std::cout << "Base::g(float)" << f << "\n"; }
 		void h(const float f) { std::cout << "Base::h(float)" << f << "\n"; }
+	};
+
+	/// virtual func = 0 纯虚数， 包含纯虚函数的类为抽象类，不能实例化
+	class BaseAbstract
+	{
+		BaseAbstract() = default;
+		~BaseAbstract() {}
+		virtual std::string GetName(int id) = 0; ///纯虚函数
+		void Func() { std::cout << "func_name" << __FUNCTION__ << "\n"; }
 	};
 
 	class Derive final : public Base01
 	{
 	public:
 		void func(int) { std::cout << "Derive::func(int)" << std::endl; }
-		void f(float f) { std::cout << "Derive f(float)" << "\n"; }
+		void Fn(float f) { std::cout << "Derive Fn(float)" << "\n"; }
 		void g(int x) { std::cout << "Derive g(int)" << "\n"; }
 		void h(float x) { std::cout << "Derive h(float)" << "\n"; }
 	};
@@ -189,16 +207,16 @@ namespace simple_demo
 		Derive* df = &pd;
 		df->func(10);
 
-		bs01->f(3.14f);
-		df->f(3.14f);
+		bs01->Fn(3.14f);
+		df->Fn(3.14f);
 	}
 
 	/*
 	 * C++ 有4个特殊成员函数(默认): 构造函数、析构函数、拷贝构造、拷贝赋值；如果程序没显示创建，则编译器自动隐式创建这些函数；
 	 * 但是如果程序创建了其它参数的构建函数，则隐式的默认构建函数则不会自动产生，创建对象就必须显式调用有参构建函数，
 	 * 如果需要编译器生成默认构建函数， 就在函数后 =default, 实现内容由编译器自动产生；如下: Student()=default;
-	 * 
-	 *  有时候程序需要禁用某成员函数，过去的方式则是将成员成成private, C++11直接提供delete; 
+	 *
+	 *  有时候程序需要禁用某成员函数，过去的方式则是将成员成成private, C++11直接提供delete;
 	 *  Student& operator=(const Student&)=delete; 显式提示禁用些operator=
 	 */
 
@@ -206,7 +224,7 @@ namespace simple_demo
 	{
 	public:
 		Student() = default;
-		explicit Student(const std::string name): name_(name), sex_('M'), age_(0) {};
+		explicit Student(const std::string name) : name_(name), sex_('M'), age_(0) {};
 
 		Student(Student const& stu) { this->name_ = stu.name_, sex_ = stu.sex_, age_ = stu.age_; }
 		Student& operator=(const Student&) = delete;
