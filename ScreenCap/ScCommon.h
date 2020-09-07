@@ -1,10 +1,13 @@
 ﻿#pragma once
-
 #include <vector>
 #include <atomic>
 #include <thread>
 #include <cassert>
 #include <chrono>
+#include <memory>
+#include <functional>
+#include <string>
+#include <cstring>
 
 #include "ScreenCapture.h"
 
@@ -27,7 +30,7 @@ namespace sc
 	 *	后续height=top-bottom, width=right-left就好理解了。 左上角point=(left, top), 右下角point=(right, bottom);
 	 */
 
-	// 图像边框, 包含4条边定位
+	 // 图像边框, 包含4条边定位
 	struct ImageRect
 	{
 		int left;
@@ -94,13 +97,13 @@ namespace sc
 	class Timer
 	{
 		using Clock = std::conditional<chrono::high_resolution_clock::is_steady,
-		                               chrono::high_resolution_clock, chrono::steady_clock>::type;
+			chrono::high_resolution_clock, chrono::steady_clock>::type;
 		using MicroSec = chrono::microseconds;
 
 	public:
 		template <typename Rep, typename Period>
 		explicit Timer(const duration<Rep, Period>& durations) : duration_(duration_cast<MicroSec>(durations)),
-		                                                         dead_line_(Clock::now() + duration_) { }
+			dead_line_(Clock::now() + duration_) { }
 
 		void Start() { this->dead_line_ = Clock::now() + duration_; }
 
@@ -127,10 +130,10 @@ namespace sc
 
 	enum CodeReturn { SUCCESS_CODE = 0, ERROR_EXPECTED_CODE = 1, ERROR_UNEXPECTED_CODE = 2 };
 
-	Monitor CreateMonitor(int index, int id, int h, int w, int ox, int oy, const std::string& n, float scale);
+	auto CreateMonitor(int index, int id, int h, int w, int ox, int oy, const std::string& n, float scale) -> Monitor;
 
-	Monitor CreateMonitor(int index, int id, int adapter, int h,
-	                      int w, int ox, int oy, const std::string& n, float scale);
+	auto CreateMonitor(int index, int id, int adapter, int h,
+	                   int w, int ox, int oy, const std::string& n, float scale) -> Monitor;
 
 	bool IsMonitorInsideBounds(const std::vector<Monitor>& monitors, const Monitor& monitor);
 

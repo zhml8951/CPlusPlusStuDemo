@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include <cstdint>
 #include "ScCommon.h"
+#include <cstdint>
 
 #ifdef __cplusplus
 #if defined(WINDOWS) || defined(WIN32)
@@ -31,7 +31,7 @@ namespace sc
 		size_t handle_size;
 		Point position_point;
 		Point size_point;
-		char name_c[128]{0};
+		char name_c[128]{ 0 };
 	};
 
 	struct SC_EXTERN Monitor
@@ -47,8 +47,8 @@ namespace sc
 		int offset_y = 0;
 		int original_offset_x = 0;
 		int original_offset_y = 0;
-		char name[128]{0};
-		float scaling{1.0f};
+		char name[128]{ 0 };
+		float scaling{ 1.0f };
 	};
 
 	struct SC_EXTERN Image;
@@ -92,7 +92,7 @@ namespace sc
 	inline SC_EXTERN int X(const Point& point) { return point.x; }
 	inline SC_EXTERN int Y(const Point& point) { return point.y; }
 
-	//获取image的rgba信息 
+	//获取image的rgba信息
 	inline SC_EXTERN const ImageBgra* StartSrc(const Image& img) { return img.data; }
 
 	inline SC_EXTERN bool IsDataContiguous(const Image& img) { return img.is_contiguous; }
@@ -108,8 +108,6 @@ namespace sc
 	std::vector<Monitor> GetMonitors();
 
 	std::vector<Window> GetWindows();
-
-	static bool screen_capture_manager_exists = false;
 
 	class SC_EXTERN IScreenCaptureManager
 	{
@@ -131,7 +129,35 @@ namespace sc
 		}
 
 		virtual void SetMouseChangeInterval(const std::shared_ptr<Timer>& timer) = 0;
+
+		virtual void Pause() = 0;
+
+		virtual bool IsPaused() const = 0;
+
+		virtual void Resume() = 0;
 	};
 
-	//class ScreenCaptureManager: public { }
+	template <typename CaptureCallback>
+	class ICaptureConfiguration
+	{
+	public:
+		virtual ~ICaptureConfiguration() {}
+		// When new frame is available the Callback is invoked;
+		virtual std::shared_ptr<ICaptureConfiguration<CaptureCallback>> OnNewFrame(const CaptureCallback& cb) = 0;
+
+		//When a Change in a frame is detected, the callback is invoked;
+		virtual std::shared_ptr<ICaptureConfiguration<CaptureCallback>> OnFrameChanged(const CaptureCallback& cb) = 0;
+
+		// When mouse image changes or the mouse changes position, the Callback is invoked;
+		virtual std::shared_ptr<ICaptureConfiguration<CaptureCallback>> OnMouseChanged(const MouseCallback& cb) = 0;
+
+		// start capturing
+		virtual std::shared_ptr<IScreenCaptureManager> StartCapturing() = 0;
+	};
+
+	auto CreateCaptureConfiguration(const MonitorCallback& monitor_to_capture)->
+		std::shared_ptr<ICaptureConfiguration<ScreenCaptureCallback>>;
+
+	auto CreateCaptureConfiguration(const WindowCallback& window_to_capture) ->
+		std::shared_ptr<ICaptureConfiguration<WindowCaptureCallback>>;
 }

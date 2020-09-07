@@ -1,2 +1,3 @@
 ﻿#define SC_EXTERN 
 #define SC_EXTERN __declspec(dllexport)
+#define SC_EXTERN __declspec(dllexport)

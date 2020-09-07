@@ -159,6 +159,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="ScCommon.h" />
     <ClInclude Include="ScreenCapture.h" />
+    <ClInclude Include="ThreadManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
@@ -170,6 +171,7 @@
     </ClCompile>
     <ClCompile Include="ScCommon.cpp" />
     <ClCompile Include="ScreenCapture.cpp" />
+    <ClCompile Include="ThreadManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

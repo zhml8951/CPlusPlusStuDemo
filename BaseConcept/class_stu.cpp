@@ -158,23 +158,26 @@ namespace simple_demo
 	}
 
 	/*
-	 * 重写(覆盖)， 隐藏。  重载 3者的关键区别
-	 * 重载在同一访问区，同class内，namespace内及全局函数，同名函数，参数不同。属静态。
-	 * 重写，和隐藏 发生在类继承关系上。 属动态。
-	 * 重写要求是函数名，参数等必须相同，基类必须是virtual成员函数。  重写当然也有隐藏属性。
-	 * 重写(覆盖)可实现基类指针指向子类，直接调用子类方法，基类需要virtual函数才能完全满足要求。
-	 * 如果没有virtual， 即使用名称，参数等全部相同，也不能实现重写， 只能算隐藏。
+	 * 重写(覆盖)， 隐藏(重定义)。  重载 3者的关键区别
+	 * 重载在同一访问区，同class内，namespace内及全局函数，函数名相同，但函数参数不同，返回值可以相同； 这属于静态的。
+	 * 重写，和隐藏 发生在类继承关系上。 属动态多态。 
+	 * 重写要求是函数名，参数等必须相同，且基类必须是virtual成员函数。  重写当然也有隐藏属性。
+	 * 重写(覆盖override)可实现基类指针指向子类，直接调用子类方法，基类需要virtual函数才能满足override要求。
+	 * 如果没有virtual， 即使用名称，参数等全部相同，也不能实现重写， 只能算隐藏(重定义)
 	 * 子类与基类 函数名相同，参数相同或不同都是隐藏基类方法， 使用基类指针指向子类，但调用依然是基类方法。
-	 * 纯虚函数，格式 virtual T1 Func(T2 args,...)=0; 包含纯虚函数的类不能实例化， 即抽象类；
+	 * 纯虚函数，格式 virtual T1 Func(T2 args,...)=0; 包含纯虚函数的类不能实例化， 即抽象类；抽象类只能被继承
 	 */
+
 	class Base01
 	{
 	public:
 		virtual ~Base01() = default;
-		void func(double, int) const { std::cout << "Base::func(double,int)" << "\n"; }
+		void Func(double, int) const { std::cout << "Base::func(double,int)" << "\n"; }
+		void Func(const char* s) { std::cout << "Func function OverLoad. " << "string: " << s << "\n"; }
 		virtual void Fn(const float f) { std::cout << "Base::Fn(float f)" << f << "\n"; }
-		void g(const float f) { std::cout << "Base::g(float)" << f << "\n"; }
-		void h(const float f) { std::cout << "Base::h(float)" << f << "\n"; }
+
+		void GFunc(const float f) { std::cout << "Base::g(float)" << f << "\n"; }
+		void HiddenFunc(const float f) { std::cout << "Base::HiddenFunc(float)" << f << "\n"; }
 	};
 
 	/// virtual func = 0 纯虚数， 包含纯虚函数的类为抽象类，不能实例化
@@ -189,23 +192,27 @@ namespace simple_demo
 	class Derive final : public Base01
 	{
 	public:
-		void func(int) { std::cout << "Derive::func(int)" << std::endl; }
-		void Fn(float f) { std::cout << "Derive Fn(float)" << "\n"; }
-		void g(int x) { std::cout << "Derive g(int)" << "\n"; }
-		void h(float x) { std::cout << "Derive h(float)" << "\n"; }
+		/// 这里Func(int)并没形成重写，与Base类的Func参数不同， 故只算作子类的独立函数
+		void Func(int) { std::cout << "Derive::func(int)" << std::endl; }
+		/// override可以不写，但为了防止函数名称误写而没形成重写，故override保证是函数是重写父类的同名函数；
+		void Fn(const float f) override { std::cout << "Derive Fn(float)" << "\n"; }
+
+		void GFunc(int x) { std::cout << "Derive g(int)" << "\n"; }
+
+		void HiddenFunc(float x) { std::cout << "Derive HiddenFunc(float)" << "\n"; }
 	};
 
 	void Main02()
 	{
 		Derive pd;
-		pd.func(1); // func 隐藏了Base的func;
+		pd.Func(1); // func 隐藏了Base的func;
 		//pd.func(0.1, 1);
 
 		Base01* bs01 = &pd;
-		bs01->func(0.1, 1);
+		bs01->Func(0.1, 1);
 
 		Derive* df = &pd;
-		df->func(10);
+		df->Func(10);
 
 		bs01->Fn(3.14f);
 		df->Fn(3.14f);
