@@ -1,6 +1,5 @@
 ﻿#pragma once
-#include "ScreenCapture.h"
-
+#include "ScCommon.h"
 
 namespace sc
 {
@@ -15,4 +14,16 @@ namespace sc
 		void Init(const std::shared_ptr<ThreadData>& data);
 		void Join();
 	};
+
+	template <typename T, typename F, typename... E>
+	bool TryCaptureMouse(const F& data, E ... args)
+	{
+		return {};
+	}
+
+	void RunCaptureMonitor(std::shared_ptr<ThreadData> data, Monitor monitor);
+
+	void RunCaptureWindow(std::shared_ptr<ThreadData> data, Window window);
+
+	void RunCaptureMouse(std::shared_ptr<ThreadData> data);
 }

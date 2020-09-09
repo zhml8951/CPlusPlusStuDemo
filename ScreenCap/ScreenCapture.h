@@ -31,7 +31,7 @@ namespace sc
 		size_t handle_size;
 		Point position_point;
 		Point size_point;
-		char name_c[128]{ 0 };
+		char name_c[128]{0};
 	};
 
 	struct SC_EXTERN Monitor
@@ -47,8 +47,8 @@ namespace sc
 		int offset_y = 0;
 		int original_offset_x = 0;
 		int original_offset_y = 0;
-		char name[128]{ 0 };
-		float scaling{ 1.0f };
+		char name[128]{0};
+		float scaling{1.0f};
 	};
 
 	struct SC_EXTERN Image;
@@ -105,9 +105,9 @@ namespace sc
 
 	bool IsMonitorInSideBounds(const std::vector<Monitor>& monitors, const Monitor& monitor);
 
-	std::vector<Monitor> GetMonitors();
+	auto GetMonitors() -> std::vector<Monitor>;
 
-	std::vector<Window> GetWindows();
+	auto GetWindows() -> std::vector<Window>;
 
 	class SC_EXTERN IScreenCaptureManager
 	{
@@ -155,9 +155,9 @@ namespace sc
 		virtual std::shared_ptr<IScreenCaptureManager> StartCapturing() = 0;
 	};
 
-	auto CreateCaptureConfiguration(const MonitorCallback& monitor_to_capture)->
-		std::shared_ptr<ICaptureConfiguration<ScreenCaptureCallback>>;
+	auto CreateCaptureConfiguration(const MonitorCallback& monitor_to_capture) ->
+	std::shared_ptr<ICaptureConfiguration<ScreenCaptureCallback>>;
 
 	auto CreateCaptureConfiguration(const WindowCallback& window_to_capture) ->
-		std::shared_ptr<ICaptureConfiguration<WindowCaptureCallback>>;
+	std::shared_ptr<ICaptureConfiguration<WindowCaptureCallback>>;
 }

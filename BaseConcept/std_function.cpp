@@ -97,9 +97,15 @@ namespace simple_demo
 				return (person.name.find(key) != std::string::npos);
 			}
 		};
+
 		// std::bind1st, std::bind2nd 将二元函数转换为一元函数， 有很多库需要一元函数
-		const auto display = [](const int val)-> void { std::cout << val << "  "; };
-		auto display_v = [](const Person& p) -> void { std::cout << p.age << ", " << p.name << std::endl; };
+		const auto display = [](const int val)-> void {
+			std::cout << val << "  ";
+		};
+
+		const auto display_v = [](const Person& p) -> void {
+			std::cout << p.age << ", " << p.name << std::endl;
+		};
 
 		int arr[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 		using namespace std;

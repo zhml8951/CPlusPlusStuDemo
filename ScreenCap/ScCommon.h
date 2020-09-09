@@ -1,15 +1,14 @@
 ﻿#pragma once
-#include <vector>
+#include "ScreenCapture.h"
 #include <atomic>
 #include <thread>
 #include <cassert>
 #include <chrono>
 #include <memory>
 #include <functional>
+#include <vector>
 #include <string>
 #include <cstring>
-
-#include "ScreenCapture.h"
 
 namespace sc
 {
@@ -163,7 +162,7 @@ namespace sc
 		F on_frame_changed;
 		std::shared_ptr<Timer> mouse_timer;
 		M on_mouse_changed;
-		M get_things_to_watch;
+		W get_things_to_watch;
 	};
 
 	struct ThreadData
@@ -210,14 +209,14 @@ namespace sc
 				base.first_run_ = false;
 			}
 			else {
-				auto new_img = CreateImage(image_rect, src_rows_stride - dst_row_stride, start_img_src);
-				auto old_img =
+				const auto new_img = CreateImage(image_rect, src_rows_stride - dst_row_stride, start_img_src);
+				const auto old_img =
 					CreateImage(image_rect, 0, reinterpret_cast<const ImageBgra*>(base.image_buffer_.get()));
 				auto img_difs = GetDifs(old_img, new_img);
 
 				for (auto& r : img_difs) {
-					auto left_offset = r.left * size_img_bgra;
-					auto this_start_src = start_src + left_offset + (r.top + src_rows_stride);
+					const auto left_offset = r.left * size_img_bgra;
+					const auto this_start_src = start_src + left_offset + (r.top + src_rows_stride);
 					auto dif_img = CreateImage(r, src_rows_stride, reinterpret_cast<const ImageBgra*>(this_start_src));
 					dif_img.is_contiguous = false;
 					data.on_frame_changed(dif_img, monitor);

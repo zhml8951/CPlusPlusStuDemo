@@ -1,6 +1,5 @@
 ﻿#include "pch.h"
 #include "ScCommon.h"
-#include "ScreenCapture.h"
 #include <algorithm>
 
 namespace sc
@@ -75,7 +74,7 @@ namespace sc
 	template <typename Block>
 	class BitMap
 	{
-		static_assert(std::is_unsigned<Block>::value);
+		static_assert(std::is_unsigned<Block>::value,"Must unsigned value");
 		static const size_t bits_per_block_ = sizeof(Block) * 8;
 
 	public:
@@ -230,13 +229,3 @@ namespace sc
 		return rects;
 	}
 }
-
-//int main(int argc, char* argv[])
-//{
-//	sc::BitMap<uint8_t> bit_map01(33, 33);
-//	bit_map01.set(22, 22);
-//	auto geted = bit_map01.get(22, 22);
-//	std::cout << std::boolalpha << geted << "\n";
-//	auto info = get_info(bit_map01);
-//	std::cout << "info: " << info << "\n";
-//}
