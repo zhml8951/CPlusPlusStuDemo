@@ -10,6 +10,8 @@
 #undef WINAPI
 #endif
 
+// ReSharper disable CppMemberFunctionMayBeStatic
+
 void func_01(const int x, const int y) { std::cout << "x:" << x << ",y:" << y; };
 int func_02() { return 0; }
 
@@ -46,12 +48,12 @@ void __stdcall func_05() { printf("func_05"); }
 
 #define DECLARE_HANDLE(name) struct get_name##__{int unused;}; typedef struct get_name##__ *get_name
 
-// ReSharper disable CppMemberFunctionMayBeStatic
-
 namespace func_simple
 {
 	/* -------------------------------------------------------------------------------------*/
 	// 成员函数指针的一般用法:  T(Cls::*func)(T1...);
+	// 在std::thread(&namespace::Func, args,... )， 这里传函数指针，
+
 	class ClsFuncPoint
 	{
 	public:
@@ -78,7 +80,7 @@ namespace func_simple
 		}
 
 		// 类成员函数， 传普通函数指针，只能调用静态成员函数，实质是不存在this指针。
-		int PFunc01(int(*p)(int, int), const int a, const int b)
+		int PFunc01(int (*p)(int, int), const int a, const int b)
 		{
 			return (*p)(a, b);
 		}
@@ -98,7 +100,7 @@ namespace func_simple
 		(obj_a.*p_func)(5); // 这里一种很奇怪的调用方式,
 
 		const std::shared_ptr<ClsFuncPoint> obj_b(new ClsFuncPoint);
-		(obj_b.get()->*p_func)(6);	// 当使用智能指针时, 需要使用get()将智能指针解出来才可指向到外部定义的函数指针
+		(obj_b.get()->*p_func)(6); // 当使用智能指针时, 需要使用get()将智能指针解出来才可指向到外部定义的函数指针
 
 		const auto obj_c = new ClsFuncPoint;
 		(obj_c->*p_func)(7);
@@ -174,17 +176,48 @@ namespace func_simple
 		return u.d;
 	}
 
-	typedef void(__fastcall *FuncArg1)(void* p_this, int edx);
-	typedef void(__fastcall *FuncArg2)(void* p_this, int edx, int a);
-	typedef void(__fastcall *FuncArg3)(void* p_this, int edx, int a, int b);
+	typedef void (__fastcall *FuncArg1)(void* p_this, int edx);
+	typedef void (__fastcall *FuncArg2)(void* p_this, int edx, int a);
+	typedef void (__fastcall *FuncArg3)(void* p_this, int edx, int a, int b);
+
+	// ReSharper disable CppUseAuto
 
 	void func_pointer_test01()
 	{
 		CApple app01;
-		FuncArg1 func01 = PointerCast<FuncArg1>(&CApple::Func01);
-		auto func02 = PointerCast<FuncArg2>(&CApple::Func02);
-		FuncArg3 func03 = UnionCast<FuncArg3>(&CApple::Func03);
-		std::cout << func01 << "\n";
+		const auto app02 = std::make_unique<CApple>();
+		const auto app03 = std::make_shared<CApple>();
+
+		const FuncArg1 func01 = PointerCast<FuncArg1>(&CApple::Func01);
+		const auto func02 = PointerCast<FuncArg2>(&CApple::Func02);
+		const FuncArg3 func03 = UnionCast<FuncArg3>(&CApple::Func03);
+
+		// 输出string, func的指针，使用printf("%p",&str),即可，若使用std::cout <<则必须进行强制转换为const void*
+		//样式:  static_cast<const void*>(&func), static_cast<const void*>(&str);s
+		std::cout << "func01_id: " << static_cast<const void*>(&func01) << "\n";
+		func01(app02.get(), 88);
+
+		std::cout << "func02_id: " << static_cast<const void*>(&func02) << "\n";
+		func02(&app01, 8, 8);
+
+		printf("func03_address: %p\n", &func03);
+		std::cout << "func03_address: " << static_cast<const void*>(&func03) << "\n";
+		func03(app03.get(), 88, 8, 9);
+
+		const char* str = "Test string use const char*, address. ";
+		printf("str.address: %p\n", &str);
+		std::cout << "str_address: " << static_cast<void*>(&str) << "\n";
+		std::string str2 = "Test string use std::string,  address. ";
+		std::cout << "str2_address: " << &str2 << "\n";
+		std::cout << "str2_address: " << static_cast<void*>(&str2) << "\n";
+	}
+
+	void test_func_ref()
+	{
+		// 概念: C++ 函数名实质指函数指针, 调用函数中, 编译器在内部转换成函数指针, 同样,我们在调用函数时,也可以直接使用函数指针样式, 
+		Test02();	// 直接调用.  
+		(&Test02)();	/// &取地址， 函数取地址，直接调用，同直接调用函数名是一样的。 这里可以明白函数指针的了，
+		(*Test01)();	/// *解引用, 同样说明函数名即指针
 	}
 }
 
@@ -192,4 +225,7 @@ int main(int argc, char* argv[])
 {
 	//func_simple::Test01();
 	func_simple::func_pointer_test01();
+	printf("\n\n");
+	func_simple::test_func_ref();
+
 }

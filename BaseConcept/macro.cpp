@@ -153,8 +153,10 @@ namespace macro_demo
 	void Demo06()
 	{
 		using std::cout;
-		//cout << "Standard Clib: " << __STDC_HOSTED__ << "\n";
-		//cout << "Standard C: " << __STDC__ << "\n";
+#if defined(MACOS)
+		cout << "Standard Clib: " << __STDC_HOSTED__ << "\n";
+		cout << "Standard C: " << __STDC__ << "\n";
+#endif
 #if defined(WIN32)
 		cout << "WIN32: " << WIN32 << "\n";
 #endif
