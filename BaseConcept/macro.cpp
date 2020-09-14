@@ -236,6 +236,26 @@ namespace macro_demo
 		Mouse mouse01;
 		DECLARE_HANDLE(Monitor);
 	}
+
+	/*
+	 * 在Linux信号量里有一个奇怪的typedef的用法， typedef void (*Handler_t)(int);
+	 */
+	void (* signal1(int sig, void (*handle)(int)))(int) = delete;
+	// 分析这类复杂声明式，首先确认哪个是关键变量名， 这里从左很一个*signal; 为了简化式，handle采用typedef来简化；
+
+	typedef void (*HandleTy)(int); // 简化后如下：
+	HandleTy signal2(int sig, HandleTy handle) = delete;
+
+	// 为什么可以这样理解呢?  ===>
+	// 1. void(*handle)(int) 可以很简单看出来，对应于typedef void(*H)(int); 
+	// 2. 声明式总体看 void (*sig(...))(int) 也对对应于typedef的Handle，直接代换过去；就成了 H S(int, H);
+	// H S（int, H) 样式看着简单，但真正解析后是什么意思呢？ 只看声明是不明白的，加上定义，则比较明了， 即返回类型H， 参数(int, H); 如下：
+	HandleTy Signal3(int sig, const HandleTy handle)
+	{
+		handle(88); // 传函数指针， 相当于回调
+		const HandleTy rst = [](int x) -> void { std::cout << "int lambda."; };
+		return rst;
+	};
 }
 #endif
 
@@ -282,7 +302,7 @@ int main(int argc, char* argv[])
 	macro_demo::Demo06();
 	printf("\n--------------------------\n");
 	extern_simple::TestSum(8);
-	extern_simple::Func01(8,8);
+	extern_simple::Func01(8, 8);
 	//extern_simple::Func04(8);
 	printf("\n--------------------------\n");
 	return 1;

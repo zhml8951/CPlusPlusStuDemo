@@ -105,6 +105,7 @@
     <ClCompile Include="str_demo.cpp" />
     <ClCompile Include="template_st.cpp" />
     <ClCompile Include="thread_demo.cpp" />
+    <ClCompile Include="thread_pool.cpp" />
     <ClCompile Include="union_demo.cpp" />
     <ClCompile Include="vector_demo.cpp" />
     <ClCompile Include="volatile_demo.cpp" />
@@ -125,6 +126,7 @@
     <ClInclude Include="mem_manager.h" />
     <ClInclude Include="Stl01.h" />
     <ClInclude Include="str_demo.h" />
+    <ClInclude Include="thread_pool.h" />
     <ClInclude Include="winapi_demo01.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

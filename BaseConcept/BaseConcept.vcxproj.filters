@@ -155,6 +155,9 @@
     <ClCompile Include="iterator_demo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="thread_pool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stl01.h">
@@ -194,6 +197,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ini_file.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="thread_pool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
