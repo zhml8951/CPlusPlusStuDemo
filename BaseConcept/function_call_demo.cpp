@@ -80,7 +80,7 @@ namespace func_simple
 		}
 
 		// 类成员函数， 传普通函数指针，只能调用静态成员函数，实质是不存在this指针。
-		int PFunc01(int (*p)(int, int), const int a, const int b)
+		int PFunc01(int(*p)(int, int), const int a, const int b)
 		{
 			return (*p)(a, b);
 		}
@@ -176,9 +176,9 @@ namespace func_simple
 		return u.d;
 	}
 
-	typedef void (__fastcall *FuncArg1)(void* p_this, int edx);
-	typedef void (__fastcall *FuncArg2)(void* p_this, int edx, int a);
-	typedef void (__fastcall *FuncArg3)(void* p_this, int edx, int a, int b);
+	typedef void(__fastcall *FuncArg1)(void* p_this, int edx);
+	typedef void(__fastcall *FuncArg2)(void* p_this, int edx, int a);
+	typedef void(__fastcall *FuncArg3)(void* p_this, int edx, int a, int b);
 
 	// ReSharper disable CppUseAuto
 
@@ -193,7 +193,7 @@ namespace func_simple
 		const FuncArg3 func03 = UnionCast<FuncArg3>(&CApple::Func03);
 
 		// 输出string, func的指针，使用printf("%p",&str),即可，若使用std::cout <<则必须进行强制转换为const void*
-		//样式:  static_cast<const void*>(&func), static_cast<const void*>(&str);s
+		//样式:  static_cast<const void*>(&func), static_cast<const void*>(&str);
 		std::cout << "func01_id: " << static_cast<const void*>(&func01) << "\n";
 		func01(app02.get(), 88);
 
@@ -214,10 +214,10 @@ namespace func_simple
 
 	void test_func_ref()
 	{
-		// 概念: C++ 函数名实质指函数指针, 调用函数中, 编译器在内部转换成函数指针, 同样,我们在调用函数时,也可以直接使用函数指针样式, 
-		Test02();	// 直接调用.  
-		(&Test02)();	/// &取地址， 函数取地址，直接调用，同直接调用函数名是一样的。 这里可以明白函数指针的了，
-		(*Test01)();	/// *解引用, 同样说明函数名即指针
+		// 概念: C++ 函数名实质指函数指针, 调用函数中, 编译器在内部转换成函数指针, 同样,我们在调用函数时,也可以直接使用函数指针样式,
+		Test02(); // 直接调用.
+		(&Test02)(); /// &取地址， 函数取地址，直接调用，同直接调用函数名是一样的。 这里可以明白函数指针的了，
+		(*Test01)(); /// *解引用, 同样说明函数名即指针
 	}
 }
 
@@ -227,5 +227,4 @@ int main(int argc, char* argv[])
 	func_simple::func_pointer_test01();
 	printf("\n\n");
 	func_simple::test_func_ref();
-
 }

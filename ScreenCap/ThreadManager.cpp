@@ -31,10 +31,10 @@ void sc::ThreadManager::Init(const std::shared_ptr<ThreadData>& data)
 	else if (data->window_capture_data.get_things_to_watch) {
 		auto windows = data->window_capture_data.get_things_to_watch();
 		this->thread_handles_.resize(windows.size() + (data->window_capture_data.on_mouse_changed ? 1 : 0));
-		for(size_t i = 0; i < windows.size(); ++i) {
+		for (size_t i = 0; i < windows.size(); ++i) {
 			thread_handles_[i] = std::thread(&sc::RunCaptureWindow, data, windows[i]);
 		}
-		if(data->window_capture_data.on_mouse_changed) {
+		if (data->window_capture_data.on_mouse_changed) {
 			thread_handles_.back() = std::thread([data] {
 				sc::RunCaptureMouse(data);
 			});
@@ -42,4 +42,16 @@ void sc::ThreadManager::Init(const std::shared_ptr<ThreadData>& data)
 	}
 }
 
-void sc::ThreadManager::Join() {}
+void sc::ThreadManager::Join()
+{
+	for (auto& t : this->thread_handles_) {
+		if (t.joinable()) {
+			if (t.get_id() == std::this_thread::get_id()) {
+				t.detach();
+			}
+			else {
+				t.join();
+			}
+		}
+	}
+}

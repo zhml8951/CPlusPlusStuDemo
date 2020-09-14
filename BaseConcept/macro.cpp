@@ -14,11 +14,17 @@
 #include <iostream>
 
 // 简单字符串替换
-#define PI 3.1415
+// 对于简单的字符串替换, C++推荐的方法是使用using, typedef, 或者常量constexpr代替
+#define PI 3.1415	// constexpr auto PI = 3.1415;
 #define NAME "arnni"
 #define AREA(r) PI*r*r
 #define STR_PTR const char*
-#define P_CHAR char*
+#define CHAR_PTR char*	// ==> typedef char* CHAR_PTR;
+using CharP = char*;
+typedef char* CharP1;
+#define DOUBLE_QUOTE(a) #a
+#define LINK(a,b) a##\ b
+#define INT_NUM(name) (int #name)
 
 // 带参数宏；
 #define MUL(a,b) a*b
@@ -104,7 +110,8 @@ namespace macro_demo
 		// 记录文件名 *** 在宏引用宏定义或内置宏，必要经过多层展开，才能得最终值；
 #define GET_FILE_NAME1(f) #f
 #define GET_FILE_NAME(f) GET_FILE_NAME1(f)
-		static char FILE_NAMES[] = GET_FILE_NAME(__FILE__);
+
+		static char file_names[] = GET_FILE_NAME(__FILE__);
 
 		// 得到一个数组类型所对应的字符串缓冲大小
 #define TYPE_BUF_SIZE1(type) sizeof #type
@@ -166,6 +173,7 @@ namespace macro_demo
 #if defined(WINDOWS) || defined(_WINDOWS)
 		cout << "WINDOWS: " << WINDOWS << '\n';
 #endif
+		// __cplusplus 是C++ 内置预定义宏, 用来判断是否为C++;
 #if defined(__cplusplus)
 		cout << "__cplusplus: " << __cplusplus << "\n";
 #endif
@@ -175,50 +183,93 @@ namespace macro_demo
 #if defined(__cplusplus)
 	extern "C" {
 #endif
-
 	// some extern c++ code.....
-
 #if defined(__cplusplus)
 	}
 #endif
 
 	/*
 	 * #define只是文本替换工具，typedef可替代大部分#define作用，且功能更强大,
-	 *	typedef [originType] [newType]  
+	 *	typedef [originType] [newType]
 	 *	任何声明变量的语句前加上typedef之后，原来是变量的都变成一种类型，不管这个声明中的标识符号出现在中间还是最后.
 	 */
 
 	typedef int Num;
-	typedef int* PtrInt;		/// 定义int* 类型
-	typedef int IntArray[];		/// 定义int array 类型
+	typedef int* PtrInt; /// 定义int* 类型
+	typedef int IntArray[]; /// 定义int array 类型
 
 	typedef struct
 	{
 		int a;
-	} IntStruct;				/// 定义struct类型
+	} IntStruct; /// 定义struct类型
 
-	typedef double FuncP(std::string&);		/// 定义一个函数类型,参数string, 返回类型double
+	typedef double FuncP(std::string&); /// 定义一个函数类型,参数string, 返回类型double
 
 	typedef void FuncQ(int* p, const std::string& s1, const std::string& s2, size_t size, bool is_true);
 	/// 定义FuncQ
 
-	FuncP(func01);		/// => double func01(std::string&); ==> FuncP func01;
+	FuncP (func01); /// => double func01(std::string&); ==> FuncP func01;
 	FuncP func02;
 
-	FuncQ(func03);		/// => void func03(int* p,....);  ==> FuncQ func04;
+	FuncQ (func03); /// => void func03(int* p,....);  ==> FuncQ func04;
 	FuncQ func04;
 
 	//// 再看几个复杂的例子:
 	typedef int*(*A[10])(int, char*); /// 从右向左理解： A是一个包含10个函数指针的数组，这些函数的参数列表是(int, char*) 返回值是int*;
 
-	typedef int(*(*Fb())[10])();	
+	typedef int (*(* Fb())[10])();
 	/// 从Fb开始，从右向左，()说明Fb是函数，左边*说明返回值指针，往外层右边[10]说明函数返回值是指向数组的指针，向左*说明数组元素是指针，
 	/// 再向外右边()说明无参参数列表，说明数组中包含的元素是函数指针，这些函数没的参数，返回值是int;
 	/// 总括：Fb是一个返回指针的函数，指针指向含有10个函数指针的数组，这些函数不接受参数，返回值是int;
+
+#ifndef STRICT
+#define DECLARE_HANDLE(name) struct name##__{int unused;}; typedef struct name##__ *name
+#else
+	typedef void* HANDLE;
+#define DECLARE_HANDLE(name) typedef HANDLE name
+#endif
+	void declare_handle_demo()
+	{
+		DECLARE_HANDLE(MUser); /*	==>  struct MUser__{int unused; }; typedef struct MUser__ *MUser; */
+		MUser user01; // user01 相当于一个struct指针， 指向struct MUser__{int unused; };
+		DECLARE_HANDLE(Mouse);
+		Mouse mouse01;
+		DECLARE_HANDLE(Monitor);
+	}
 }
 #endif
 
 // g++ -E macro.cpp -o macro.i 不运行编译，只进行宏展开命令;
+// g++ 多文件编译: 
+// g++ -c macro.cpp extern_demo.cpp -std=c++11
+// g++ macro.o extern_demo. -o A.exe; 
+
+// 测试关键词extern; 这里引入extern_demo;
+#include "extern_demo.h"
+
+namespace extern_simple
+{
+	extern const std::string kStrShare = "string in macro.";
+	extern std::string str_share;
+	extern int value_c;
+
+	// 模板在 extern_demo.h 定义, 在 extern_demo.cpp实例化过<int, double>, 这里使用extern避免重复实例化。 
+	//extern template int SumTy1<int, double>(int, double);
+	// 现代编译器已经能够很好对于此类问题进行相应的优化， 故extern template 声明外部template, 或者显式实例化template SumTy1, 也是一样的， 而且用处不大
+	//template double SumTy1<double, int>(double, int);
+
+	void TestSum(int)
+	{
+		auto rst = SumTy1(89, 89.9);
+		rst += SumTy1(99.9, 88);
+		std::cout << "Rst: " << rst << "\n";
+		std::cout << "value_c: " << value_c << "\n";
+		std::cout << "str_share: " << str_share << "\n";
+		std::cout << "macro.cpp static value_b: " << value_b << "\n";
+		std::cout << "global const kValueD: " << kValueD << "\n";
+		std::cout << "defined value6 A.cpp, Called in B.cpp: " << kValue6 << "\n";
+	}
+}
 
 int main(int argc, char* argv[])
 {
@@ -229,6 +280,10 @@ int main(int argc, char* argv[])
 	macro_demo::Demo03();
 	printf("\n--------------------------\n");
 	macro_demo::Demo06();
-
+	printf("\n--------------------------\n");
+	extern_simple::TestSum(8);
+	extern_simple::Func01(8,8);
+	//extern_simple::Func04(8);
+	printf("\n--------------------------\n");
 	return 1;
 }
