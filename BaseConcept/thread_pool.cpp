@@ -7,17 +7,16 @@
 #include <condition_variable>
 #include <deque>
 
-
 namespace pool
 {
 	using std::cout;
 	std::unique_ptr<ILogger> active_logger = nullptr;
 
-	static const char kBlack[] = {0x1b, '[', '1', ';', '3', '0', 'm', 0};
-	static const char kRed[] = {0x1b, '[', '1', ';', '3', '1', 'm', 0};
-	static const char kYellow[] = {0x1b, '[', '1', ';', '3', '3', 'm', 0};
-	static const char kBlue[] = {0x1b, '[', '1', ';', '3', '4', 'm', 0};
-	static const char kNormal[] = {0x1b, '[', '1', ';', '3', '9', 'm', 0};
+	static const char kBlack[] = { 0x1b, '[', '1', ';', '3', '0', 'm', 0 };
+	static const char kRed[] = { 0x1b, '[', '1', ';', '3', '1', 'm', 0 };
+	static const char kYellow[] = { 0x1b, '[', '1', ';', '3', '3', 'm', 0 };
+	static const char kBlue[] = { 0x1b, '[', '1', ';', '3', '4', 'm', 0 };
+	static const char kNormal[] = { 0x1b, '[', '1', ';', '3', '9', 'm', 0 };
 
 	Logger::Logger(const LogLevel level) : log_level_(level) { }
 
@@ -108,16 +107,14 @@ namespace pool
 	}
 
 	ThreadPool::ThreadPool(const int init_size) : init_threads_size_(init_size), mutex_(), cond_var_(),
-	                                              is_started_(false)
+		is_started_(false)
 	{
 		Start();
 	}
 
-	ThreadPool::~ThreadPool() { }
-
 	void ThreadPool::Start()
 	{
-		assert(threads_.empty(), "Threads empty.");
+		assert(threads_.empty(), "Threads not empty.");
 		is_started_ = true;
 		threads_.reserve(init_threads_size_);
 		for (auto i = 0; i < init_threads_size_; ++i) {
@@ -125,35 +122,71 @@ namespace pool
 		}
 	}
 
+	ThreadPool::~ThreadPool()
+	{
+		if (this->is_started_)
+			Stop();
+	}
+
+	void ThreadPool::Stop()
+	{
+		LOGGING(Debug, "ThreadPool::stop() ");
+		{
+			std::unique_lock<std::mutex> lock(this->mutex_);
+			this->is_started_ = false;
+			this->cond_var_.notify_all();
+			LOGGING(Debug, "ThreadPool::stop notify_all(). ");
+		}
+		for (auto task : this->threads_) {
+			task->join();
+			delete task;
+		}
+		threads_.clear();
+	}
+
+	void ThreadPool::AddTask(const TaskFunc& task)
+	{
+		std::unique_lock<std::mutex> lock(this->mutex_);
+		/*while (this->tasks_.isFull()) {		// 判断任务队列是否满， 当前无实现
+			this->cond_var_.notify_one();
+		}*/
+		tasks_.push_back(task);
+		this->cond_var_.notify_one();
+	}
+
 	bool ThreadPool::IsStarted() const { return this->is_started_; }
 
 	void ThreadPool::ThreadLoop()
 	{
 		LOGGING(Debug, "ThreadLoop() tid: " + GetId() + " start. ");
-		while (is_started_) {
-			TaskFunc task = Take();
+		while (this->is_started_) {
+			auto task = Take();
+			if (task)
+				task();
 		}
+		LOGGING(Debug, "ThreadPool::ThreadLoop() tid: " + GetId() + " exit. ");
 	}
 
-	auto ThreadPool::Take() -> ThreadPool::TaskFunc
+	auto ThreadPool::Take() -> TaskFunc
 	{
 		std::unique_lock<std::mutex> lock(this->mutex_);
-		while(tasks_.empty() && is_started_) {
+		while (tasks_.empty() && is_started_) {
 			LOGGING(Debug, "ThreadPool::Take() tid: " + GetId() + " wait. ");
 			cond_var_.wait(lock);
 		}
 		LOGGING(Debug, "ThreadPool::Take() tid: " + GetId() + " wakeup. ");
 		TaskFunc task;
+		const auto size = this->tasks_.size();
+		if (!this->tasks_.empty() && this->is_started_) {
+			task = *(this->tasks_.begin());
+			tasks_.pop_front();
+			assert(size - 1 == tasks_.size());
+		}
+		return task;
 	}
 }
 
-/*
- *
- * 	private:
-		int init_threads_size_;
-		ThreadsVec threads_;
-		TasksDeque tasks_;
-		std::mutex mutex_;
-		std::condition_variable cond_var_;
-		bool is_started_;
- */
+int main(int argc, char* argv[])
+{
+	
+}

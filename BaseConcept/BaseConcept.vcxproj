@@ -73,6 +73,7 @@
     <ClCompile Include="cast_demo.cpp" />
     <ClCompile Include="chrono_demo .cpp" />
     <ClCompile Include="class_stu.cpp" />
+    <ClCompile Include="Closure_stu.cpp" />
     <ClCompile Include="construction_demo.cpp" />
     <ClCompile Include="const_stu.cpp" />
     <ClCompile Include="csdn_demo01.cpp" />

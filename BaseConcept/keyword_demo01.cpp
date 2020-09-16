@@ -3,6 +3,7 @@
 #include <string>
 #include <functional>
 #include <algorithm>
+#include <map>
 
 // C++ 关键词及关键技术点记录
 
@@ -125,7 +126,7 @@ namespace keywords_simple
 		// 使用auto it = vec.begin(); 迭代器实质是指针包装出来的， 通过&(*it)可取地址。
 	}
 
-	// 这里再看一下隐式类型转换(类型转换)
+	// 隐式类型转换(类型转换)
 	class C
 	{
 	public:
@@ -198,6 +199,92 @@ namespace keywords_simple
 	{
 		typedef decltype(true ? declval<T1>() : declval<T2>()) Type;
 	};
+
+	/*
+	 *	常用类型推导: auto,  decltype,  result_of, declval;
+	 *	auto与auto*在使用时没有本质区别, 即指针类型可以自动推导出来. 但auto& 与auto就不同了，即如果使用auto默认是值， auto&才是引用。
+	 *	auto与cv-qualifier要结合使用, auto并不能从表达式中带走cv-qualifier; 故当需要const或volatile时，需添加进去, const auto, volatile auto;
+	 *	decltype 用库开发， 用于复杂类型推导
+	 *
+	 */
+
+	struct Person
+	{
+		std::string name;
+		int age;
+		std::string city;
+	};
+
+	/*
+	 *	实现SQL的group by功能， 如：
+	 *		vector<Person> vec = {{"name1", 20, "ks"}, {"name2", 22, "sz"}, {"name3",22,"ks"}, {"name4", 20, "sz"}};
+	 *		如果我们按age分组，则效果如：{20, {"name1",..}}, {20, {"name4"...}}, {22, {"name2...}}, {22, {"name3",..}};
+	 *	如果不使用template则需要分别定义根据name,age,city的分组函数，如果字段很多,会产生大量重复代码；
+	 */
+
+	 // 最初版本，T为selector_key的类型， 参数需要传入key;
+	template <typename T>
+	auto GroupBy0(const vector<Person>& persons, const T& key) -> multimap<T, Person>
+	{
+		multimap<T, Person> rst;
+		for_each(begin(persons), end(persons), [&](const Person& person) {
+			// 这里只能按age分类，如果需要city或其它字段分类，就必须要再copy一份
+			rst.insert(make_pair(person.age, persons)); // 这里person.age如何换成key呢？key又如何与person相关字段关联呢？
+			});
+		return rst;
+	}
+
+	// template 需要两个类型， Type(key的数据类型), Func(分组key选择函数);功能使用没有问题，但每次调用都必须指明key的类型；
+	template <typename T, typename Fn>
+	multimap<T, Person> GroupBy1(const vector<Person>& persons, const Fn& key_selector_fn)
+	{
+		multimap<T, Person> map;
+		for_each(persons.begin(), persons.end(), [&](const Person& person) {
+			// key_selector_fn(person)实质由回调函数实现类型擦除，类型选择由调用者提供函数处理
+			map.insert(make_pair(key_selector_fn(person), person));
+			});
+		return map;
+	}
+
+	template <typename Fn>
+	auto GroupBy2(const vector<Person>& persons, const Fn& key_selector_fn)
+	{
+		// 返回值只能用auto, //TODO 如果不用auto, 返回值该如何写？？？ 
+		using KeyTy = decltype(key_selector_fn(*static_cast<Person*>(nullptr)));
+		// 使用decltype可解决multimap<key_type? 问题，但*static_cast<Person*>(nullptr)是如何运行的呢？ 
+
+		//using KeyTy = decltype(key_selector_fn(*((Person*)0)));
+		// 这里实质是强制类型转换 (Person*)0 => static_cast<Person*>(nullptr);
+
+		multimap<KeyTy, Person> rst;
+		for_each(begin(persons), end(persons), [&rst, &key_selector_fn](const Person& person) {
+			rst.insert(make_pair(key_selector_fn(person), person));
+			});
+		return rst;
+	}
+
+	const vector<Person> kUsers = {
+		{"name1", 20, "ks"}, {"name2", 22, "sz"},
+		{"name3", 22, "ks"}, {"name4", 20, "sz"}
+	};
+
+	void Grouping01()
+	{
+		const multimap<int, Person> rst_age =
+			GroupBy1<int, function<int(const Person&)>>(kUsers, [](const Person& person) { return person.age; });
+
+		const multimap<string, Person> rst_city =
+			GroupBy1<string, function<string(const Person&)>>(kUsers, [](const Person& person) { return person.city; });
+
+		for (auto it = rst_age.cbegin(); it != rst_age.cend(); ++it) {
+			std::cout << "key: " << it->first << ", value: " << it->second.name << "," << it->second.city << "\n";
+		}
+
+		auto rst_name = GroupBy2(kUsers, [](const Person& person) { return person.name; });
+		for (auto it = rst_age.cbegin(); it != rst_age.cend(); ++it) {
+			std::cout << "key: " << it->first << ", value: " << it->second.name << "," << it->second.city << "\n";
+		}
+	}
 
 	//--------------------------------------------------------------------------------------------//
 
@@ -286,7 +373,7 @@ namespace keywords_simple
 		class C
 		{
 		public:
-			void MemberFunc(int x, int y) const;
+			void MemberFunc(int x, int y) const {}
 		};
 
 		// const C& 相当于成员函数调用时的传递this；因为成员函数调用时实质进行了自动this传递，只是隐藏在传递中
@@ -325,4 +412,5 @@ int main(int argc, char* argv[])
 	//keywords_simple::no_explicit_test();
 	keywords_simple::test_type_traits();
 	keywords_simple::test_sfinae();
+	keywords_simple::Grouping01();
 }
