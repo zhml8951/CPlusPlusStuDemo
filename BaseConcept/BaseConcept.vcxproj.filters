@@ -80,9 +80,6 @@
     <ClCompile Include="lr_value.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="string_demo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="std_function.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -161,6 +158,9 @@
     <ClCompile Include="Closure_stu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="simple_demo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stl01.h">
@@ -203,6 +203,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="thread_pool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="group_by.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

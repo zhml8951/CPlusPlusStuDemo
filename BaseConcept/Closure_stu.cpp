@@ -12,6 +12,7 @@ namespace closure_callback
 	{
 		// 返回lambda函数， 通过std::function<int()>将函数变成function对象
 		return [x]() mutable -> int {
+			// mutable 对Capture对象有效，这里指x; 当采用值传递时，增加mutable，可实现在lambda内部修改值x，但不影响外部值
 			++x;
 			return x;
 		};

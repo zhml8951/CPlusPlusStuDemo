@@ -1,15 +1,12 @@
-#pragma once
-#include <cstdlib>
-#include <cstring>
-#include <iostream>
+ï»¿#pragma once
 
 #ifndef MAJOR_SIZE
-#define MAJOR_SIZE 20  // #define C,C++ ºê£¬ Ô¤±àÒëÊ±Ö±½Ó½øĞĞ×Ö·ûÌæ»»¡£
+#define MAJOR_SIZE 20  // #define C,C++ å®ï¼Œ é¢„ç¼–è¯‘æ—¶ç›´æ¥è¿›è¡Œå­—ç¬¦æ›¿æ¢ã€‚
 #endif
 
-const auto kNameSize = 10; // const³£Á¿£¬×î³£ÓÃ¶¨Òå³£Á¿·½·¨¡£
+const auto kNameSize = 10; // constå¸¸é‡ï¼Œæœ€å¸¸ç”¨å®šä¹‰å¸¸é‡æ–¹æ³•
 
-constexpr auto kIdSize = 8; // constexpr C++11¶¨Òå³£Á¿µÄ³£ÓÃ·½·¨
+constexpr auto kIdSize = 8; // constexpr C++11å®šä¹‰å¸¸é‡çš„å¸¸ç”¨æ–¹æ³•
 
 struct Student
 {
@@ -19,10 +16,14 @@ struct Student
 	char m_str_major[MAJOR_SIZE];
 };
 
-namespace string_demo
+namespace simple_demo
 {
 	char* str_link_float(const char* src, float num);
+
+	// std::cinç»‘å®šè‡³ofsï¼Œå°†consoleè¾“å…¥æ•°æ®åŒæ­¥è¾“å‡ºè‡³file;
+	void CinTieDemo();
+	// ifstream ç»‘å®šè‡³ ofstream å®ç°åŒæ­¥åˆ·æ–°ï¼›
+	void IsfTieOsf();
 }
 
-
-void stu_main();
+void DemoMain();

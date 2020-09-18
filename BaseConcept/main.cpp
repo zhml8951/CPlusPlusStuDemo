@@ -1,4 +1,4 @@
-#include <QtCore/QCoreApplication>
+﻿#include <QtCore/QCoreApplication>
 #include <string>
 // #include "Stl01.h"
 #include "cast_demo.h"
@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 void test_extern()
 {
 	const auto str003 = int_to_string(int01);
-	printf_s("str001: %s\n", str003.c_str());
+	printf_s("str001: %s\n", str003);
 	printf_s("str02_from_extern: %s\n", str02);
 	printf_s("str01_from extern_demo: %s\n", str01);
 	for (auto iter : vec01) {

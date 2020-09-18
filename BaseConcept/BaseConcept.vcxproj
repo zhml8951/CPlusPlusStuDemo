@@ -102,7 +102,7 @@
     <ClCompile Include="Stl01.cpp" />
     <ClCompile Include="stl_coding_stu.cpp" />
     <ClCompile Include="stl_tuple_pair.cpp" />
-    <ClCompile Include="string_demo.cpp" />
+    <ClCompile Include="simple_demo.cpp" />
     <ClCompile Include="str_demo.cpp" />
     <ClCompile Include="template_st.cpp" />
     <ClCompile Include="thread_demo.cpp" />
@@ -121,6 +121,7 @@
     <ClInclude Include="declspec_demo.h" />
     <ClInclude Include="extern_demo.h" />
     <ClInclude Include="file_demo.h" />
+    <ClInclude Include="group_by.hpp" />
     <ClInclude Include="IniParser.h" />
     <ClInclude Include="ini_file.h" />
     <ClInclude Include="io_stu.h" />

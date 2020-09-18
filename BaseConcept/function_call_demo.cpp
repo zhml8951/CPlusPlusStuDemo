@@ -11,6 +11,7 @@
 #endif
 
 // ReSharper disable CppMemberFunctionMayBeStatic
+// ReSharper disable IdentifierTypo
 
 void func_01(const int x, const int y) { std::cout << "x:" << x << ",y:" << y; };
 int func_02() { return 0; }

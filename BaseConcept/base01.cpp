@@ -1,4 +1,4 @@
-#include "base01.h"
+﻿#include "base01.h"
 #include <iostream>
 #include <string.h>
 #include <string>
@@ -80,7 +80,7 @@ namespace base_concept
 		std::cout << "e1: " << e1 << '\n';
 	}
 }
-
+/*
 int main()
 {
 	//base_concept::point_demo();
@@ -106,3 +106,11 @@ int main()
 	std::cout <<"sizeof(psome): " << sizeof(psome) << "sizeof(*psome): " <<  sizeof(*psome) << "\n";
 	std::cout <<"sizeof(psome2): " << sizeof(psome2) << "sizeof(*psome2): " <<  sizeof(*psome2) << "\n";
 }
+*/
+#include "group_by.hpp"
+
+int main(int argc, char* argv[])
+{
+	group_demo::TestGroupBy();	
+}
+
