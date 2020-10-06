@@ -4,6 +4,9 @@
 #include <functional>
 #include <algorithm>
 #include <map>
+#include <list>
+#include <numeric>
+#include <random>
 
 // C++ 关键词及关键技术点记录
 
@@ -369,12 +372,25 @@ namespace keywords_simple
 	 *		using IntAgain = std::remove_pointer<IntPtr>::type;	// IntAgain即int;
 	 *
 	 */
-	// std::reference_wrapper? 引用包装器, 主要与模板结合,通常使用std::ref(value), std::cref(value) 来创建reference_wrapper对象。
-	//	reference_wrapper在STL标准库使用非常多，如： make_pair() 就是创建pair<> of reference, make_tuple()创建tuple<>的reference,
-	//	通常使用std::ref, std::cref创建reference_wrapper对象，但在定义时必须使用reference_wrapper如：
-	//		vector<MyClass&> vec_my; /// 创建vec,存入MyClass对象引用，这样定义不能通过编译， 必须使用如下格式：
-	//		vector<std::reference_wrapper<MyClass>> vec_my;   // 变量声明和定义时必须使用reference_wrapper<T>
-	//		MyClass obj1; vec_my.push_back(std::ref(obj1)); vec_my.emplace_back(std::ref<MyClass>(obj2));
+
+	/* std::reference_wrapper? 引用包装器, 主要与模板结合,通常使用std::ref(value), std::cref(value) 来创建reference_wrapper对象。
+	/	reference_wrapper在STL标准库使用非常多，如： make_pair() 就是创建pair<> of reference, make_tuple()创建tuple<>的reference,
+	/	通常使用std::ref, std::cref创建reference_wrapper对象，但在定义时必须使用reference_wrapper如：
+	/		vector<MyClass&> vec_my; /// 创建vec,存入MyClass对象引用，这样定义不能通过编译， 必须使用如下格式：
+	/		vector<std::reference_wrapper<MyClass>> vec_my;   // 变量声明和定义时必须使用reference_wrapper<T>
+	/		MyClass obj1; vec_my.push_back(std::ref(obj1)); vec_my.emplace_back(std::ref<MyClass>(obj2));
+	*/
+
+	void RefWrapperDemo()
+	{
+		std::list<int> l(10);
+		std::iota(l.begin(), l.end(), 44	);
+
+		std::vector<std::reference_wrapper<int>> v(l.begin(), l.end());
+		std::shuffle(v.begin(), v.end(), std::mt19937{std::random_device{}()});
+	}
+
+
 
 	// Substitution Failure Is Not An Error ==> SFINAE, 匹配失败不是错误. 典型的使用std::enable_if<bool, T>
 	template <typename T>

@@ -80,7 +80,6 @@ namespace simple_demo
 		auto rst = std::tie(rh.first_name, rh.last_name, rh.age);
 		auto name = std::get<0>(rst) + std::get<1>(rst);
 		std::cout << "name: " << name << "\n";
-
 		return rst;
 	}
 
@@ -90,11 +89,31 @@ namespace simple_demo
 		return tie_members(lhs) < tie_members(rhs);
 	}
 
+	void TieLValueDemo()
+	{
+		int a, b;
+
+		/// std::tie(a,b) ==> std::tuple<int, int>；// tie(a, b)将a,b组合成tuple<int,int>变量，是左值临时变量,但a,b值已经引入
+		std::tie(a, b) = std::make_tuple(2, 3); // 这在多变量同时赋值时非常有用, 如Python中的：a,b = 2,3;类似；
+		// C++ 称tie(a,b) = tuple 为tuple解包, tie也可以为pair解包
+		// C++17 支持此类: auto [a,b] = std::make_tuple(2,3); 
+		// C++17：  std::tuple t(2,3); auto& [a, b] = t;
+		auto rst = std::make_tuple(2, 3);
+		std::cout << "a, b: " << a << ", " << b << "\n";
+		std::cout << "rst: " << std::get<0>(rst) << ", " << std::get<1>(rst) << "\n";
+
+		std::tie(a, b) = std::make_tuple(b, a); //同Python: a,b = b,a;
+		std::cout << "a, b: " << a << ", " << b << "\n";
+
+		std::tie(a, b) = std::make_pair(22, 33);		// 效果同make_tuple相同，但make_pair只能有两个值
+		std::cout << "a, b: " << a << ", " << b << "\n";
+	}
 }
 
 int main(int argc, char* argv[])
 {
 	simple_demo::PairDemo01();
 	simple_demo::TupleDemo01();
-	simple_demo::tie_members(simple_demo::Person{"Jack","Do", 88});
+	tie_members(simple_demo::Person{"Jack", "Do", 88});
+	simple_demo::TieLValueDemo();
 }

@@ -136,7 +136,7 @@ namespace func_simple
 
 	/*
 	 * 获取成员函数指针
-	 *	例子使用了几个奇特类型转换:
+	 *	例子使用了两次类型转换: &src转void*, void*再转DsyDy*, *取值
 	 *		*static_cast<DstTy*>(static_cast<void*>(&src)) ==> DstTy;
 	 *
 	 */

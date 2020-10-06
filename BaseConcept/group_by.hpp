@@ -24,6 +24,10 @@ namespace group_demo
 		explicit Range(const R& range) : range_(range) {}
 		~Range() {};
 
+		/*
+		 * 实现类似SQL的group by功能
+		 *	key_selector回调函数, 实例keyword_demo01.cpp中有详细说明
+		 */
 		template <typename Fn>
 		auto GroupBy(const Fn& key_selector) -> multimap<typename result_of<Fn(VType)>::type, VType>
 		{
@@ -36,9 +40,9 @@ namespace group_demo
 		}
 
 		template <typename FnKey, typename FnVal>
-		auto GroupUseCast(const FnKey& key_selector,
-		                  const FnVal& val_selector) -> multimap<decltype(key_selector(*static_cast<VType*>(nullptr))),
-		                                                         decltype(val_selector(*static_cast<VType*>(nullptr)))>
+		auto GroupUseCast(const FnKey& key_selector, const FnVal& val_selector)
+						/*返回值可直接使用auto -> multimap<decltype(key_selector(*static_cast<VType*>(nullptr))),
+										decltype(val_selector(*static_cast<VType*>(nullptr)))> */
 		{
 			typedef decltype(key_selector(*static_cast<VType*>(nullptr))) KTy;
 			typedef decltype(val_selector(*static_cast<VType*>(nullptr))) VTy;
@@ -75,6 +79,51 @@ namespace group_demo
 			return rst;
 		}
 
+		template <typename Rt>
+		void PrintMap(const Rt& range)
+		{
+			//Person p{"name1", 88, "city"};
+			//auto tp = std::make_pair(p.name, p);
+			//std::vector<std::pair<std::string, Person>> v{tp};
+			for (auto it : range) {
+				std::cout << it.first << " " << it.second.name << " " << it.second.age << " " << it.second.city << "\n";
+			}
+		}
+
+		template <typename Ty, typename... Rt>
+		void PrintMap(Ty t, const Rt&... range)
+		{
+			PrintMap(t);
+			PrintMap(range...);
+		}
+
+		template <class Tuple, size_t N>
+		struct TuplePrinter
+		{
+			static void print(const Tuple& t)
+			{
+				TuplePrinter<Tuple, N - 1>::print(t);
+				cout << ", " << std::get<N - 1>(t);
+			}
+		};
+
+		template <class Tuple>
+		struct TuplePrinter<Tuple, 1>
+		{
+			static void print(const Tuple& t)
+			{
+				std::cout << "finished. " << std::get<0>(t);
+			}
+		};
+
+		template <class... Args>
+		void PrintTuple(const std::tuple<Args...>& t)
+		{
+			std::cout << "(";
+			TuplePrinter<decltype(t), sizeof...(Args)>::print(t);
+			std::cout << ")\n";
+		}
+
 	private:
 		R range_;
 	};
@@ -91,32 +140,36 @@ namespace group_demo
 		};
 
 		Range<vector<Person>> range1{users};
-		auto result = range1.GroupBy([](const Person& p) -> int { return p.age; });
-		for (auto item : result) {
+		auto result1 = range1.GroupBy([](const Person& p) -> int { return p.age; });
+		for (auto item : result1) {
 			cout << "key: " << item.first << ", value: " << item.second.name << ", " << item.second.city << "\n";
 		}
 
-		const auto result_cast = range1.GroupUseCast(
+		const auto result2 = range1.GroupUseCast(
 			[](const Person& p) { return p.name; },
 			[](const Person& p) { return p.age; });
-		for (auto it = result_cast.cbegin(); it != result_cast.cend(); ++it) {
+		for (auto it = result2.cbegin(); it != result2.cend(); ++it) {
 			cout << "key: " << it->first << ", value: " << it->second << "\n";
 		}
 
-		const auto result_decl = range1.GroupUseDeclval(
+		const auto result3 = range1.GroupUseDeclval(
 			[](const Person& p) { return p.name; },
 			[](const Person& p) { return p.age; });
 
-		for_each(begin(result_decl), end(result_decl), [](const pair<string, int> p) {
-			cout << "key:" << p.first << ", value: " << p.second << "\n";
-		});
+		for_each(begin(result3), end(result3),
+		         [](const pair<string, int> p) {
+			         cout << "key:" << p.first << ", value: " << p.second << "\n";
+		         });
 
-		const auto result_use_result_of = range1.GroupUseResultOf(
+		const auto result4 = range1.GroupUseResultOf(
 			[](const Person& person) { return person.age; },
 			[](const Person& person) { return tie(person.name, person.city); });
 
-		for(auto item : result_use_result_of) {
-			//std::cout << "key: " << item.first << ",value: " << item.second << "\n";
+		for (auto item : result4) {
+			std::cout << "key: " << item.first << ",value: "
+				<< std::get<0>(item.second) << "," << get<1>(item.second) << "\n";
 		}
+
+		//const auto result5 =
 	}
 }

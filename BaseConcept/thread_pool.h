@@ -14,15 +14,17 @@ namespace pool
 {
 	using std::string;
 
-	class ILogger
+	class LoggerInterface
 	{
 	public:
-		ILogger(void) = default;
-		virtual ~ILogger(void) = default;
-		ILogger(const ILogger&) = default;
-		ILogger& operator=(const ILogger&) = default;
+		LoggerInterface() = default;
 
-		//
+		virtual ~LoggerInterface() = default;
+
+		LoggerInterface(const LoggerInterface&) = default;
+
+		LoggerInterface& operator=(const LoggerInterface&) = default;
+
 		virtual void Debug(const string& msg, const string& file, size_t line) = 0;
 
 		virtual void Info(const string& msg, const string& file, size_t line) = 0;
@@ -32,7 +34,7 @@ namespace pool
 		virtual void Error(const string& msg, const string& file, size_t line) = 0;
 	};
 
-	class Logger final : public ILogger
+	class Logger final : public LoggerInterface
 	{
 	public:
 		enum class LogLevel
@@ -63,11 +65,10 @@ namespace pool
 		LogLevel log_level_;
 		std::mutex mutex_;
 
-	private:
 		void OutInfo(const string& msg, const string& file, size_t line, LogLevel level);
 	};
 
-	extern std::unique_ptr<ILogger> active_logger;
+	extern std::unique_ptr<LoggerInterface> active_logger;
 
 	void Debug(const string& msg, const string& file, size_t line);
 
@@ -97,7 +98,6 @@ namespace pool
 		void ThreadLoop();
 		TaskFunc Take();
 
-	private:
 		int init_threads_size_;
 		ThreadsVec threads_;
 		TasksDeque tasks_;

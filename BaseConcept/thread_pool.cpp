@@ -10,13 +10,13 @@
 namespace pool
 {
 	using std::cout;
-	std::unique_ptr<ILogger> active_logger = nullptr;
+	std::unique_ptr<LoggerInterface> active_logger = nullptr;
 
-	static const char kBlack[] = { 0x1b, '[', '1', ';', '3', '0', 'm', 0 };
-	static const char kRed[] = { 0x1b, '[', '1', ';', '3', '1', 'm', 0 };
-	static const char kYellow[] = { 0x1b, '[', '1', ';', '3', '3', 'm', 0 };
-	static const char kBlue[] = { 0x1b, '[', '1', ';', '3', '4', 'm', 0 };
-	static const char kNormal[] = { 0x1b, '[', '1', ';', '3', '9', 'm', 0 };
+	static const char kBlack[] = {0x1b, '[', '1', ';', '3', '0', 'm', 0};
+	static const char kRed[] = {0x1b, '[', '1', ';', '3', '1', 'm', 0};
+	static const char kYellow[] = {0x1b, '[', '1', ';', '3', '3', 'm', 0};
+	static const char kBlue[] = {0x1b, '[', '1', ';', '3', '4', 'm', 0};
+	static const char kNormal[] = {0x1b, '[', '1', ';', '3', '9', 'm', 0};
 
 	Logger::Logger(const LogLevel level) : log_level_(level) { }
 
@@ -107,7 +107,7 @@ namespace pool
 	}
 
 	ThreadPool::ThreadPool(const int init_size) : init_threads_size_(init_size), mutex_(), cond_var_(),
-		is_started_(false)
+	                                              is_started_(false)
 	{
 		Start();
 	}
@@ -186,7 +186,4 @@ namespace pool
 	}
 }
 
-int main(int argc, char* argv[])
-{
-	
-}
+int main(int argc, char* argv[]) { }

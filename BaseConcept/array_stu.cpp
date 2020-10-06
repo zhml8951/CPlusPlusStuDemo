@@ -1,5 +1,6 @@
 ﻿#include <array>
 #include <iostream>
+#include <string>
 
 /*
  * 1. 数组内存的存储方式：
@@ -24,7 +25,7 @@
  */
 
 // ReSharper disable CppUseAuto
-namespace arr01
+namespace array01
 {
 	// 数组指针做为返回类型。
 	// 数组指针样式： int (*ptr)[10] 代换进去 int (*func(args...))[10] 这里args: int (&arr)[10] 数组引用
@@ -107,7 +108,7 @@ namespace arr01
 		}
 
 		printf("Use int* p[]. \n");
-		int* pi = nullptr;
+		int* pi;
 		for (int i = 0; i < 20; i++) {
 			pi = p_int[i];
 			for (int j = 0; j < 10; j++) {
@@ -132,17 +133,53 @@ namespace arr01
 }
 
 /*
- *  # 二维数组 行(row)Y, 列(col)X 在一般固定行和固定列的数组再转 指针数组或数组指针 的意义不大。 
+ *  # 二维数组 行(row)Y, 列(col)X 在一般固定行和固定列的数组再转 指针数组或数组指针 的意义不大。
  *  # 当行(Y)固定，列长不一定采用指针数组，这时应用指针数组如： const char* names[4] = {"John", "Green", "Arnni", "pic"}. 这里的4是行数，
  *  # 当列(X)固定，行不固定时采用数组指针， int (*Sex)[3]; 主要作用是将数组降级到数组，便于有时传参使用。如下：
-  	int ar[][3] = {{3, 4, 5}, {33, 44, 55}};
+	int ar[][3] = {{3, 4, 5}, {33, 44, 55}};
 	int (*sex)[3] = ar;
 	int ar2[][3] = {{11, 22, 33}, {44, 55, 66}, {77, 88, 99}};
-	sex = ar2; 
- *  
+	sex = ar2;
+ *
  */
+
+namespace array02
+{
+	// std::array demo
+	void Demo01()
+	{
+		std::array<std::string, 8> a01;
+		a01[7] = 8;
+		a01[1] = "first_1";
+		a01[3] = "three_3";
+		std::cout << "a01: " << a01[0] << ", " << a01[1] << ", " << a01[2] << ", " << a01[3] << "\n";
+	}
+
+	template <size_t N>
+	std::array<std::string, N> get_strings(const std::string s)
+	{
+		std::array<std::string, N> rst;
+		auto start = 0;
+		auto end = s.find_first_of(" ");
+		for (auto i = 0;; i++) {
+			rst[i] = std::move(s.substr(start, end - start));
+			if (end == std::string::npos)break;
+			start = end + 2;
+			end = s.find_first_of(" ", start);
+		}
+		return rst;
+	}
+}
 
 int main(int argc, char* argv[])
 {
-	arr01::ArrayPointTest();
+	//array01::ArrayPointTest();
+
+	array02::Demo01();
+
+	auto a1 = array02::get_strings<5>("str01 str02 str03, str04");
+	for (auto item : a1) {
+		std::cout << item << "  ";
+	}
+	printf("Over. \n");
 }

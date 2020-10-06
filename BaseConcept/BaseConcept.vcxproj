@@ -91,10 +91,12 @@
     <ClCompile Include="keyword_demo01.cpp" />
     <ClCompile Include="lr_value.cpp" />
     <ClCompile Include="macro.cpp" />
+    <ClCompile Include="macro_adv.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="map_demo.cpp" />
     <ClCompile Include="mem_manager.cpp" />
     <ClCompile Include="point_demo.cpp" />
+    <ClCompile Include="random_demo.cpp" />
     <ClCompile Include="reflect_demo.cpp" />
     <ClCompile Include="regex_demo.cpp" />
     <ClCompile Include="static_stu.cpp" />

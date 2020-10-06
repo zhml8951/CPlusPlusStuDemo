@@ -86,7 +86,7 @@ namespace template_simple
 	};
 
 	template <typename T, size_t N>
-	class CompoundT<T[N]>			// => class CompoundT<T[]>{....}
+	class CompoundT<T[N]> // => class CompoundT<T[]>{....}
 	{
 	public:
 		enum { kIsPtrT = 0, kIsRefT = 0, kIsArrayT = 1, kIsFuncT = 0, kIsPtrMemT = 0 };
@@ -229,7 +229,7 @@ namespace template_struct
 	/*
 	 *	typename...T:  参数包(模板参数列表, 函数参数列表)
 	 *	模板参数包在模板推导过程中被认定为一个特殊的类型参数(函数参数包被认为是一个特殊类型参数)
-	 *	参数包不可以直接使用，需要展开， 展开方式两种： 1. 递归操作， 2. 逗号操作
+	 *	参数包不能直接使用，需要展开， 展开方式两种： 1. 递归操作， 2. 逗号操作
 	 */
 	template <typename T, typename ... Ts>
 	void PrintSize(T arg1, Ts ... args)
@@ -241,18 +241,21 @@ namespace template_struct
 	void test_print_size()
 	{
 		PrintSize(88.8, 36, 24, 55, 99);
+		const std::initializer_list<int> list{16, 26, 36, 46, 56, 66};
+		PrintSize(76, list);
 	}
 
-	// 模板函数参数包递归展开， Sum(Ty num) 递归终止函数
+	/* 递归展开，采用递归调用重载单参函数; 递归调用必需有一个重载的终止函数
+	 * Sum<Ty>(rest...) 递归调用，自动展开rest...， 这里的调用实质上是不断调用自身，直到最后一个元素调用递归终止函数
+	 */
+
+	// 模板函数参数包递归展开， 递归终止函数Sum(Ty num)
 	template <typename Ty>
-	Ty Sum(Ty num)
+	Ty Sum(Ty num) // 递归调用终止函数
 	{
 		printf("Called Sum<Ty>(), num: %d\n", num);
 		return num;
 	}
-
-	// 递归展开，采用递归调用重载单参函数; 递归调用必需有一个重载的终止函数
-	// Sum<Ty>(rest...) 递归调用，自动展开rest...， 这里的调用实质上是不断调用自身，直到最后一个元素调用递归终止函数
 
 	template <typename Ty, typename... Tys>
 	Ty Sum(Ty first, Tys ... rest)
@@ -263,28 +266,70 @@ namespace template_struct
 
 	// 可变参数模板函数, 采用逗号展开
 	template <class Ty>
-	void PrintArg(Ty t) { std::cout << t << "\n"; }
+	int PrintArg(Ty t)
+	{
+		std::cout << t << "\n";
+		return 3;
+	}
 
 	template <class... Tys>
 	void Expand(Tys ... rest)
 	{
-		int arr[] = {(PrintArg(rest), 1)...};
+		/*
+		 * 逗号展开式运算的核心是std::initializer_list即 {...}, 展开式的标准样式： { (Func(arg), result)... }
+		 */
+		int arr[] = {(PrintArg(rest), 2)...}; // ,逗号展开时,这里的'2'是返回结果,这里=是可以省略的
 		for (auto i = 0; i < sizeof(arr) / sizeof(arr[0]); i++) {
 			printf("i: %d  ", arr[i]);
 		}
 	}
 
+	/*
+	 * C++11 "一致性初始化{}", 旧样式int a=3; 新的列表样式:int a{3}; vector<int> vec; 引入列表初始化后可直接vector<int> vec{1,2,3};
+	 * {列表初始化} 是用 initializer_list作为核心来实现的
+	 *  const Func& func 传回调函数， 参数Tys&&... 参数包
+	 */
 	template <class Func, class... Tys>
 	void ExpandUseList(const Func& func, Tys&&... args)
 	{
-		// C++ "一致性初始化", 旧样式int a=3; 列表样式: int a{3}; vector<int> vec; 引入列表初始化后可直接vector<int> vec{1,2,3};
-		// {列表初始化} 引入实现由 initializer_list 体现.
-		//列表初始化时使用auto 可见db_list即std::initializer_list<double> 类型， 这里 = 号必可少的
-		auto db_list_auto = {1.1, 2., 3.0, 4., 5.1};
-		std::initializer_list<double> db_list_init{3.2, 4, 5, 5};
+		auto db_list_auto = {1.1, 2., 3.0, 4., 5.1}; //db_list_auto是initializer_list<double> 类型，这里 = 号必可少的*
+		const std::initializer_list<double> db_list_init{3.2, 4, 5, 5};
 
-		// initializer_list 奇特用法,需要结合前面{(PrintArg(... 来更解。这里传回调函数会很有用处。
-		std::initializer_list<int>{(func(std::forward<Tys>(args)), 0)...};
+		auto t1 = std::tie(db_list_auto, db_list_auto);
+
+		const auto max_it = db_list_auto.size() >= db_list_init.size() ? db_list_auto.end() : db_list_auto.end();
+		for (auto it1 = db_list_auto.begin(), it2 = db_list_init.begin();;) {
+			if (it1 == max_it || it2 == max_it) {
+				printf("Every iterator finished.\n");
+				break;
+			}
+
+			std::tuple<double, double> rst_tmp;
+
+			if (it1 != db_list_auto.end()) {
+				if (it2 != db_list_init.end()) {
+					rst_tmp = std::tie(*it1++, *it2++);
+				}
+				else {
+					rst_tmp = std::make_tuple(*it1++, 0);
+				}
+			}
+			else {
+				if (it2 != db_list_init.end()) {
+					rst_tmp = std::make_tuple(0, *it2++);
+				}
+			}
+			std::cout << "elements: " << std::get<0>(rst_tmp) << ", " << std::get<1>(rst_tmp) << "\n";
+		}
+
+		// initializer_list, { } C++11标准初始化, 内部函数调用 {(func(forward<Tys>(args), rst)...};
+		// std::move() 强制转换为右值引用， std::forward<T>() 是根据传入值类型判断来转发,
+		std::initializer_list<int> rst = {(func(std::forward<Tys>(args)), 0)...};
+		std::cout << "func_result: \n";
+		for (auto i : rst) {
+			std::cout << i << "  ";
+		}
+		printf("\n");
 	}
 
 	void test_expand()
@@ -355,13 +400,56 @@ namespace template_struct
 		test_func0(888);
 		test_func1(88, 99);
 	}
+
+	/*
+	 * 参数包展开采用偏特化模板类的方式, 这种方式同函数递归调用类似, 第2个参数size_t类型不断--，最后终止函数在N=1
+	 */
+	template <class Tuple, size_t N>
+	struct TuplePrinter
+	{
+		static void print(const Tuple& t)
+		{
+			TuplePrinter<Tuple, N - 1>::print(t); // N-1实现不断递归调用
+			std::cout << ", " << std::get<N - 1>(t); // 递归调用时,递归创建相当于创建了多层次循环，递归后面的语句相当于内层循环之后
+			// 这里的调用顺序生成多层次代码，如下：
+			/*	假定N=3
+			 *		TuplePrinter<T, 3>::print(t){
+			 *			TuplePrinter<T,2>::print(t){
+			 *				TuplePrint<T>::print(t){	/// N=1时直接调用重载函数TuplePrinter<Tuple,1>
+			 *					cout << "TuplePrinter<Tuple,1>: " << std::get<0>(t);
+			 *				}
+			 *				cout << ", " << get<2-1>(t);
+			 *			}
+			 *			cout << ", " << get<3-1>(t);
+			 *		}
+			 *	从递归生成代码看,如果N比较大,则包围层次则非常深,同样效率比较慢的, 总体尽可能的使用循环比较好.
+			 */
+		}
+	};
+
+	template <class Tuple>
+	struct TuplePrinter<Tuple, 1>
+	{
+		static void print(const Tuple& t)
+		{
+			std::cout << "calling TuplePrinter<Tuple,1>;  " << std::get<0>(t);
+		}
+	};
+
+	template <class... Args>
+	void PrintTuple(const std::tuple<Args...>& t)
+	{
+		std::cout << "(";
+		TuplePrinter<decltype(t), sizeof...(Args)>::print(t);
+		std::cout << ")\n";
+	}
 }
 
 int main(int argc, char* argv[])
 {
 	namespace ts = template_struct;
 	//template_struct::test_integral();
-	ts::test_print_size();
+	//ts::test_print_size();
 	ts::test_expand();
-	ts::test_delegate();
+	//ts::test_delegate();
 }

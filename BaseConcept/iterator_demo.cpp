@@ -1,6 +1,11 @@
 ﻿#include <iterator>
 #include <iostream>
 #include <vector>
+#include <list>
+#include <algorithm>
+#include <deque>
+#include <array>
+#include <string>
 
 // ReSharper disable CppUseAuto
 
@@ -55,6 +60,71 @@ namespace iterator_simple
 		cout << "arr[1]: " << arr[1] << "\n";
 	}
 
+	/* <iterator>:  back_inserter(C) 为C 创建一个back_insert_iterator; 同理还有front_inserter => front_insert_iterator
+	 * back_inserter为容器快捷创建末部插入器，容器需支持push_back, emplace_back; 如vector
+	 * back_inserter, front_inserter 返回insert迭代器, 那么insert_iterator同 begin返的迭代器有什么不同呢？
+	 */
+	void FrontBackInserterDemo()
+	{
+		// generate_n use back_insert_iterator 使用generate_n对vector进行填充
+		[]() -> void {
+			std::vector<int> v;
+			// generate ==> Generate values for range with function;
+			// generate_n ==> Generate values for sequence with function;
+			std::generate_n(std::back_insert_iterator<std::vector<int>>(v), 10,
+				[n = 0]()mutable { return ++n; });
+			for (auto n : v) {
+				printf("%d  ", n);
+			}
+			printf("\n");
+		}();
+
+		// back_inserter(Container) 快捷创建 std::back_insert_iterator<Ty>(Object)对象。 C++同类方式很多， 大多make_...; 如：make_shared, make_pair,make_tuple
+		// std::make_unique<Ty>(...) 快捷创建 std::unique_ptr<Ty>对象. ref创建reference_wrapper<
+		[]()-> void {
+			std::vector<int> numbers{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+			std::fill_n(std::back_inserter(numbers), 3, -1);
+
+			for (auto n : numbers) {
+				printf("%d  ", n);
+			}
+			printf("\n");
+		}();
+
+		// 从vector使用back_inserter, copy数据到list, deque. 迭代器可以使用back_insert_iterator, front_insert_iterator;
+		[]()-> void {
+			std::vector<int> v{ 1, 2, 3, 4, 5 };
+			std::deque<int> db1;
+			std::list<int> list1;
+			std::array<int, 10> array1; //// array 不支持push_back; 故后面的copy(... back_insert_iterator<...>不能编译
+			array1.fill(0);
+			//std::copy(v.begin(), v.end(), std::front_inserter(d));
+			std::copy(v.begin(), v.end(), std::back_inserter(db1));
+			std::copy(v.begin(), v.end(), std::front_inserter(list1));
+			//std::copy(v.begin(), v.end(), std::back_insert_iterator<std::array<int,10>>(array1));
+			//std::copy(v.begin(), v.end(),std::begin(d));
+			auto ait = array1.begin();
+			for (auto vit = v.begin(); vit != v.end(); ++vit) {
+				*ait = *vit;
+				++ait;
+			}
+
+			for (auto it = db1.begin(); it < db1.end(); ++it) {
+				printf("%d  ", *it);
+			}
+			printf("\n");
+
+			for (auto i = 0; i < array1.size(); i++) {
+				printf("%d  ", array1[i]);
+			}
+			printf("\n");
+
+			for (auto it = list1.begin(); it != list1.end(); ++it) {
+				printf("%d   ", *it);
+			}
+			printf("\n");
+		}();
+	}
 
 	// TODO:  stl的迭代器还有很多功能, 目前公此而已
 }

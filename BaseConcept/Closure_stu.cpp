@@ -56,7 +56,18 @@ namespace closure_callback
 int main(int argc, char* argv[])
 {
 	closure_callback::test_main();
+	
 }
+#define MACRO_EXPAND(...) __VA_ARGS__
+
+#define MAKE_ARG_LIST(op, arg, ...) op(arg)
+#define MAKE_ARG_LIST_1(op, arg, ...) op(arg), MACRO_EXPAND(MAKE_ARG_LIST(op, __VA__ARGS__))
+
+template<typename T1, typename T2, typename T3>
+constexpr auto MakeArgListX(T1 op, T2  arg, T3  ...) { return op(arg); }
+
+template<typename T1, typename T2, typename T3>
+constexpr auto MakeArgListX1(T1 op, T2  arg, T3  ...) { return op(arg), MACRO_EXPAND(MAKE_ARG_LIST(op, __VA__ARGS__)); }
 
 /*
  * C++ 闭包(Closure)即 带上下文的函数, 也就是带状态的函数, 也就是带有类功能的函数; 闭包 = 函数 + 上下文
