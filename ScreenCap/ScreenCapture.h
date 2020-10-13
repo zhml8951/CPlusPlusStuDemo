@@ -155,9 +155,9 @@ namespace sc
 		virtual std::shared_ptr<IScreenCaptureManager> StartCapturing() = 0;
 	};
 
-	auto CreateCaptureConfiguration(const MonitorCallback& monitor_to_capture) ->
-	std::shared_ptr<ICaptureConfiguration<ScreenCaptureCallback>>;
+	auto CreateCaptureConfiguration(
+		const MonitorCallback& monitor_to_capture) -> std::shared_ptr<ICaptureConfiguration<ScreenCaptureCallback>>;
 
-	auto CreateCaptureConfiguration(const WindowCallback& window_to_capture) ->
-	std::shared_ptr<ICaptureConfiguration<WindowCaptureCallback>>;
+	auto CreateCaptureConfiguration(
+		const WindowCallback& window_to_capture) -> std::shared_ptr<ICaptureConfiguration<WindowCaptureCallback>>;
 }

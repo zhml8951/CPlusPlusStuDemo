@@ -120,12 +120,12 @@ namespace pointer_simple_demo
 			return *p == nullptr ? -1 : 1;
 		};
 
-		int(*alloc_two_p)(float**, const int) = [](float** ptr, const int n) -> int {
+		int (*alloc_two_p)(float**, const int) = [](float** ptr, const int n) -> int {
 			*ptr = static_cast<float*>(calloc(n, sizeof(float)));
 			return *ptr == nullptr ? -1 : 1;
 		};
 		/// 这些操作，重点是可以明了 typedef 和using比较高阶的用法。 //
-		typedef int(*AllocTwoFuncPtr)(float**, const int); /// 使用typedef 定义类型，这里要理解类型处于中间位置时的含义。
+		typedef int (*AllocTwoFuncPtr)(float**, const int); /// 使用typedef 定义类型，这里要理解类型处于中间位置时的含义。
 		AllocTwoFuncPtr t02 = alloc_two_p;
 		typedef std::function<int(double**, const int)> FuncPtrAllocTwo;
 		using FuncPtrAllocTwoUsing = std::function<int(double**, const int)>;
@@ -154,6 +154,24 @@ namespace pointer_simple_demo
 		free(ptr1);
 	}
 
+	/*
+	 *  模板类声明和定义时使用函数指针类型时的样式:
+	 *		std::function<R(Args...)>
+	 *		R(*FuncPtr)(Args...)
+	 *		R(*)(Args...)
+	 *		R(Args...)		// 此简化方式在官方文档中常见. 
+	 */
+
+	template <typename T>
+	class Ts;
+
+	/// <R(Args...)> => <R(*)(Args...) => <R(*FuncPtr)(Args...)> => <std::function<R(Args...)>>
+	template <typename R, typename... Args>
+	class Ts<R(Args ...)> {};
+
+	//class Ts<std::function<R(Args...)>>
+
+
 	void Alloc2dSpaceDemo()
 	{
 		const std::function<void*(int, int, int)> alloc2d = [](const int base, const int row, const int col)-> void* {
@@ -162,9 +180,9 @@ namespace pointer_simple_demo
 		};
 
 		void*(*p_alloc2d)(uint8_t, uint8_t, uint8_t) = [](const uint8_t base, const uint8_t row,
-			const uint8_t col) -> void* {
-				void* ptr = calloc(row * col, base);
-				return ptr;
+		                                                  const uint8_t col) -> void* {
+			void* ptr = calloc(row * col, base);
+			return ptr;
 		};
 
 		printf("Test allocate space use *ptr. \n");
@@ -236,17 +254,19 @@ namespace pointer_simple_demo
 		if (n1 > 1 && t0_func(&ptr0, n1)) {
 			delete[] ptr0;
 			ptr0 = nullptr;
-		} else if(n2 == 1 && t0_func(&ptr0, n2)) {
+		}
+		else if (n2 == 1 && t0_func(&ptr0, n2)) {
 			delete ptr0;
 			ptr0 = nullptr;
-		} else {
+		}
+		else {
 			printf("nothing to do.\n");
 		}
 	}
 } // namespace pointer_simple_demo
 
 namespace csdn_demo01
-	// 函数指针直接使用是看不出本来用途的，只有当定义函数指针作形参，传递函数作实参时可实现回调效果，感觉比js回调还要自然。这才是函数指针的直正用途。
+// 函数指针直接使用是看不出本来用途的，只有当定义函数指针作形参，传递函数作实参时可实现回调效果，感觉比js回调还要自然。这才是函数指针的直正用途。
 {
 	double Func01(const int num)
 	{
@@ -256,13 +276,13 @@ namespace csdn_demo01
 
 	// 函数指针与指针函数的区别 ==>
 	double* Func02(int) = delete;
-	double(*p_func03)(int); // double* fun(int)  返回指针类型的函数即<指针函数>。 double (*func)(int) 指向函数的指针即<函数指针>
+	double (*p_func03)(int); // double* fun(int)  返回指针类型的函数即<指针函数>。 double (*func)(int) 指向函数的指针即<函数指针>
 
 	void test_function_pointer()
 	{
 		// 定义函数指针，参数为int, 返回值double.
 		// ReSharper disable CppJoinDeclarationAndAssignment
-		double(*p_func01)(int);
+		double (*p_func01)(int);
 		p_func01 = Func01;
 
 		printf_s("p_func01 output: %.2lf\n", (*p_func01)(8));
@@ -289,7 +309,7 @@ namespace csdn_demo01
 		return 0.5 * lines;
 	}
 
-	void estimate(const int line_num, double(*pf)(int))
+	void estimate(const int line_num, double (*pf)(int))
 	{
 		const auto ret = (*pf)(line_num);
 		std::cout << "num:  " << line_num << ",  need times is: " << ret << std::endl;
@@ -310,7 +330,7 @@ namespace csdn_demo01
 	// Begin Demo02
 
 	const double* Demo02Func01(const double arr[], int n);
-	const double* Demo02Func02(const double[], int);
+	const double* Demo02Func02(const double [], int);
 	const double* Demo02Func03(const double*, int);
 
 	void Demo02Main()
@@ -326,14 +346,14 @@ namespace csdn_demo01
 		const auto p_func02 = Demo02Func02;
 		const Pf p_func03 = Demo02Func03;
 
-		double arr[5]{ 11.1, 12.2, 13.3, 14.4, 15.5 };
+		double arr[5]{11.1, 12.2, 13.3, 14.4, 15.5};
 
 		std::cout << "func01_point:  " << (*p_func01)(arr, 3) << "\n";
 		std::cout << "func02_point:  " << p_func02(arr, 3) << "\n";
 		std::cout << "*(func03_point):  " << *((*p_func03)(arr, 3)) << "\n";
 
-		const double* (*func_array_p1[3])(const double*, int) { Demo02Func01, Demo02Func02, p_func03 };
-		Pf func_array_p2[]{ Demo02Func01, Demo02Func02, p_func03 };
+		const double* (*func_array_p1[3])(const double*, int){Demo02Func01, Demo02Func02, p_func03};
+		Pf func_array_p2[]{Demo02Func01, Demo02Func02, p_func03};
 
 		std::cout << "func_p1[0]:  " << func_array_p1[0](arr, 2) << "\n";
 		std::cout << "*(func_p2[0]):  " << *(func_array_p2[0](arr, 2)) << "\n";
@@ -423,7 +443,7 @@ namespace intelligent_point
 	{
 	public:
 		ClassA(const std::string& name_cs, const std::string& own_name_cs, const int n_val) : s_name_(name_cs),
-			s_own_name_(own_name_cs)
+		                                                                                      s_own_name_(own_name_cs)
 		{
 			if (0 == n_val) {
 				std::runtime_error o_rt_ex("n_val can not 0\n");
@@ -657,12 +677,13 @@ namespace intelligent_point
 		const auto pair_ptr = std::make_shared<std::pair<int, double>>(33, 33.0);
 		printf("pair_ptr->data(first, second): %d, %lf", pair_ptr->first, pair_ptr->second);
 	}
+
 	/*
 	 * C++ RAII技术(Resource Acquisition Is Initialization)资源获取即初始化。也就是(在构造函数中申请分配资源在析构中释放资源)
 	 * 智能指针(shared_ptr, unique_ptr)是RAII最佳实现代表；
 	 * RAII实现基础是(对象生命周期来管理资源)，管理资源就创建对应的对象，将资源的生命周期同对象的生命周期相关联。
 	 * 智能指针管理内存(内存的自动释放，释放时机，防止多次释放)，智能指针还可以把一个值语义转换成引用语义
-	 */ 
+	 */
 
 	/*
 	 *	值语义(对象的拷贝与原对象无关),内置类型(int/double/bool/float/char)都是值语义，标准库(pair, vector, map, string...)也是值语义 

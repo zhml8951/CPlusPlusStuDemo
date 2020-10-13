@@ -16,11 +16,11 @@
  *	explicit 不需要添加默认构造，多参构造(总是显示构造)。只需要添加单参构造，目的是防止不必要的隐式类型转换
  *	需要注意单参构造（多参构造但只有一个参数没有默认值）时，采用赋值时会产生隐式类型转换，这类转换有时并不是我们需要的。 explicit阻止隐式类型转换；
  */
-/* ReSharper 可提供最佳代码实践， 如下： NonExplicitConvertingConstructor, NonExplicitConversionOperator, UseAuto... 这里先禁用这些*/
+ /* ReSharper 可提供最佳代码实践， 如下： NonExplicitConvertingConstructor, NonExplicitConversionOperator, UseAuto... 这里先禁用这些*/
 
-// ReSharper disable CppNonExplicitConvertingConstructor
-// ReSharper disable CppNonExplicitConversionOperator
-// ReSharper disable CppUseAuto
+ // ReSharper disable CppNonExplicitConvertingConstructor
+ // ReSharper disable CppNonExplicitConversionOperator
+ // ReSharper disable CppUseAuto
 
 using namespace std;
 
@@ -91,9 +91,9 @@ namespace keywords_simple
 	 *	标准转换: int 转char, long 转double..
 	 */
 
-	/* C++ 一致初始化， 早期C++初始化有多种方式，很容易混淆。故引用列表初始化(一致初始化)｛..｝
-	 * C++11 列表初始化(一致初始化) 内部实现的本质是用 initializer_list<T>来实现，而initializer_list<>实质也就是array
-	 */
+	 /* C++ 一致初始化， 早期C++初始化有多种方式，很容易混淆。故引用列表初始化(一致初始化)｛..｝
+	  * C++11 列表初始化(一致初始化) 内部实现的本质是用 initializer_list<T>来实现，而initializer_list<>实质也就是array
+	  */
 
 	void Print(const std::initializer_list<int> values)
 	{
@@ -107,7 +107,7 @@ namespace keywords_simple
 		 * 使用auto时，默认是copy构造的，尽量使用reference( auto& )，如果需需要常量引用则const auto&;
 		 *
 		 */
-		vector<int> vec{16, 26, 36, 46, 56};
+		vector<int> vec{ 16, 26, 36, 46, 56 };
 		for (auto& elem : vec) {
 			elem += 3;
 		}
@@ -144,7 +144,7 @@ namespace keywords_simple
 
 	void test_class()
 	{
-		vector<string> vs{"first", "second", "three"};
+		vector<string> vs{ "first", "second", "three" };
 
 		for (const auto& el : vs) {
 			cout << "el.size: " << el.size() << "el.type: " << typeid(el).name() << "\n";
@@ -174,7 +174,7 @@ namespace keywords_simple
 	 *	这里的关键在于对template<class T>进行判断，
 	 *	TypeTrait是泛型代码(Generic Code)的基石
 	 */
-	//--------------------------------------------------------------------------------------------//
+	 //--------------------------------------------------------------------------------------------//
 
 	template <typename T>
 	void FooImpl(const T& val, std::true_type)
@@ -226,7 +226,7 @@ namespace keywords_simple
 	 *	如果不使用template则需要分别定义根据name,age,city的分组函数，如果字段很多,会产生大量重复代码；
 	 */
 
-	// 最初版本，T为selector_key的类型， 参数需要传入key;
+	 // 最初版本，T为selector_key的类型， 参数需要传入key;
 	template <typename T>
 	auto GroupBy0(const vector<Person>& persons, const T& key) -> multimap<T, Person>
 	{
@@ -234,14 +234,14 @@ namespace keywords_simple
 		for_each(begin(persons), end(persons), [&](const Person& person) {
 			// 这里只能按age分类，如果需要city或其它字段分类，就必须要再copy一份
 			rst.insert(make_pair(person.age, persons)); // 这里person.age如何换成key呢？key又如何与person相关字段关联呢？
-		});
+			});
 		return rst;
 	}
 
 	// template 需要两个类型， Type(key的数据类型), Func(分组key选择函数);功能使用没有问题，但每次调用都必须指明key的类型；
 	template <typename T, typename Fn>
 	multimap<T, Person> GroupBy1(const vector<Person>& persons, const Fn& key_selector_fn)
-	// 回调函数Fn&由于lambda都是临时变量，可以采用F&&右值引用，或者必需使用const; 
+		// 回调函数Fn&由于lambda都是临时变量，可以采用F&&右值引用，或者必需使用const;
 	{
 		multimap<T, Person> map;
 
@@ -249,7 +249,7 @@ namespace keywords_simple
 		for_each(persons.begin(), persons.end(), [&](const Person& person) {
 			// key_selector_fn(person)实质由回调函数实现类型擦除，类型选择由调用者提供函数处理
 			map.insert(make_pair(key_selector_fn(person), person));
-		});
+			});
 		return map;
 	}
 
@@ -275,7 +275,7 @@ namespace keywords_simple
 		multimap<KeyTy, Person> rst;
 		for_each(begin(persons), end(persons), [&rst, &key_selector_fn](const Person& person) {
 			rst.insert(make_pair(key_selector_fn(person), person));
-		});
+			});
 		return rst;
 	}
 
@@ -292,12 +292,12 @@ namespace keywords_simple
 		 *	4. declval<Fn>( declval<Person>() )  将Person对象做参数， 传入Fn(Person&) 等于后面的lambda => [&](Person& p){...};
 		 */
 
-		// template 编程时核心思路需要改变， template<class ...> 定义函数时其实需要行明白调用模板函数后编译器的动作；
+		 // template 编程时核心思路需要改变， template<class ...> 定义函数时其实需要行明白调用模板函数后编译器的动作；
 
 		multimap<KeyTy, Person> rst;
 		for_each(persons.begin(), persons.end(), [&rst, &key_selector_fn](const Person& person) {
 			rst.insert(make_pair(key_selector_fn(person), person));
-		});
+			});
 		return rst;
 	}
 
@@ -311,7 +311,7 @@ namespace keywords_simple
 		map<KeyTy, ValTy> rst;
 		for_each(begin(persons), end(persons), [&](const Person& person) {
 			rst.insert(make_pair(key_fn(person), value_fn(person)));
-		});
+			});
 
 		return rst;
 	}
@@ -342,15 +342,15 @@ namespace keywords_simple
 
 		auto result = GroupBy3(kUsers, [](const Person& person) {
 			return person.age;
-		});
+			});
 
 		for (auto p : result) {
 			cout << p.first << ": " << p.second.name << ", " << p.second.city << "\n";
 		}
 
 		auto result2 = GroupBy4(kUsers,
-		                        [](const Person& person) { return person.age; },
-		                        [](const Person& person) { return person.name; });
+			[](const Person& person) { return person.age; },
+			[](const Person& person) { return person.name; });
 
 		for (auto p : result2) {
 			std::cout << "key: " << p.first << ", value: " << p.second << "\n";
@@ -373,74 +373,21 @@ namespace keywords_simple
 	 *
 	 */
 
-	/* std::reference_wrapper? 引用包装器, 主要与模板结合,通常使用std::ref(value), std::cref(value) 来创建reference_wrapper对象。
-	/	reference_wrapper在STL标准库使用非常多，如： make_pair() 就是创建pair<> of reference, make_tuple()创建tuple<>的reference,
-	/	通常使用std::ref, std::cref创建reference_wrapper对象，但在定义时必须使用reference_wrapper如：
-	/		vector<MyClass&> vec_my; /// 创建vec,存入MyClass对象引用，这样定义不能通过编译， 必须使用如下格式：
-	/		vector<std::reference_wrapper<MyClass>> vec_my;   // 变量声明和定义时必须使用reference_wrapper<T>
-	/		MyClass obj1; vec_my.push_back(std::ref(obj1)); vec_my.emplace_back(std::ref<MyClass>(obj2));
-	*/
+	 /* std::reference_wrapper? 引用包装器, 主要与模板结合,通常使用std::ref(value), std::cref(value) 来创建reference_wrapper对象。
+	 /	reference_wrapper在STL标准库使用非常多，如： make_pair() 就是创建pair<> of reference, make_tuple()创建tuple<>的reference,
+	 /	通常使用std::ref, std::cref创建reference_wrapper对象，但在定义时必须使用reference_wrapper如：
+	 /		vector<MyClass&> vec_my; /// 创建vec,存入MyClass对象引用，这样定义不能通过编译， 必须使用如下格式：
+	 /		vector<std::reference_wrapper<MyClass>> vec_my;   // 变量声明和定义时必须使用reference_wrapper<T>
+	 /		MyClass obj1; vec_my.push_back(std::ref(obj1)); vec_my.emplace_back(std::ref<MyClass>(obj2));
+	 */
 
 	void RefWrapperDemo()
 	{
 		std::list<int> l(10);
-		std::iota(l.begin(), l.end(), 44	);
+		std::iota(l.begin(), l.end(), 44);
 
 		std::vector<std::reference_wrapper<int>> v(l.begin(), l.end());
-		std::shuffle(v.begin(), v.end(), std::mt19937{std::random_device{}()});
-	}
-
-
-
-	// Substitution Failure Is Not An Error ==> SFINAE, 匹配失败不是错误. 典型的使用std::enable_if<bool, T>
-	template <typename T>
-	typename std::enable_if<std::is_trivial<T>::value>::type SfinaeT1(T value)
-	{
-		std::cout << "T is Trivial" << ", value: " << value << "\n";
-	}
-
-	/// SfinaeT1如果是普通函数(模板函数)都是不能通过编译的， 但使用enable_if<T> 则可以使用，因为在推导过程中，只有一个是合法。这样就不会出现二义性
-	/// enable_if<bool B, typename T=void>, enable_if 结合type_traits内的类型判断来定义模板，bool B为true时，则进行类型定义，否则不处理
-	template <typename T>
-	typename std::enable_if<!std::is_trivial<T>::value>::type SfinaeT1(T value)
-	{
-		std::cout << "T is not trivial. " << ", value: " << value << "\n";
-	}
-
-	struct T1
-	{
-		enum { kIntT, kFloatT } m_type;
-
-		template <typename Integer, std::enable_if_t<std::is_integral<Integer>::value, int>  = 0>
-		T1(Integer) : m_type(kIntT) {}
-
-		template <typename Floating, typename std::enable_if<std::is_floating_point<Floating>::value, int>::type = 0>
-		T1(Floating) : m_type(kFloatT) {}
-	};
-
-	void test_sfinae()
-	{
-		SfinaeT1(std::string("string is not trivial value type."));
-		SfinaeT1(888); // int is a trivial value type.
-	}
-
-	void test_type_traits()
-	{
-		struct Foo
-		{
-			void m() { std::cout << "Non-CV" << "\n"; }
-			void m() const { std::cout << "Const func." << "\n"; }
-			void m() volatile { std::cout << "Volatile func. " << "\n"; }
-			void m() const volatile { std::cout << "Const-Volatile func. " << "\n"; }
-		};
-
-		const auto foo_main = []()-> void {
-			Foo{}.m();
-			std::add_const<Foo>::type{}.m(); //type_traits调用方式,相当于const Foo tmp; tmp.m();
-			std::add_volatile<Foo>::type{}.m();
-			std::add_cv<Foo>::type{}.m();
-		};
-		foo_main();
+		std::shuffle(v.begin(), v.end(), std::mt19937{ std::random_device{}() });
 	}
 
 	/*
@@ -451,7 +398,7 @@ namespace keywords_simple
 	void FuncObject()
 	{
 		std::vector<function<void(int, int)>> some_tasks; // vector保存函数对象(返回void, 参数为(int, int));
-		typedef void (*FuncPtr)(int, int); // 定义函数指针类型
+		typedef void(*FuncPtr)(int, int); // 定义函数指针类型
 		std::vector<FuncPtr> some_jobs; // 函数指针做为vector， 即将函数对象做为vector成员
 		// std::function<void(int, int)>, 当将类成员函数定义成调用对象时，类对象必须作第一参数
 		class C

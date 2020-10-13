@@ -78,7 +78,7 @@ namespace simple_demo
 	auto tie_members(const Person& rh) noexcept
 	{
 		auto rst = std::tie(rh.first_name, rh.last_name, rh.age);
-		auto name = std::get<0>(rst) + std::get<1>(rst);
+		auto const name = std::get<0>(rst) + std::get<1>(rst);
 		std::cout << "name: " << name << "\n";
 		return rst;
 	}
@@ -105,9 +105,61 @@ namespace simple_demo
 		std::tie(a, b) = std::make_tuple(b, a); //同Python: a,b = b,a;
 		std::cout << "a, b: " << a << ", " << b << "\n";
 
-		std::tie(a, b) = std::make_pair(22, 33);		// 效果同make_tuple相同，但make_pair只能有两个值
+		std::tie(a, b) = std::make_pair(22, 33); // 效果同make_tuple相同，但make_pair只能有两个值
 		std::cout << "a, b: " << a << ", " << b << "\n";
 	}
+
+	/* ---------------------------------------------------------------------------------------------*/
+	// tuple_cat 官方实例
+
+	template <class Tuple, std::size_t N>
+	struct TuplePrinter
+	{
+		static void print(const Tuple& t)
+		{
+			TuplePrinter<Tuple, N - 1>::print(t);
+			std::cout << ", " << std::get<N - 1>(t);
+		}
+	};
+
+	template <typename Tuple>
+	struct TuplePrinter<Tuple, 1>
+	{
+		static void print(const Tuple& t)
+		{
+			std::cout << std::get<0>(t);
+		}
+	};
+
+	// 使用enable_if 作判断， 如果空tuple则调用此function;  C++采用模板参数不同实现重载技
+	template <typename... Args, std::enable_if_t<sizeof...(Args) == 0, int>  = 0>
+	void print(const std::tuple<Args...>& t)
+	{
+		std::cout << "()\n";
+	}
+
+	template <typename... Args, std::enable_if_t<sizeof...(Args) != 0, int>  = 0>
+	void print(const std::tuple<Args...>& t)
+	{
+		std::cout << "(";
+		TuplePrinter<decltype(t), sizeof...(Args)>::print(t);
+		std::cout << ")\n";
+	}
+
+	void TupleCatDemo()
+	{
+		std::tuple<int, std::string, float> t1(10, "test01", 3.14);
+		auto n = 7;
+		auto t2 = std::tuple_cat(t1, std::make_tuple("Foo", "Bar"), t1, std::tie(n));
+		n = 11;
+		print(t2);
+		print(std::make_tuple());
+		// template可变参数，指定参数的方法
+		print<int, std::string, int>(std::tuple<int, std::string, int>(11, "string", 22));
+		std::tuple<int, int>({33, 44});
+	}
+
+	/* ---------------------------------------------------------------------------------------------*/
 }
 
 int main(int argc, char* argv[])
@@ -116,4 +168,6 @@ int main(int argc, char* argv[])
 	simple_demo::TupleDemo01();
 	tie_members(simple_demo::Person{"Jack", "Do", 88});
 	simple_demo::TieLValueDemo();
+	printf("\n---------------------------\n");
+	simple_demo::TupleCatDemo();
 }

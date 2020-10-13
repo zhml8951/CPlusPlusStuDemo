@@ -103,19 +103,23 @@ namespace kapok_template
 		return output;
 	}
 
+	/*
+	 *	参数包typename... Args 递归调用的终止函数;
+	 */
 	template <size_t N, typename T>
-	static inline auto make(const std::array<std::string, N>& arr, size_t index, const T& args)
+	static auto Make(const std::array<std::string, N>& arr, size_t index, const T& args)
 	{
 		return args;
 	}
 
 	template <size_t N, typename T1, typename T2, typename... Args>
-	static inline auto make(const std::array<std::string, N>& arr, size_t index,
-	                        T1 const& t, T2& first, Args&... args)
+	static auto Make(const std::array<std::string, N>& arr, size_t index, T1 const& t, T2& first, Args&... args)
 	{
-		return make(arr, index + 1, std::tuple_cat(t, std::make_tuple(std::pair<std::string, T2&>(arr[index], first))),
+		// 这里会不断递归调用自身， 参数包Args... 会不断向析出first, 直到args...全部析完，会调用重载的Make终止函数
+		return Make(arr, index + 1, std::tuple_cat(t, std::make_tuple(std::pair<std::string, T2&>(arr[index], first))),
 		            args...);
 	}
+	//TODO 后续这里问题需要更深入理解
 
 #define VA_ARGS_NUM(...) \
   std::tuple_size<decltype(std::make_tuple(__VA_ARGS__))>::value
@@ -123,8 +127,15 @@ namespace kapok_template
 #define META(...)                                                  \
   auto meta() {                                                    \
     auto arr = split<VA_ARGS_NUM(__VA_ARGS__)>(#__VA_ARGS__, ','); \
-    return make(arr, 0, std::tuple<>(), __VA_ARGS__);              \
+    return Make(arr, 0, std::tuple<>(), __VA_ARGS__);              \
   }
+
+	struct Per
+	{
+		size_t id;
+		std::string name;
+		META(id, name)
+	};
 }
 
 int main(int argc, char* argv[])

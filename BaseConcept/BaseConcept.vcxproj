@@ -71,13 +71,14 @@
     <ClCompile Include="BitMapAlgo.cpp" />
     <ClCompile Include="bits_operation.cpp" />
     <ClCompile Include="cast_demo.cpp" />
+    <ClCompile Include="chain_call_demo.cpp" />
     <ClCompile Include="chrono_demo .cpp" />
     <ClCompile Include="class_stu.cpp" />
     <ClCompile Include="Closure_stu.cpp" />
     <ClCompile Include="construction_demo.cpp" />
     <ClCompile Include="const_stu.cpp" />
     <ClCompile Include="csdn_demo01.cpp" />
-    <ClCompile Include="declspec_demo.cpp" />
+    <ClCompile Include="decl_type_demo.cpp" />
     <ClCompile Include="enum_demo.cpp" />
     <ClCompile Include="exception_demo.cpp" />
     <ClCompile Include="extern_demo.cpp" />
@@ -120,7 +121,6 @@
     <ClInclude Include="base01.h" />
     <ClInclude Include="BitMapAlgo.h" />
     <ClInclude Include="cast_demo.h" />
-    <ClInclude Include="declspec_demo.h" />
     <ClInclude Include="extern_demo.h" />
     <ClInclude Include="file_demo.h" />
     <ClInclude Include="group_by.hpp" />

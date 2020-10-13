@@ -41,8 +41,9 @@ namespace extern_simple
 		value_b = 188;
 		std::cout << "static value_b: " << value_b << "\n";
 	}
+
 	void Func02(int, int) {}
-	void Func04(int const x) {std::cout << "Func04.x: " << x << "\n"; }
+	void Func04(int const x) { std::cout << "Func04.x: " << x << "\n"; }
 }
 
 
@@ -52,3 +53,7 @@ namespace extern_simple
 //	std::cout << kStrShare << "\n";
 //	std::cout << kStrNoExtern << "\n";
 //}
+int sub(const int num1, const int num2)
+{
+	return num1 - num2;
+}
