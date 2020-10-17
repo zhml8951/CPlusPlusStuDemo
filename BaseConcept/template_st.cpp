@@ -3,6 +3,11 @@
 #include <functional>
 
 /*
+ *	C++ STL ==> Standard Template Library	c++ 标准库
+ *	ATL	==> ActivateX Template Library， 微软面向COM的框架，采用模板，多继承技术
+ *	MFC
+ */
+/*
  *	模板参数分为<类型模板> 和 <非类型模板>
  *		template <class T1, size_t N = 0>	T1类型模板参数，  N 则为非类型模板参数，使用一个常量来定义参数
  *		class Array{...}

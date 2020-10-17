@@ -5,9 +5,7 @@ VisualStudioVersion = 15.0.28307.1145
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "v01", "BaseConcept\BaseConcept.vcxproj", "{A3C3C203-853B-4A66-B4B0-D7CE25E75D65}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winApp", "winApp\winApp.vcxproj", "{7E104589-40CB-40AE-A90B-72DE9278EDED}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mfcApp", "mfcApp\mfcApp.vcxproj", "{FE91F6F6-FBF9-4E1F-9038-4428E21DCF76}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "win32App", "winApp\winApp.vcxproj", "{7E104589-40CB-40AE-A90B-72DE9278EDED}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ScreenCap", "ScreenCap\ScreenCap.vcxproj", "{5B09BE8E-FC71-414C-AB5A-0C4B70438873}"
 EndProject
@@ -33,14 +31,6 @@ Global
 		{7E104589-40CB-40AE-A90B-72DE9278EDED}.Release|x64.Build.0 = Release|x64
 		{7E104589-40CB-40AE-A90B-72DE9278EDED}.Release|x86.ActiveCfg = Release|Win32
 		{7E104589-40CB-40AE-A90B-72DE9278EDED}.Release|x86.Build.0 = Release|Win32
-		{FE91F6F6-FBF9-4E1F-9038-4428E21DCF76}.Debug|x64.ActiveCfg = Debug|x64
-		{FE91F6F6-FBF9-4E1F-9038-4428E21DCF76}.Debug|x64.Build.0 = Debug|x64
-		{FE91F6F6-FBF9-4E1F-9038-4428E21DCF76}.Debug|x86.ActiveCfg = Debug|Win32
-		{FE91F6F6-FBF9-4E1F-9038-4428E21DCF76}.Debug|x86.Build.0 = Debug|Win32
-		{FE91F6F6-FBF9-4E1F-9038-4428E21DCF76}.Release|x64.ActiveCfg = Release|x64
-		{FE91F6F6-FBF9-4E1F-9038-4428E21DCF76}.Release|x64.Build.0 = Release|x64
-		{FE91F6F6-FBF9-4E1F-9038-4428E21DCF76}.Release|x86.ActiveCfg = Release|Win32
-		{FE91F6F6-FBF9-4E1F-9038-4428E21DCF76}.Release|x86.Build.0 = Release|Win32
 		{5B09BE8E-FC71-414C-AB5A-0C4B70438873}.Debug|x64.ActiveCfg = Debug|x64
 		{5B09BE8E-FC71-414C-AB5A-0C4B70438873}.Debug|x64.Build.0 = Debug|x64
 		{5B09BE8E-FC71-414C-AB5A-0C4B70438873}.Debug|x86.ActiveCfg = Debug|Win32
@@ -54,7 +44,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {D24C0A8F-2D5F-4FE9-9D00-D3D6DC45716D}
 		Qt5Version = Qt5.12_msvc2017_64
+		SolutionGuid = {D24C0A8F-2D5F-4FE9-9D00-D3D6DC45716D}
 	EndGlobalSection
 EndGlobal

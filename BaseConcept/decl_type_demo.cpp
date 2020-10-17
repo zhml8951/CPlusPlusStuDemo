@@ -2,14 +2,13 @@
 
 /*
  * C++ 类型推导主要有auto, decltype；
- *		auto 忽略顶层const, decltype保留顶层const; 
- *		对引用操作，auto推导出原有类型，decltype推断出引用 
- *		解引用操作， auto推展出原有类型，decltype推断出引用 
- *		auto推导时会实际执行， decltype不会执行，只做分析 
+ *		auto 忽略顶层const, decltype保留顶层const;
+ *		对引用操作，auto推导出原有类型，decltype推断出引用
+ *		解引用操作， auto推展出原有类型，decltype推断出引用
+ *		auto推导时会实际执行， decltype不会执行，只做分析
  *	decltype主用于模板操作。模板函数的操作类型依赖于其模板参数类型。
  *		decltype在模板使用过程中经常结合declval
  */
-
 
 namespace type_demo
 {
@@ -28,6 +27,7 @@ namespace type_demo
 
 		typedef std::result_of<decltype(fn01)&(int)>::type Ty1;
 		Ty1 var_a;
+		std::result_of<decltype(fn01)(int)>::type var_a2;
 
 		std::result_of<decltype(fn01)&(int)>::type var_b;
 
@@ -35,9 +35,6 @@ namespace type_demo
 		Ty2 var_c;
 
 		std::result_of<FnClass(int)>::type var_d;
-
-		Ty1 var_x;
-		std::result_of<decltype(fn01)(int)>::type(var_x);
 
 		std::cout << std::boolalpha;
 		std::cout << "typedefs of int: " << "\n";
@@ -52,4 +49,3 @@ int main(int argc, char* argv[])
 {
 	type_demo::OfficialDemo01();
 }
-

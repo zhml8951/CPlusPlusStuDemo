@@ -20,6 +20,24 @@ namespace chain_simple
 	 *			class Task2{......};
 	 *	从这些定义可以看出, 这里的定义只对内部递归调用时创建Task对象时格式有影响，总体来说Demo3方式最简单，但如果多参数时，这些参数直接列出
 	 *	没能很好的区分。 采用Demo1时， then的返回值和实际return语句难以理解。
+	 *
+	 *	链式调用的实质是多个函数按照前一函数输出作为后一函数的输入这样组合串起来，然后推迟至某个需要的时刻再进行计算.
+	 *	通常使用这样调用没有什么实质意义, 实现较复杂. 在一些延迟计算的场景下有这方面的需求;
+	 *	链式调用的实现关键点： std::function<R(Args...)> fn, 也就是函数做为参数Callback;
+	 *		任务整体以Task对象传递, 而Task对象中关键成员变量function<R(Args...)>,
+	 *		整个链式调用过程,并没有真正的计算,只在调用Run(...)时，返回fn(...)并调用。
+	 *
+	 *		初始化任务时： Task(function<R(Args...)>) 即返回值R，参数Args...; 这里的R将是 第1个Then函数的输入
+	 *		Then函数的关键点在于返回值: Task<typename std::result_of<F(R)>::type(Args...)> 也就是Task对象;
+	 *		Then函数函数再次返回Task对象，对象内部将前一函数包括在内部，形成连环调用：
+	 *			return Task<RstType(Args...)>([func, &f](Args&&... args){
+	 *				return f(func(std::forward<Args>(args...));
+	 *			});
+	*		最后形成的整体式:	auto result=then3(then2(then1(task(88)))); 运行过程task(88)->then1->...
+	 *
+	 *	链式调用在js使用非常多，但C++中不容易使用；但提高程序性能方面却
+	 *	总体原则:  不论参数类型如何变, 后一函数的输入参数类型是前一函数的返回值类型, 故lambda表达式里的参数类型可设置为auto,
+	 *		但具体类型还是由前一函数返回值推导出来。
 	 */
 	template <typename T>
 	class Task;
@@ -62,9 +80,31 @@ namespace chain_simple
 		const auto result = f.Run(3);
 		std::cout << "run task result: " << result << "\n";
 
-		Task<double(double, double)> task2([](double x, double y)-> double {
+		Task<double(double, double)> task2([](const double x, const double y)-> double {
 			return x + y;
 		});
+		// 1. 创建task, return double类型
+		auto proc =
+			task2.Then([](const double x) -> auto {
+				// 2. Then1, 接收tas返回值double作为参数类型， return tuple<string, double>;
+				return std::make_tuple(std::to_string(x), x + 100);
+			}).Then([](std::tuple<std::string, double> tuple) {
+				// 3. Then2, 接收Then1返回类型tuple<string, double>; 返回类型pair<string, double>
+				return std::make_pair(std::get<0>(tuple), std::get<1>(tuple));
+			}).Then([](std::pair<std::string, double> const p) {
+				// 4. Then3, 接收Then2返回类型pair<string, double>; 返回值类型initializer_list<double>;
+				const std::initializer_list<double> rst{p.second, p.second + 1.1, p.second + 2.2};
+				return rst;
+			}).Then([](std::initializer_list<double> numbers) {
+				// 5. Then4, 接收Then3返回值initializer_list<double>; 返回值double;
+				auto rst = 0.0;
+				for (auto num : numbers) {
+					rst += num;
+				}
+				return rst;
+			});
+		const auto rst = proc.Run(11.0, 22.0);
+		std::cout << "Result: " << rst << "\n";
 	}
 
 	template <typename R, typename... Args>
@@ -196,6 +236,7 @@ namespace chain_simple
 				std::cout << "third: " << i << "\n";
 				return std::make_tuple(i + 3, "n+3");
 			}).then([&str](auto n) {
+				// auto实质为前一个then的返回值类型即:std::tuple<int, string>;
 				str += "lambda_4\t";
 				std::cout << "fourth: " << std::get<0>(n) << ", string: " << std::get<1>(n) << "\n";
 				return std::make_tuple(std::get<0>(n) + 4, "n+4");
@@ -206,10 +247,17 @@ namespace chain_simple
 			<< "str_result:  " << str << "\n";
 	}
 
+	/*
+	 *	链式调用过程使用异步async, 这里难点在于程序的运行顺序. 
+	 *		链式调用可使程序将所有计算推迟到需要计算的时候进行, 而异步可以使主线程不用等待子函数完成即可进行后面运行. 
+	 *		但在链式调用时,作用不大. 实际项目不太需要这么使用. 
+	 *	这里仅供参考, 不推荐使用
+	 */
+
 	auto FuAsync(int i)
 	{
-		auto f = std::async([](int n) {
-			std::cout << "sleep two " << n << " seconds..." << std::endl;
+		auto f = std::async([](const int n) {
+			std::cout << "Sleep [" << n << "] seconds..." << std::endl;
 			const std::chrono::milliseconds dre(n * 1000);
 			std::this_thread::sleep_for(dre);
 			return n * n;
@@ -221,8 +269,46 @@ namespace chain_simple
 	{
 		std::cout << "Chain test future func thread: " << std::this_thread::get_id() << std::endl;
 		typedef std::future<int> FutureInt;
-		typedef std::result_of<decltype(FuAsync)*(int)>::type FuType;
+		typedef std::result_of<decltype(FuAsync)&(int)>::type FuType;
 		static_assert(std::is_same<FutureInt, FuType>::value, "type not equal.");
+
+		Task<FuType(int)> task(FuAsync);
+
+		auto t1 = task.Then([](FuType n) {
+			std::cout << "Then1 wait value..." << "\n";
+			std::cout << "At first then func thread: " << std::this_thread::get_id() << std::endl;
+			auto i_tmp = n.get() + 100;
+			auto f = std::async([](const int i) {
+				std::cout << "Number new value: " << i << " .." << "\n";
+				std::cout << "Then1 async in thread: " << std::this_thread::get_id() << "\n";
+				const std::chrono::milliseconds dre(1 * 1000);
+				std::this_thread::sleep_for(dre);
+				return i * i;
+			}, i_tmp);
+			return std::forward<decltype(f)>(f);
+		}).Then([](FuType n) {
+			std::cout << "Then2 wait value... \n";
+			std::cout << "At second then func thread: " << std::this_thread::get_id() << "\n";
+			std::chrono::milliseconds dre(1000);
+			std::this_thread::sleep_for(dre);
+			std::cout << "wait last value...,,,,,,,," << "\n";
+			return n.get() + 1000;
+		}).Then([](int n) {
+			std::cout << "Then3 out lambda func" << "\n";
+			auto fu = std::async([](int const i) {
+				std::cout << "In lambda wait value...\n";
+				std::cout << "At third then func thread: " << std::this_thread::get_id() << "\n";
+				auto num = 2134;
+				for (auto j = 0; j < i; j++) {
+					num += (j % 3 == 0 && j > num * 1.5) ? 1 : 2;
+				}
+				std::cout << "[" << num << "]\n";
+				return num;
+			}, n);
+			return std::forward<decltype(fu)>(fu);
+		});
+
+		std::cout << "[Future get]: \n" << t1.Run(2).get() << "\n";
 	}
 }
 
@@ -230,5 +316,6 @@ int main(int argc, char* argv[])
 {
 	//chain_simple::task_test();
 	//chain_simple::task2_test();
-	chain_simple::chain_test();
+	//chain_simple::chain_test();
+	chain_simple::chain_future_test();
 }

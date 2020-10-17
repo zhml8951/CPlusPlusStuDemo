@@ -24,10 +24,14 @@
  * C++ 并没有提供多进程通信的原生支持。
  */
 
- // RAII ==> Resource Acquisition Is Initialization 即 资源获取即初始化，主要实现方式即采用智能指针，资源采用类的方式管理，
- // 最典型的RAII使用如：  std::lock_guard<std::mutex>
+// RAII ==> Resource Acquisition Is Initialization 即 资源获取即初始化，主要实现方式即采用智能指针，资源采用类的方式管理，
+// 最典型的RAII使用如：  std::lock_guard<std::mutex>
 
- // ReSharper disable CppUseAuto
+/*
+ *	多线程是同一进程中同时多个线程执行任务, 多线程花销小切换快, 同时线程间通信更方便;线程间共享数据需要加锁;
+ *	异步操作的主要目的是让调用函数的主线程不需要等待被调用函数完成,从而让主线程继续执行它下面的代码.JavaScript一直都是这种异步方式
+ *	C++多线程的异步主要由：  std::future, std::async, std::packaged_task, std::promise组合使用
+ */
 
 namespace thread_sample
 {
@@ -91,8 +95,8 @@ namespace thread_sample
 	{
 		std::chrono::milliseconds interval(100);
 		std::mutex mutex;
-		int job_shared = 0;
-		int job_exclusive = 0;
+		auto job_shared = 0;
+		auto job_exclusive = 0;
 
 		auto job01 = [&]() -> void {
 			const auto this_id = std::this_thread::get_id();
@@ -151,7 +155,7 @@ namespace thread_sample
 		std::mutex mutex01;
 
 		const auto put_data = [&]() -> void {
-			int count = 10;
+			auto count = 10;
 			while (count > 0) {
 				std::unique_lock<std::mutex> locker(mutex01);
 				deque_int.push_front(count);
@@ -163,7 +167,7 @@ namespace thread_sample
 		};
 
 		const auto get_data = [&]() -> void {
-			int data = 0;
+			auto data = 0;
 			while (data != 1) {
 				std::unique_lock<std::mutex> locker(mutex01);
 				if (!deque_int.empty()) {
@@ -203,7 +207,7 @@ namespace thread_sample
 
 		auto producer = [&]() {
 			// 生产者，往队列存入数据
-			int count = 10;
+			auto count = 10;
 			while (count > 0) {
 				std::unique_lock<std::mutex> locker(mu);
 				deque_int.push_front(count);
@@ -216,7 +220,7 @@ namespace thread_sample
 
 		auto customer = [&]() {
 			// 消费者，从队列提取数据
-			int data = 0;
+			auto data = 0;
 			while (data != 1) {
 				std::unique_lock<std::mutex> locker(mu);
 				while (deque_int.empty()) {
@@ -241,15 +245,15 @@ namespace thread_sample
 
 	typedef std::vector<int>::iterator VecIter;
 
-	void AsyncUseCondition() // 使用condition_variable 实现异步；
+	void AsyncUseCondition() // 使用condition_variable 实现线程互斥锁
 	{
 		using VecIter = std::vector<int>::iterator;
-		int rst = 0;
-		std::mutex mu;
-		std::condition_variable cond;
+		auto rst = 0; // 接收运算结果,同时作标志位
+		std::mutex mu; // 全局互斥锁
+		std::condition_variable cond; // 全局条件变量
 
 		auto accumulate_lam = [&](const VecIter first, const VecIter last) -> void {
-			const int sum = std::accumulate(first, last, 0);
+			const auto sum = std::accumulate(first, last, 0);
 			std::unique_lock<std::mutex> locker(mu);
 			rst = sum;
 			locker.unlock();
@@ -257,19 +261,20 @@ namespace thread_sample
 			std::this_thread::sleep_for(std::chrono::seconds(1));
 		};
 
-		std::vector<int> numbers = { 1, 2, 3, 4, 5, 6 };
+		std::vector<int> numbers = {1, 2, 3, 4, 5, 6};
 		std::thread work_thread(accumulate_lam, numbers.begin(), numbers.end());
-		std::unique_lock<std::mutex> main_locker(mu);
 
-		cond.wait(main_locker, [&]() -> bool { return rst; }); // 从thread创建开始异步执行，使用condition_variable.wait等待结果返回。
+		std::unique_lock<std::mutex> main_locker(mu);
+		// work_thread并发执行，这里main_locker定义在主线程，后面wait使用main_locker,条件是rst得到结果才进行后续
+		cond.wait(main_locker, [&]() -> bool { return rst; });
 
 		std::cout << "Result: " << rst << "\n";
 		main_locker.unlock();
 		work_thread.join();
+		// 使用condition_variable, mutex, thread进行多线程并发时，使用简单，但需要多个全局变量，耦合度高,很多全局量需要引入到线程函数.
 	}
 
 	/*
-	 * 使用condition_variable可完成大部分异步任务，最大缺点则是数据耦合度太高，很多全局量需要引入到线程函数；
 	 * 采用Future， promise, future 实现在数据松耦合；从下例可以看到， 使用promise<int> future<int> 可以将全部全局变量去除；
 	 */
 	void AsyncUseFuture()
@@ -285,7 +290,7 @@ namespace thread_sample
 		};
 
 		Accumulate accumulate01;
-		std::vector<int> numbers = { 1, 2, 3, 4, 5, 6, 7 };
+		std::vector<int> numbers = {1, 2, 3, 4, 5, 6, 7};
 		std::promise<int> accumulate_promise;
 		std::future<int> accumulate_future = accumulate_promise.get_future();
 		// 创建线程时，需要使用move(future)右值引用，通promise返回。
@@ -309,7 +314,7 @@ namespace thread_sample
 		};
 
 		AccumulateCls accumulate_obj;
-		std::vector<int> numbers = { 1, 2, 3, 4, 5, 6, 7, 8 };
+		std::vector<int> numbers = {1, 2, 3, 4, 5, 6, 7, 8};
 
 		std::packaged_task<int(VecIter, VecIter)> accumulate_task(accumulate_obj); // 同promise方式相似。
 
@@ -327,7 +332,7 @@ namespace thread_sample
 			return sum;
 		};
 
-		std::vector<int> numbers{ 1, 2, 3, 4, 5, 6, 7, 8 };
+		std::vector<int> numbers{1, 2, 3, 4, 5, 6, 7, 8};
 		//auto accumulate_future = std::async(std::launch::async, accumulate, numbers.begin(), numbers.end());
 		std::future<int> accumulate_future = std::async(std::launch::async, accumulate, numbers.begin(), numbers.end());
 		std::cout << "Rst: " << accumulate_future.get() << "\n";
@@ -645,7 +650,7 @@ namespace thread_github
 	{
 		S01 s1;
 		std::thread t1(s1);
-		std::thread t2{ S01() };
+		std::thread t2{S01()};
 		// 需要注意定义t3时采用传统的t3(...), 这里为解决t3(S01())解析问题需要在s01()外再加一(), 即： t3( (S01()) );
 		std::thread t3((S01())); // 注意(()) 解决 most vexing parse ;
 		std::thread t4([] { std::cout << "lambda call t4" << "\n"; });
@@ -672,7 +677,7 @@ namespace thread_github
 	void TestS02()
 	{
 		int x = 0;
-		S02 s02{ x };
+		S02 s02{x};
 		std::thread t1(s02); //调用仿函数operator()()const;
 		t1.detach(); //主程序直接结束不等待
 	}
@@ -680,7 +685,7 @@ namespace thread_github
 	void TestS03()
 	{
 		int x = 0;
-		S02 s02{ x };
+		S02 s02{x};
 		std::thread t(s02);
 		/*
 			try{ 主线程操作， 如果发生异常，会导致线程没能执行join(); 故需要在catch(...){ 执行 t.join(); }；
@@ -719,9 +724,9 @@ namespace thread_github
 	void ThreadGuardTest01()
 	{
 		auto x = 0;
-		S02 s2{ x };
-		std::thread t2{ s2 };
-		ThreadGuard tg2{ t2 };
+		S02 s2{x};
+		std::thread t2{s2};
+		ThreadGuard tg2{t2};
 
 		std::thread t1(Func02, std::ref(x)); // Func02 传递int&; 引用传递；
 		ThreadGuard tg1(t1);
@@ -730,14 +735,14 @@ namespace thread_github
 		auto func03 = [](const std::unique_ptr<int> p) -> void { (*p)++; };
 		t3->join();
 
-		std::unique_ptr<int> num{ new int(8) };
+		std::unique_ptr<int> num{new int(8)};
 		std::unique_ptr<std::thread> t4 = std::make_unique<std::thread>(func03, std::move(num));
 		t4->join();
 
 		/*
 		 * some code....;
 		 */
-		 // 这里使用类管理线程，函数结束时自动调用析构函数，实现自动线程join; 避免了try...catch(...){...}；
+		// 这里使用类管理线程，函数结束时自动调用析构函数，实现自动线程join; 避免了try...catch(...){...}；
 	}
 
 	class ScopedThread
@@ -762,7 +767,7 @@ namespace thread_github
 	void ScopedThreadTest()
 	{
 		// 直接将线程传入类中，由类对象进行自动管理线程
-		ScopedThread st(std::thread{ S01() });
+		ScopedThread st(std::thread{S01()});
 	}
 
 	/*
