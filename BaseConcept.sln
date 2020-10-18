@@ -3,13 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.1145
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "v01", "BaseConcept\BaseConcept.vcxproj", "{A3C3C203-853B-4A66-B4B0-D7CE25E75D65}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "win32App", "winApp\winApp.vcxproj", "{7E104589-40CB-40AE-A90B-72DE9278EDED}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ScreenCap", "ScreenCap\ScreenCap.vcxproj", "{5B09BE8E-FC71-414C-AB5A-0C4B70438873}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SDIApp01", "SDIApp01\SDIApp01.vcxproj", "{405E34C9-59B5-4165-8714-4531AEDEAFFA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "STL_Demo", "BaseConcept\BaseConcept.vcxproj", "{A3C3C203-853B-4A66-B4B0-D7CE25E75D65}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,36 +19,12 @@ Global
 		{A3C3C203-853B-4A66-B4B0-D7CE25E75D65}.Release|x64.ActiveCfg = Release|x64
 		{A3C3C203-853B-4A66-B4B0-D7CE25E75D65}.Release|x64.Build.0 = Release|x64
 		{A3C3C203-853B-4A66-B4B0-D7CE25E75D65}.Release|x86.ActiveCfg = Release|x64
-		{7E104589-40CB-40AE-A90B-72DE9278EDED}.Debug|x64.ActiveCfg = Debug|x64
-		{7E104589-40CB-40AE-A90B-72DE9278EDED}.Debug|x64.Build.0 = Debug|x64
-		{7E104589-40CB-40AE-A90B-72DE9278EDED}.Debug|x86.ActiveCfg = Debug|Win32
-		{7E104589-40CB-40AE-A90B-72DE9278EDED}.Debug|x86.Build.0 = Debug|Win32
-		{7E104589-40CB-40AE-A90B-72DE9278EDED}.Release|x64.ActiveCfg = Release|x64
-		{7E104589-40CB-40AE-A90B-72DE9278EDED}.Release|x64.Build.0 = Release|x64
-		{7E104589-40CB-40AE-A90B-72DE9278EDED}.Release|x86.ActiveCfg = Release|Win32
-		{7E104589-40CB-40AE-A90B-72DE9278EDED}.Release|x86.Build.0 = Release|Win32
-		{5B09BE8E-FC71-414C-AB5A-0C4B70438873}.Debug|x64.ActiveCfg = Debug|x64
-		{5B09BE8E-FC71-414C-AB5A-0C4B70438873}.Debug|x64.Build.0 = Debug|x64
-		{5B09BE8E-FC71-414C-AB5A-0C4B70438873}.Debug|x86.ActiveCfg = Debug|Win32
-		{5B09BE8E-FC71-414C-AB5A-0C4B70438873}.Debug|x86.Build.0 = Debug|Win32
-		{5B09BE8E-FC71-414C-AB5A-0C4B70438873}.Release|x64.ActiveCfg = Release|x64
-		{5B09BE8E-FC71-414C-AB5A-0C4B70438873}.Release|x64.Build.0 = Release|x64
-		{5B09BE8E-FC71-414C-AB5A-0C4B70438873}.Release|x86.ActiveCfg = Release|Win32
-		{5B09BE8E-FC71-414C-AB5A-0C4B70438873}.Release|x86.Build.0 = Release|Win32
-		{405E34C9-59B5-4165-8714-4531AEDEAFFA}.Debug|x64.ActiveCfg = Debug|x64
-		{405E34C9-59B5-4165-8714-4531AEDEAFFA}.Debug|x64.Build.0 = Debug|x64
-		{405E34C9-59B5-4165-8714-4531AEDEAFFA}.Debug|x86.ActiveCfg = Debug|Win32
-		{405E34C9-59B5-4165-8714-4531AEDEAFFA}.Debug|x86.Build.0 = Debug|Win32
-		{405E34C9-59B5-4165-8714-4531AEDEAFFA}.Release|x64.ActiveCfg = Release|x64
-		{405E34C9-59B5-4165-8714-4531AEDEAFFA}.Release|x64.Build.0 = Release|x64
-		{405E34C9-59B5-4165-8714-4531AEDEAFFA}.Release|x86.ActiveCfg = Release|Win32
-		{405E34C9-59B5-4165-8714-4531AEDEAFFA}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {D24C0A8F-2D5F-4FE9-9D00-D3D6DC45716D}
 		Qt5Version = Qt5.12_msvc2017_64
+		SolutionGuid = {D24C0A8F-2D5F-4FE9-9D00-D3D6DC45716D}
 	EndGlobalSection
 EndGlobal
