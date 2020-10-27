@@ -2,6 +2,7 @@
 
 #include "framework.h"
 #include "Win32App01.h"
+#include "systems1.h"
 
 // Global Variables:
 
@@ -60,7 +61,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 //
 //  PURPOSE: Registers the window class.
 //
-ATOM MyRegisterClass(HINSTANCE hInstance)
+ATOM MyRegisterClass(HINSTANCE const hInstance)
 {
 	WNDCLASSEXW wcex;
 
@@ -97,7 +98,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
 	hInst = hInstance; // Store instance handle in our global variable
 
-	HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+	HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW | WS_VSCROLL,
 	                          CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 
 	if (!hWnd) {
@@ -122,10 +123,27 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	HDC hdc;
+	static int cxChar, cxCaps, cyChar;
+	TCHAR szBuffer[10];
+	TEXTMETRIC tm;
+
+	static int cxClient, cyClient;
+
+	static HWND hTextBox;
+
 	switch (message) {
 	case WM_CREATE:
 	{
-		MessageBoxW(hWnd, _T("Create"), _T("Before Create Window"), MB_OK);
+		hdc = GetDC(hWnd);
+		GetTextMetrics(hdc, &tm);
+		cxChar = tm.tmAveCharWidth;
+		cxCaps = (tm.tmPitchAndFamily & 1 ? 3 : 2) * cxChar / 2;
+		cyChar = tm.tmHeight + tm.tmExternalLeading;
+		ReleaseDC(hWnd, hdc);
+		hTextBox = CreateWindowEx(WS_EX_STATICEDGE, L"EDIT", L"",
+		                          WS_CHILD | WS_VISIBLE | ES_READONLY | ES_RIGHT,
+		                          0, 0, 200, 50, hWnd, nullptr, hInst, nullptr);
 	}
 	break;
 
@@ -149,18 +167,34 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_PAINT:
 	{
 		PAINTSTRUCT ps;
-		HDC hdc = BeginPaint(hWnd, &ps);
+		hdc = BeginPaint(hWnd, &ps);
+
+
+		// Display systems1.h system_tricks[] info;
+		for (int i = 0; i < NUM_LINES; i++) {
+			TextOut(hdc, 10, cyChar * i, system_tricks[i].szLabel, lstrlenW(system_tricks[i].szLabel));
+			TextOut(hdc, 22 * cxCaps, cyChar * i, system_tricks[i].szDesc, lstrlenW(system_tricks[i].szDesc));
+			SetTextAlign(hdc, TA_RIGHT | TA_TOP);
+			TextOut(hdc, 22 * cxCaps + 40 * cxChar, cyChar * i, szBuffer,
+			        wsprintf(szBuffer, TEXT("%5d"), GetSystemMetrics(system_tricks[i].iIndex)));
+			SetTextAlign(hdc, TA_LEFT | TA_TOP);
+		}
 
 		///// Some user code.....;
 		RECT rect;
 		GetClientRect(hWnd, &rect);
-		DrawText(hdc, _T("Hello, Win32App"), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+		DrawText(hdc, TEXT("Hello, Win32App"), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 		/////
 
 		EndPaint(hWnd, &ps);
 	}
 	break;
-
+	case WM_SIZE:
+	{
+		cxClient = LOWORD(lParam);
+		cyClient = HIWORD(lParam);
+	}
+	break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
@@ -171,7 +205,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 // Message handler for about box.
-INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK About(const HWND hDlg, const UINT message, WPARAM const wParam, const LPARAM lParam)
 {
 	UNREFERENCED_PARAMETER(lParam);
 	switch (message) {
@@ -185,7 +219,8 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 		break;
 	default:
-		MessageBoxW(nullptr, _T("Why?"), _T("Why is here??"), MB_ABORTRETRYIGNORE | MB_ICONERROR);
+		DefWindowProc(hDlg, message, wParam, lParam);
+		//MessageBoxW(nullptr, _T("Why?"), _T("Why is here??"), MB_ABORTRETRYIGNORE | MB_ICONERROR);
 	}
 	return static_cast<INT_PTR>(FALSE);
 }

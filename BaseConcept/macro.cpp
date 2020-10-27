@@ -39,6 +39,9 @@ typedef char* CharP1;
 #define LINK_NAME(name) sz_##name
 #define OUT_VAL(name) std::cout << "sz_"#name" = " << LINK_NAME(name) << "\n";
 
+// 结果是(p) 实质是什么都不做，主要目的是防止编译器警告。 即函数内如果定义变量没有使用则可以使用(var)方式去忽略警告;
+#define UNREFERENCED_PARAM(p) (p)
+
 /*
  * 常见内置宏： (以 __ 起头 属C++内置，  以 _ 起头则表示 编译器内置)
  *		__FILE__,   __DATE__,  __FUNCTION__, __LINE__,  __TIME__, __TIMESTAMP__;
