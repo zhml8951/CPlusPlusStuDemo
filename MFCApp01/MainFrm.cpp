@@ -1,12 +1,17 @@
-
-// MainFrm.cpp : implementation of the CMainFrame class
+﻿// MainFrm.cpp : implementation of the CMainFrame class
 //
 
 #include "pch.h"
 #include "framework.h"
 #include "MFCApp01.h"
-
 #include "MainFrm.h"
+
+#include "CDlgEdit01.h"
+#include "CListBox01.h"
+#include "ComboBox01.h"
+#include "ImageDemo.h"
+#include "RadioDemo.h"
+#include "ListViewDemo.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -16,22 +21,30 @@
 
 IMPLEMENT_DYNCREATE(CMainFrame, CFrameWndEx)
 
-const int  iMaxUserToolbars = 10;
+const int iMaxUserToolbars = 10;
 const UINT uiFirstUserToolBarId = AFX_IDW_CONTROLBAR_FIRST + 40;
 const UINT uiLastUserToolBarId = uiFirstUserToolBarId + iMaxUserToolbars - 1;
 
 BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_WM_CREATE()
-	ON_COMMAND(ID_VIEW_CUSTOMIZE, &CMainFrame::OnViewCustomize)
 	ON_REGISTERED_MESSAGE(AFX_WM_CREATETOOLBAR, &CMainFrame::OnToolbarCreateNew)
 	ON_COMMAND_RANGE(ID_VIEW_APPLOOK_WIN_2000, ID_VIEW_APPLOOK_WINDOWS_7, &CMainFrame::OnApplicationLook)
-	ON_UPDATE_COMMAND_UI_RANGE(ID_VIEW_APPLOOK_WIN_2000, ID_VIEW_APPLOOK_WINDOWS_7, &CMainFrame::OnUpdateApplicationLook)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_VIEW_APPLOOK_WIN_2000, ID_VIEW_APPLOOK_WINDOWS_7,
+		&CMainFrame::OnUpdateApplicationLook)
 	ON_WM_SETTINGCHANGE()
+	ON_COMMAND(ID_VIEW_CUSTOMIZE, &CMainFrame::OnViewCustomize)
+	ON_COMMAND(ID_DEMOS_EDITCONTROL, &CMainFrame::OnDemosEditControl)
+	ON_COMMAND(ID_DEMOS_LISTBOX01, &CMainFrame::OnDemosListbox01)
+	ON_COMMAND(ID_DEMOS_COMBOBOX01, &CMainFrame::OnDemosComboBox01)
+	ON_COMMAND(ID_DEMOS_IMAGEDEMO01, &CMainFrame::OnDemosImageDemo01)
+	ON_COMMAND(ID_DEMOS_RADIODEMO01, &CMainFrame::OnDemosRadioDemo01)
+	ON_COMMAND(ID_DEMOS_SCREENCAPTURE01, &CMainFrame::OnDemosScreenCapture01)
+	ON_COMMAND(ID_DEMOS_STUDENT_INFO, &CMainFrame::OnDemosStudentInfo)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
 {
-	ID_SEPARATOR,           // status line indicator
+	ID_SEPARATOR, // status line indicator
 	ID_INDICATOR_CAPS,
 	ID_INDICATOR_NUM,
 	ID_INDICATOR_SCRL,
@@ -45,21 +58,16 @@ CMainFrame::CMainFrame() noexcept
 	theApp.m_nAppLook = theApp.GetInt(_T("ApplicationLook"), ID_VIEW_APPLOOK_VS_2008);
 }
 
-CMainFrame::~CMainFrame()
-{
-}
+CMainFrame::~CMainFrame() {}
 
-int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
+int CMainFrame::OnCreate(LPCREATESTRUCT const lpCreateStruct)
 {
 	if (CFrameWndEx::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	BOOL bNameValid;
-
-	if (!m_wndMenuBar.Create(this))
-	{
+	if (!m_wndMenuBar.Create(this)) {
 		TRACE0("Failed to create menubar\n");
-		return -1;      // fail to create
+		return -1; // fail to create
 	}
 
 	m_wndMenuBar.SetPaneStyle(m_wndMenuBar.GetPaneStyle() | CBRS_SIZE_DYNAMIC | CBRS_TOOLTIPS | CBRS_FLYBY);
@@ -67,15 +75,17 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// prevent the menu bar from taking the focus on activation
 	CMFCPopupMenu::SetForceMenuFocus(FALSE);
 
-	if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
-		!m_wndToolBar.LoadToolBar(theApp.m_bHiColorIcons ? IDR_MAINFRAME_256 : IDR_MAINFRAME))
-	{
+	if (!m_wndToolBar.CreateEx(
+		this, TBSTYLE_FLAT,
+		WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
+		!m_wndToolBar.LoadToolBar(theApp.m_bHiColorIcons ? IDR_MAINFRAME_256 : IDR_MAINFRAME)
+		) {
 		TRACE0("Failed to create toolbar\n");
-		return -1;      // fail to create
+		return -1; // fail to create
 	}
 
 	CString strToolBarName;
-	bNameValid = strToolBarName.LoadString(IDS_TOOLBAR_STANDARD);
+	BOOL bNameValid = strToolBarName.LoadString(IDS_TOOLBAR_STANDARD);
 	ASSERT(bNameValid);
 	m_wndToolBar.SetWindowText(strToolBarName);
 
@@ -87,12 +97,11 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Allow user-defined toolbars operations:
 	InitUserToolbars(nullptr, uiFirstUserToolBarId, uiLastUserToolBarId);
 
-	if (!m_wndStatusBar.Create(this))
-	{
+	if (!m_wndStatusBar.Create(this)) {
 		TRACE0("Failed to create status bar\n");
-		return -1;      // fail to create
+		return -1; // fail to create
 	}
-	m_wndStatusBar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT));
+	m_wndStatusBar.SetIndicators(indicators, sizeof(indicators) / sizeof(UINT));
 
 	// TODO: Delete these five lines if you don't want the toolbar and menubar to be dockable
 	m_wndMenuBar.EnableDocking(CBRS_ALIGN_ANY);
@@ -100,7 +109,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	EnableDocking(CBRS_ALIGN_ANY);
 	DockPane(&m_wndMenuBar);
 	DockPane(&m_wndToolBar);
-
 
 	// enable Visual Studio 2005 style docking window behavior
 	CDockingManager::SetDockingMode(DT_SMART);
@@ -111,8 +119,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	CMFCToolBar::AddToolBarForImageCollection(IDR_MENU_IMAGES, theApp.m_bHiColorIcons ? IDB_MENU_IMAGES_24 : 0);
 
 	// create docking windows
-	if (!CreateDockingWindows())
-	{
+	if (!CreateDockingWindows()) {
 		TRACE0("Failed to create docking windows\n");
 		return -1;
 	}
@@ -136,11 +143,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// enable quick (Alt+drag) toolbar customization
 	CMFCToolBar::EnableQuickCustomization();
 
-	if (CMFCToolBar::GetUserImages() == nullptr)
-	{
+	if (CMFCToolBar::GetUserImages() == nullptr) {
 		// load user-defined toolbar images
-		if (m_UserImages.Load(_T(".\\UserImages.bmp")))
-		{
+		if (m_UserImages.Load(_T(".\\UserImages.bmp"))) {
 			CMFCToolBar::SetUserImages(&m_UserImages);
 		}
 	}
@@ -179,7 +184,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 {
-	if( !CFrameWndEx::PreCreateWindow(cs) )
+	if (!CFrameWndEx::PreCreateWindow(cs))
 		return FALSE;
 	// TODO: Modify the Window class or styles here by modifying
 	//  the CREATESTRUCT cs
@@ -189,14 +194,15 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 
 BOOL CMainFrame::CreateDockingWindows()
 {
-	BOOL bNameValid;
-
 	// Create class view
 	CString strClassView;
-	bNameValid = strClassView.LoadString(IDS_CLASS_VIEW);
+	BOOL bNameValid = strClassView.LoadString(IDS_CLASS_VIEW);
 	ASSERT(bNameValid);
-	if (!m_wndClassView.Create(strClassView, this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_CLASSVIEW, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_LEFT | CBRS_FLOAT_MULTI))
-	{
+
+	if (!m_wndClassView.Create(
+		strClassView, this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_CLASSVIEW,
+		WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_LEFT | CBRS_FLOAT_MULTI)
+		) {
 		TRACE0("Failed to create Class View window\n");
 		return FALSE; // failed to create
 	}
@@ -205,8 +211,10 @@ BOOL CMainFrame::CreateDockingWindows()
 	CString strFileView;
 	bNameValid = strFileView.LoadString(IDS_FILE_VIEW);
 	ASSERT(bNameValid);
-	if (!m_wndFileView.Create(strFileView, this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_FILEVIEW, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_LEFT| CBRS_FLOAT_MULTI))
-	{
+	if (!m_wndFileView.Create(
+		strFileView, this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_FILEVIEW,
+		WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_LEFT | CBRS_FLOAT_MULTI)
+		) {
 		TRACE0("Failed to create File View window\n");
 		return FALSE; // failed to create
 	}
@@ -215,8 +223,11 @@ BOOL CMainFrame::CreateDockingWindows()
 	CString strOutputWnd;
 	bNameValid = strOutputWnd.LoadString(IDS_OUTPUT_WND);
 	ASSERT(bNameValid);
-	if (!m_wndOutput.Create(strOutputWnd, this, CRect(0, 0, 100, 100), TRUE, ID_VIEW_OUTPUTWND, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_BOTTOM | CBRS_FLOAT_MULTI))
-	{
+
+	if (!m_wndOutput.Create(
+		strOutputWnd, this, CRect(0, 0, 100, 100), TRUE, ID_VIEW_OUTPUTWND,
+		WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_BOTTOM | CBRS_FLOAT_MULTI)
+		) {
 		TRACE0("Failed to create Output window\n");
 		return FALSE; // failed to create
 	}
@@ -225,8 +236,11 @@ BOOL CMainFrame::CreateDockingWindows()
 	CString strPropertiesWnd;
 	bNameValid = strPropertiesWnd.LoadString(IDS_PROPERTIES_WND);
 	ASSERT(bNameValid);
-	if (!m_wndProperties.Create(strPropertiesWnd, this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_PROPERTIESWND, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
-	{
+
+	if (!m_wndProperties.Create(
+		strPropertiesWnd, this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_PROPERTIESWND,
+		WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI)
+		) {
 		TRACE0("Failed to create Properties window\n");
 		return FALSE; // failed to create
 	}
@@ -237,18 +251,35 @@ BOOL CMainFrame::CreateDockingWindows()
 
 void CMainFrame::SetDockingWindowIcons(BOOL bHiColorIcons)
 {
-	HICON hFileViewIcon = (HICON) ::LoadImage(::AfxGetResourceHandle(), MAKEINTRESOURCE(bHiColorIcons ? IDI_FILE_VIEW_HC : IDI_FILE_VIEW), IMAGE_ICON, ::GetSystemMetrics(SM_CXSMICON), ::GetSystemMetrics(SM_CYSMICON), 0);
+	HICON hFileViewIcon =
+		static_cast<HICON>(::LoadImage(::AfxGetResourceHandle(),
+			MAKEINTRESOURCE(bHiColorIcons ? IDI_FILE_VIEW_HC : IDI_FILE_VIEW),
+			IMAGE_ICON, ::GetSystemMetrics(SM_CXSMICON),
+			::GetSystemMetrics(SM_CYSMICON), 0));
 	m_wndFileView.SetIcon(hFileViewIcon, FALSE);
 
-	HICON hClassViewIcon = (HICON) ::LoadImage(::AfxGetResourceHandle(), MAKEINTRESOURCE(bHiColorIcons ? IDI_CLASS_VIEW_HC : IDI_CLASS_VIEW), IMAGE_ICON, ::GetSystemMetrics(SM_CXSMICON), ::GetSystemMetrics(SM_CYSMICON), 0);
+	HICON hClassViewIcon =
+		static_cast<HICON>(::LoadImage(::AfxGetResourceHandle(),
+			MAKEINTRESOURCE(bHiColorIcons ? IDI_CLASS_VIEW_HC : IDI_CLASS_VIEW),
+			IMAGE_ICON, ::GetSystemMetrics(SM_CXSMICON),
+			::GetSystemMetrics(SM_CYSMICON), 0));
 	m_wndClassView.SetIcon(hClassViewIcon, FALSE);
 
-	HICON hOutputBarIcon = (HICON) ::LoadImage(::AfxGetResourceHandle(), MAKEINTRESOURCE(bHiColorIcons ? IDI_OUTPUT_WND_HC : IDI_OUTPUT_WND), IMAGE_ICON, ::GetSystemMetrics(SM_CXSMICON), ::GetSystemMetrics(SM_CYSMICON), 0);
+	HICON hOutputBarIcon =
+		static_cast<HICON>(::LoadImage(::AfxGetResourceHandle(),
+			MAKEINTRESOURCE(bHiColorIcons ? IDI_OUTPUT_WND_HC : IDI_OUTPUT_WND),
+			IMAGE_ICON, ::GetSystemMetrics(SM_CXSMICON),
+			::GetSystemMetrics(SM_CYSMICON), 0));
 	m_wndOutput.SetIcon(hOutputBarIcon, FALSE);
 
-	HICON hPropertiesBarIcon = (HICON) ::LoadImage(::AfxGetResourceHandle(), MAKEINTRESOURCE(bHiColorIcons ? IDI_PROPERTIES_WND_HC : IDI_PROPERTIES_WND), IMAGE_ICON, ::GetSystemMetrics(SM_CXSMICON), ::GetSystemMetrics(SM_CYSMICON), 0);
-	m_wndProperties.SetIcon(hPropertiesBarIcon, FALSE);
+	HICON hPropertiesBarIcon =
+		static_cast<HICON>(::LoadImage(::AfxGetResourceHandle(),
+			MAKEINTRESOURCE(
+				bHiColorIcons ? IDI_PROPERTIES_WND_HC : IDI_PROPERTIES_WND),
+			IMAGE_ICON, ::GetSystemMetrics(SM_CXSMICON),
+			::GetSystemMetrics(SM_CYSMICON), 0));
 
+	m_wndProperties.SetIcon(hPropertiesBarIcon, FALSE);
 }
 
 // CMainFrame diagnostics
@@ -265,7 +296,6 @@ void CMainFrame::Dump(CDumpContext& dc) const
 }
 #endif //_DEBUG
 
-
 // CMainFrame message handlers
 
 void CMainFrame::OnViewCustomize()
@@ -275,11 +305,10 @@ void CMainFrame::OnViewCustomize()
 	pDlgCust->Create();
 }
 
-LRESULT CMainFrame::OnToolbarCreateNew(WPARAM wp,LPARAM lp)
+LRESULT CMainFrame::OnToolbarCreateNew(WPARAM wp, LPARAM lp)
 {
-	LRESULT lres = CFrameWndEx::OnToolbarCreateNew(wp,lp);
-	if (lres == 0)
-	{
+	LRESULT lres = CFrameWndEx::OnToolbarCreateNew(wp, lp);
+	if (lres == 0) {
 		return 0;
 	}
 
@@ -301,8 +330,7 @@ void CMainFrame::OnApplicationLook(UINT id)
 
 	theApp.m_nAppLook = id;
 
-	switch (theApp.m_nAppLook)
-	{
+	switch (theApp.m_nAppLook) {
 	case ID_VIEW_APPLOOK_WIN_2000:
 		CMFCVisualManager::SetDefaultManager(RUNTIME_CLASS(CMFCVisualManager));
 		break;
@@ -337,8 +365,7 @@ void CMainFrame::OnApplicationLook(UINT id)
 		break;
 
 	default:
-		switch (theApp.m_nAppLook)
-		{
+		switch (theApp.m_nAppLook) {
 		case ID_VIEW_APPLOOK_OFF_2007_BLUE:
 			CMFCVisualManagerOffice2007::SetStyle(CMFCVisualManagerOffice2007::Office2007_LunaBlue);
 			break;
@@ -371,16 +398,13 @@ void CMainFrame::OnUpdateApplicationLook(CCmdUI* pCmdUI)
 	pCmdUI->SetRadio(theApp.m_nAppLook == pCmdUI->m_nID);
 }
 
-
 BOOL CMainFrame::LoadFrame(UINT nIDResource, DWORD dwDefaultStyle, CWnd* pParentWnd, CCreateContext* pContext)
 {
 	// base class does the real work
 
-	if (!CFrameWndEx::LoadFrame(nIDResource, dwDefaultStyle, pParentWnd, pContext))
-	{
+	if (!CFrameWndEx::LoadFrame(nIDResource, dwDefaultStyle, pParentWnd, pContext)) {
 		return FALSE;
 	}
-
 
 	// enable customization button for all user toolbars
 	BOOL bNameValid;
@@ -388,11 +412,9 @@ BOOL CMainFrame::LoadFrame(UINT nIDResource, DWORD dwDefaultStyle, CWnd* pParent
 	bNameValid = strCustomize.LoadString(IDS_TOOLBAR_CUSTOMIZE);
 	ASSERT(bNameValid);
 
-	for (int i = 0; i < iMaxUserToolbars; i ++)
-	{
+	for (int i = 0; i < iMaxUserToolbars; i++) {
 		CMFCToolBar* pUserToolbar = GetUserToolBarByIndex(i);
-		if (pUserToolbar != nullptr)
-		{
+		if (pUserToolbar != nullptr) {
 			pUserToolbar->EnableCustomizeButton(TRUE, ID_VIEW_CUSTOMIZE, strCustomize);
 		}
 	}
@@ -400,9 +422,58 @@ BOOL CMainFrame::LoadFrame(UINT nIDResource, DWORD dwDefaultStyle, CWnd* pParent
 	return TRUE;
 }
 
-
 void CMainFrame::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 {
 	CFrameWndEx::OnSettingChange(uFlags, lpszSection);
 	m_wndOutput.UpdateFonts();
+}
+
+void CMainFrame::OnDemosEditControl()
+{
+	CDlgEdit01 dlgEdit01;
+	INT_PTR nRet = dlgEdit01.DoModal();
+	if (nRet == IDOK) {
+		AfxMessageBox(_T("Edit01 Dialog box over by IDOK"));
+	}
+	else {
+		AfxMessageBox(_T("Edit01 Dialog box over by IDCANCEL"));
+	}
+}
+
+void CMainFrame::OnDemosListbox01()
+{
+	CListBox01 dlgListBox01;
+	INT_PTR nRet = dlgListBox01.DoModal();
+}
+
+void CMainFrame::OnDemosComboBox01()
+{
+	CComboBox01 cmbBox01;
+	cmbBox01.DoModal();
+}
+
+void CMainFrame::OnDemosImageDemo01()
+{
+	CImageDemo imgDemo01;
+	imgDemo01.DoModal();
+}
+
+
+void CMainFrame::OnDemosRadioDemo01()
+{
+	CRadioDemo radioDemo01;
+	radioDemo01.DoModal();
+}
+
+
+void CMainFrame::OnDemosScreenCapture01()
+{
+	AfxMessageBox(_T("ok"));
+}
+
+
+void CMainFrame::OnDemosStudentInfo()
+{
+	CListViewDemo dlgDemo;
+	dlgDemo.DoModal();
 }

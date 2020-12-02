@@ -1,14 +1,12 @@
-
-// CDialog01Dlg.h : header file
+﻿// CDialog01Dlg.h : header file
 //
 
 #pragma once
 
-
 // CDialog01Dlg dialog
 class CDialog01Dlg : public CDialogEx
 {
-// Construction
+	// Construction
 public:
 	CDialog01Dlg(CWnd* pParent = nullptr);	// standard constructor
 
@@ -17,9 +15,8 @@ public:
 	enum { IDD = IDD_MFCDIALOG01_DIALOG };
 #endif
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
-
 
 // Implementation
 protected:
@@ -31,4 +28,7 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnBnClickedButton1();
+	afx_msg void OnBnClickedBtnMgr01();
 };

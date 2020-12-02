@@ -1,5 +1,4 @@
-
-// MFCApp01.cpp : Defines the class behaviors for the application.
+﻿// MFCApp01.cpp : Defines the class behaviors for the application.
 //
 
 #include "pch.h"
@@ -16,7 +15,6 @@
 #define new DEBUG_NEW
 #endif
 
-
 // CApp01App
 
 BEGIN_MESSAGE_MAP(CApp01App, CWinAppEx)
@@ -27,7 +25,6 @@ BEGIN_MESSAGE_MAP(CApp01App, CWinAppEx)
 	// Standard print setup command
 	ON_COMMAND(ID_FILE_PRINT_SETUP, &CWinAppEx::OnFilePrintSetup)
 END_MESSAGE_MAP()
-
 
 // CApp01App construction
 
@@ -46,7 +43,7 @@ CApp01App::CApp01App() noexcept
 
 	// TODO: replace application ID string below with unique ID string; recommended
 	// format for string is CompanyName.ProductName.SubProduct.VersionInformation
-	SetAppID(_T("MFCApp01.AppID.NoVersion"));
+	SetAppID(_T("MFCApp01.01.101"));
 
 	// TODO: add construction code here,
 	// Place all significant initialization in InitInstance
@@ -55,7 +52,6 @@ CApp01App::CApp01App() noexcept
 // The one and only CApp01App object
 
 CApp01App theApp;
-
 
 // CApp01App initialization
 
@@ -73,10 +69,8 @@ BOOL CApp01App::InitInstance()
 
 	CWinAppEx::InitInstance();
 
-
 	// Initialize OLE libraries
-	if (!AfxOleInit())
-	{
+	if (!AfxOleInit()) {
 		AfxMessageBox(IDP_OLE_INIT_FAILED);
 		return FALSE;
 	}
@@ -95,38 +89,34 @@ BOOL CApp01App::InitInstance()
 	// Change the registry key under which our settings are stored
 	// TODO: You should modify this string to be something appropriate
 	// such as the name of your company or organization
-	SetRegistryKey(_T("Local AppWizard-Generated Applications"));
-	LoadStdProfileSettings(4);  // Load standard INI file options (including MRU)
-
+	SetRegistryKey(_T("BaseConcept_MFC_Demo01"));
+	LoadStdProfileSettings(4); // Load standard INI file options (including MRU)
 
 	InitContextMenuManager();
 
 	InitKeyboardManager();
 
 	InitTooltipManager();
+
 	CMFCToolTipInfo ttParams;
 	ttParams.m_bVislManagerTheme = TRUE;
 	theApp.GetTooltipManager()->SetTooltipParams(AFX_TOOLTIP_TYPE_ALL,
 		RUNTIME_CLASS(CMFCToolTipCtrl), &ttParams);
 
-	// Register the application's document templates.  Document templates
-	//  serve as the connection between documents, frame windows and views
-	CSingleDocTemplate* pDocTemplate;
-	pDocTemplate = new CSingleDocTemplate(
-		IDR_MAINFRAME,
-		RUNTIME_CLASS(CApp01Doc),
-		RUNTIME_CLASS(CMainFrame),       // main SDI frame window
-		RUNTIME_CLASS(CApp01View));
+	CSingleDocTemplate* pDocTemplate =
+		new CSingleDocTemplate(
+			IDR_MAINFRAME,
+			RUNTIME_CLASS(CApp01Doc),
+			RUNTIME_CLASS(CMainFrame), // main SDI frame window
+			RUNTIME_CLASS(CApp01View));
+
 	if (!pDocTemplate)
 		return FALSE;
 	AddDocTemplate(pDocTemplate);
 
-
 	// Parse command line for standard shell commands, DDE, file open
 	CCommandLineInfo cmdInfo;
 	ParseCommandLine(cmdInfo);
-
-
 
 	// Dispatch commands specified on the command line.  Will return FALSE if
 	// app was launched with /RegServer, /Register, /Unregserver or /Unregister.
@@ -147,9 +137,6 @@ int CApp01App::ExitInstance()
 	return CWinAppEx::ExitInstance();
 }
 
-// CApp01App message handlers
-
-
 // CAboutDlg dialog used for App About
 
 class CAboutDlg : public CDialogEx
@@ -157,29 +144,35 @@ class CAboutDlg : public CDialogEx
 public:
 	CAboutDlg() noexcept;
 
-// Dialog Data
+	// Dialog Data
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ABOUTBOX };
 #endif
 
+	// Implementation
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX); // DDX/DDV support
+	virtual BOOL OnInitDialog();
 
-// Implementation
-protected:
 	DECLARE_MESSAGE_MAP()
+
+private:
+	CMFCMenuButton m_mfcMenuBtn;
+	CMFCButton m_mfcBtn;
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 };
 
-CAboutDlg::CAboutDlg() noexcept : CDialogEx(IDD_ABOUTBOX)
-{
-}
+CAboutDlg::CAboutDlg() noexcept : CDialogEx(IDD_ABOUTBOX) {}
 
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	  DDX_Control(pDX, IDC_MFCMENUBUTTON1, m_mfcMenuBtn);
+	//  DDX_Control(pDX, IDC_MFCBUTTON1, m_mfcBtn);
 }
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
+	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
 // App command to run the dialog
@@ -193,9 +186,8 @@ void CApp01App::OnAppAbout()
 
 void CApp01App::PreLoadState()
 {
-	BOOL bNameValid;
 	CString strName;
-	bNameValid = strName.LoadString(IDS_EDIT_MENU);
+	BOOL bNameValid = strName.LoadString(IDS_EDIT_MENU);
 	ASSERT(bNameValid);
 	GetContextMenuManager()->AddMenu(strName, IDR_POPUP_EDIT);
 	bNameValid = strName.LoadString(IDS_EXPLORER);
@@ -203,15 +195,23 @@ void CApp01App::PreLoadState()
 	GetContextMenuManager()->AddMenu(strName, IDR_POPUP_EXPLORER);
 }
 
-void CApp01App::LoadCustomState()
+void CApp01App::LoadCustomState() {}
+
+void CApp01App::SaveCustomState() {}
+
+int CAboutDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
+	if (CDialogEx::OnCreate(lpCreateStruct) == -1)
+		return -1;
+
+	return 0;
 }
 
-void CApp01App::SaveCustomState()
+
+BOOL CAboutDlg::OnInitDialog()
 {
+	CDialogEx::OnInitDialog();
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+				  // EXCEPTION: OCX Property Pages should return FALSE
 }
-
-// CApp01App message handlers
-
-
-

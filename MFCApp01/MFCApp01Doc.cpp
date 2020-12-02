@@ -1,5 +1,4 @@
-
-// MFCApp01Doc.cpp : implementation of the CApp01Doc class
+﻿// MFCApp01Doc.cpp : implementation of the CApp01Doc class
 //
 
 #include "pch.h"
@@ -31,17 +30,16 @@ END_MESSAGE_MAP()
 CApp01Doc::CApp01Doc() noexcept
 {
 	// TODO: add one-time construction code here
-
 }
 
-CApp01Doc::~CApp01Doc()
-{
-}
+CApp01Doc::~CApp01Doc() {}
 
 BOOL CApp01Doc::OnNewDocument()
 {
 	if (!CDocument::OnNewDocument())
 		return FALSE;
+
+	SetTitle(_T("VC_MFC_Demo01"));
 
 	// TODO: add reinitialization code here
 	// (SDI documents will reuse this document)
@@ -50,18 +48,14 @@ BOOL CApp01Doc::OnNewDocument()
 }
 
 
-
-
 // CApp01Doc serialization
 
 void CApp01Doc::Serialize(CArchive& ar)
 {
-	if (ar.IsStoring())
-	{
+	if (ar.IsStoring()) {
 		// TODO: add storing code here
 	}
-	else
-	{
+	else {
 		// TODO: add loading code here
 	}
 }
@@ -94,7 +88,7 @@ void CApp01Doc::InitializeSearchContent()
 {
 	CString strSearchContent;
 	// Set search contents from document's data.
-	// The content parts should be separated by ";"
+// The content parts should be separated by ";"
 
 	// For example:  strSearchContent = _T("point;rectangle;circle;ole object;");
 	SetSearchContent(strSearchContent);

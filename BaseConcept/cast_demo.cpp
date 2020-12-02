@@ -185,7 +185,6 @@ void cast_stu::demo04()
 	printf("demo04 end.");
 }
 
-
 //int main(int argc, char* argv[])
 //{
 //	cast_stu::demo04();

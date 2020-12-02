@@ -1,13 +1,12 @@
-
-#pragma once
+﻿#pragma once
 
 #include "ViewTree.h"
 
 class CClassToolBar : public CMFCToolBar
 {
-	virtual void OnUpdateCmdUI(CFrameWnd* /*pTarget*/, BOOL bDisableIfNoHndler)
+	virtual void OnUpdateCmdUI(CFrameWnd* /*pTarget*/, const BOOL bDisableIfNoHandler)
 	{
-		CMFCToolBar::OnUpdateCmdUI((CFrameWnd*) GetOwner(), bDisableIfNoHndler);
+		CMFCToolBar::OnUpdateCmdUI(static_cast<CFrameWnd*>(GetOwner()), bDisableIfNoHandler);
 	}
 
 	virtual BOOL AllowShowOnList() const { return FALSE; }
@@ -26,11 +25,11 @@ protected:
 	CClassToolBar m_wndToolBar;
 	CViewTree m_wndClassView;
 	CImageList m_ClassViewImages;
-	UINT m_nCurrSort;
+	UINT m_nCurrentSort;
 
 	void FillClassView();
 
-// Overrides
+	// Overrides
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
@@ -45,10 +44,9 @@ protected:
 	afx_msg void OnNewFolder();
 	afx_msg void OnPaint();
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
-	afx_msg LRESULT OnChangeActiveTab(WPARAM, LPARAM);
 	afx_msg void OnSort(UINT id);
 	afx_msg void OnUpdateSort(CCmdUI* pCmdUI);
+	afx_msg LRESULT OnChangeActiveTab(WPARAM, LPARAM);
 
 	DECLARE_MESSAGE_MAP()
 };
-

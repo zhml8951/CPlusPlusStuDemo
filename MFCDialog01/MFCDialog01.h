@@ -1,4 +1,4 @@
-
+﻿
 // MFCDialog01.h : main header file for the PROJECT_NAME application
 //
 
@@ -19,10 +19,12 @@ class CDialog01App : public CWinApp
 {
 public:
 	CDialog01App();
+	CShellManager *pShellManager = nullptr;
 
 // Overrides
 public:
 	virtual BOOL InitInstance();
+	int ExitInstance() override;
 
 // Implementation
 

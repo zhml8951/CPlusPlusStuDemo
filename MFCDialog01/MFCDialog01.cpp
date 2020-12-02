@@ -1,5 +1,4 @@
-
-// MFCDialog01.cpp : Defines the class behaviors for the application.
+﻿// MFCDialog01.cpp : Defines the class behaviors for the application.
 //
 
 #include "pch.h"
@@ -15,7 +14,7 @@
 // CDialog01App
 
 BEGIN_MESSAGE_MAP(CDialog01App, CWinApp)
-	ON_COMMAND(ID_HELP, &CWinApp::OnHelp)
+		ON_COMMAND(ID_HELP, &CWinApp::OnHelp)
 END_MESSAGE_MAP()
 
 
@@ -57,7 +56,7 @@ BOOL CDialog01App::InitInstance()
 
 	// Create the shell manager, in case the dialog contains
 	// any shell tree view or shell list view controls.
-	CShellManager *pShellManager = new CShellManager;
+	pShellManager = new CShellManager;
 
 	// Activate "Windows Native" visual manager for enabling themes in MFC controls
 	CMFCVisualManager::SetDefaultManager(RUNTIME_CLASS(CMFCVisualManagerWindows));
@@ -74,25 +73,22 @@ BOOL CDialog01App::InitInstance()
 	CDialog01Dlg dlg;
 	m_pMainWnd = &dlg;
 	INT_PTR nResponse = dlg.DoModal();
-	if (nResponse == IDOK)
-	{
+	if (nResponse == IDOK) {
 		// TODO: Place code here to handle when the dialog is
 		//  dismissed with OK
 	}
-	else if (nResponse == IDCANCEL)
-	{
+	else if (nResponse == IDCANCEL) {
 		// TODO: Place code here to handle when the dialog is
 		//  dismissed with Cancel
 	}
-	else if (nResponse == -1)
-	{
+	else if (nResponse == -1) {
 		TRACE(traceAppMsg, 0, "Warning: dialog creation failed, so application is terminating unexpectedly.\n");
-		TRACE(traceAppMsg, 0, "Warning: if you are using MFC controls on the dialog, you cannot #define _AFX_NO_MFC_CONTROLS_IN_DIALOGS.\n");
+		TRACE(traceAppMsg, 0,
+		      "Warning: if you are using MFC controls on the dialog, you cannot #define _AFX_NO_MFC_CONTROLS_IN_DIALOGS.\n");
 	}
 
 	// Delete the shell manager created above.
-	if (pShellManager != nullptr)
-	{
+	if (pShellManager != nullptr) {
 		delete pShellManager;
 	}
 
@@ -105,3 +101,9 @@ BOOL CDialog01App::InitInstance()
 	return FALSE;
 }
 
+int CDialog01App::ExitInstance()
+{
+	AfxMessageBox(TEXT("Exit Instance."), MB_OK);
+	CWinApp::ExitInstance();
+	return EXIT_SUCCESS;
+}

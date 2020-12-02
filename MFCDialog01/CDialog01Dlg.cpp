@@ -1,5 +1,4 @@
-
-// CDialog01Dlg.cpp : implementation file
+﻿// CDialog01Dlg.cpp : implementation file
 //
 
 #include "pch.h"
@@ -20,22 +19,20 @@ class CAboutDlg : public CDialogEx
 public:
 	CAboutDlg();
 
-// Dialog Data
+	// Dialog Data
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ABOUTBOX };
 #endif
 
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-
-// Implementation
 protected:
-	DECLARE_MESSAGE_MAP()
+	virtual void DoDataExchange(CDataExchange* pDX); // DDX/DDV support
+
+	// Implementation
+protected:
+DECLARE_MESSAGE_MAP()
 };
 
-CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
-{
-}
+CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX) {}
 
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -49,9 +46,7 @@ END_MESSAGE_MAP()
 // CDialog01Dlg dialog
 
 
-
-CDialog01Dlg::CDialog01Dlg(CWnd* pParent /*=nullptr*/)
-	: CDialogEx(IDD_MFCDIALOG01_DIALOG, pParent)
+CDialog01Dlg::CDialog01Dlg(CWnd* pParent /*=nullptr*/) : CDialogEx(IDD_MFCDIALOG01_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -62,9 +57,10 @@ void CDialog01Dlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CDialog01Dlg, CDialogEx)
-	ON_WM_SYSCOMMAND()
-	ON_WM_PAINT()
-	ON_WM_QUERYDRAGICON()
+		ON_WM_SYSCOMMAND()
+		ON_WM_PAINT()
+		ON_WM_QUERYDRAGICON()
+		ON_BN_CLICKED(IDC_BTN_MGR01, &CDialog01Dlg::OnBnClickedBtnMgr01)
 END_MESSAGE_MAP()
 
 
@@ -81,14 +77,11 @@ BOOL CDialog01Dlg::OnInitDialog()
 	ASSERT(IDM_ABOUTBOX < 0xF000);
 
 	CMenu* pSysMenu = GetSystemMenu(FALSE);
-	if (pSysMenu != nullptr)
-	{
-		BOOL bNameValid;
+	if (pSysMenu != nullptr) {
 		CString strAboutMenu;
-		bNameValid = strAboutMenu.LoadString(IDS_ABOUTBOX);
+		BOOL bNameValid = strAboutMenu.LoadString(IDS_ABOUTBOX);
 		ASSERT(bNameValid);
-		if (!strAboutMenu.IsEmpty())
-		{
+		if (!strAboutMenu.IsEmpty()) {
 			pSysMenu->AppendMenu(MF_SEPARATOR);
 			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
 		}
@@ -96,23 +89,21 @@ BOOL CDialog01Dlg::OnInitDialog()
 
 	// Set the icon for this dialog.  The framework does this automatically
 	//  when the application's main window is not a dialog
-	SetIcon(m_hIcon, TRUE);			// Set big icon
-	SetIcon(m_hIcon, FALSE);		// Set small icon
+	SetIcon(m_hIcon, TRUE); // Set big icon
+	SetIcon(m_hIcon, FALSE); // Set small icon
 
 	// TODO: Add extra initialization here
 
-	return TRUE;  // return TRUE  unless you set the focus to a control
+	return TRUE; // return TRUE  unless you set the focus to a control
 }
 
 void CDialog01Dlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
-	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
-	{
+	if ((nID & 0xFFF0) == IDM_ABOUTBOX) {
 		CAboutDlg dlgAbout;
 		dlgAbout.DoModal();
 	}
-	else
-	{
+	else {
 		CDialogEx::OnSysCommand(nID, lParam);
 	}
 }
@@ -123,8 +114,7 @@ void CDialog01Dlg::OnSysCommand(UINT nID, LPARAM lParam)
 
 void CDialog01Dlg::OnPaint()
 {
-	if (IsIconic())
-	{
+	if (IsIconic()) {
 		CPaintDC dc(this); // device context for painting
 
 		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
@@ -140,8 +130,7 @@ void CDialog01Dlg::OnPaint()
 		// Draw the icon
 		dc.DrawIcon(x, y, m_hIcon);
 	}
-	else
-	{
+	else {
 		CDialogEx::OnPaint();
 	}
 }
@@ -153,3 +142,10 @@ HCURSOR CDialog01Dlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+void CDialog01Dlg::OnBnClickedBtnMgr01()
+{
+	CString sFilePath;
+	theApp.pShellManager->BrowseForFolder(sFilePath, nullptr, L"D:\\temp");
+	this->MessageBox(sFilePath, L"FilePath", MB_OK);
+}

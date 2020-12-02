@@ -1,5 +1,4 @@
-
-#include "pch.h"
+﻿#include "pch.h"
 #include "framework.h"
 #include "MainFrm.h"
 #include "ClassView.h"
@@ -13,19 +12,20 @@ class CClassViewMenuButton : public CMFCToolBarMenuButton
 	DECLARE_SERIAL(CClassViewMenuButton)
 
 public:
-	CClassViewMenuButton(HMENU hMenu = nullptr) noexcept : CMFCToolBarMenuButton((UINT)-1, hMenu, -1)
-	{
-	}
+	explicit CClassViewMenuButton(HMENU hMenu = nullptr) noexcept : CMFCToolBarMenuButton(
+		static_cast<UINT>(-1), hMenu, -1) { }
 
 	virtual void OnDraw(CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages, BOOL bHorz = TRUE,
-		BOOL bCustomizeMode = FALSE, BOOL bHighlight = FALSE, BOOL bDrawBorder = TRUE, BOOL bGrayDisabledButtons = TRUE)
+		BOOL bCustomizeMode = FALSE, BOOL bHighlight = FALSE, BOOL bDrawBorder = TRUE,
+		BOOL bGrayDisabledButtons = TRUE)
 	{
 		pImages = CMFCToolBar::GetImages();
 
 		CAfxDrawState ds;
 		pImages->PrepareDrawImage(ds);
 
-		CMFCToolBarMenuButton::OnDraw(pDC, rect, pImages, bHorz, bCustomizeMode, bHighlight, bDrawBorder, bGrayDisabledButtons);
+		CMFCToolBarMenuButton::OnDraw(pDC, rect, pImages, bHorz, bCustomizeMode, bHighlight, bDrawBorder,
+			bGrayDisabledButtons);
 
 		pImages->EndDrawImage(ds);
 	}
@@ -33,18 +33,12 @@ public:
 
 IMPLEMENT_SERIAL(CClassViewMenuButton, CMFCToolBarMenuButton, 1)
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 CClassView::CClassView() noexcept
 {
-	m_nCurrSort = ID_SORTING_GROUPBYTYPE;
+	m_nCurrentSort = ID_SORTING_GROUPBYTYPE;
 }
 
-CClassView::~CClassView()
-{
-}
+CClassView::~CClassView() {}
 
 BEGIN_MESSAGE_MAP(CClassView, CDockablePane)
 	ON_WM_CREATE()
@@ -73,12 +67,12 @@ int CClassView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	rectDummy.SetRectEmpty();
 
 	// Create views:
-	const DWORD dwViewStyle = WS_CHILD | WS_VISIBLE | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
+	const DWORD dwViewStyle = WS_CHILD | WS_VISIBLE | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | WS_CLIPSIBLINGS
+		| WS_CLIPCHILDREN;
 
-	if (!m_wndClassView.Create(dwViewStyle, rectDummy, this, 2))
-	{
+	if (!m_wndClassView.Create(dwViewStyle, rectDummy, this, 2)) {
 		TRACE0("Failed to create Class View\n");
-		return -1;      // fail to create
+		return -1; // fail to create
 	}
 
 	// Load images:
@@ -88,7 +82,9 @@ int CClassView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	OnChangeVisualStyle();
 
 	m_wndToolBar.SetPaneStyle(m_wndToolBar.GetPaneStyle() | CBRS_TOOLTIPS | CBRS_FLYBY);
-	m_wndToolBar.SetPaneStyle(m_wndToolBar.GetPaneStyle() & ~(CBRS_GRIPPER | CBRS_SIZE_DYNAMIC | CBRS_BORDER_TOP | CBRS_BORDER_BOTTOM | CBRS_BORDER_LEFT | CBRS_BORDER_RIGHT));
+	m_wndToolBar.SetPaneStyle(
+		m_wndToolBar.GetPaneStyle() & ~(CBRS_GRIPPER | CBRS_SIZE_DYNAMIC | CBRS_BORDER_TOP | CBRS_BORDER_BOTTOM |
+			CBRS_BORDER_LEFT | CBRS_BORDER_RIGHT));
 
 	m_wndToolBar.SetOwner(this);
 
@@ -100,13 +96,12 @@ int CClassView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	m_wndToolBar.ReplaceButton(ID_SORT_MENU, CClassViewMenuButton(menuSort.GetSubMenu(0)->GetSafeHmenu()));
 
-	CClassViewMenuButton* pButton =  DYNAMIC_DOWNCAST(CClassViewMenuButton, m_wndToolBar.GetButton(0));
+	CClassViewMenuButton* pButton = DYNAMIC_DOWNCAST(CClassViewMenuButton, m_wndToolBar.GetButton(0));
 
-	if (pButton != nullptr)
-	{
+	if (pButton != nullptr) {
 		pButton->m_bText = FALSE;
 		pButton->m_bImage = TRUE;
-		pButton->SetImage(GetCmdMgr()->GetCmdImage(m_nCurrSort));
+		pButton->SetImage(GetCmdMgr()->GetCmdImage(m_nCurrentSort));
 		pButton->SetMessageWnd(this);
 	}
 
@@ -124,10 +119,10 @@ void CClassView::OnSize(UINT nType, int cx, int cy)
 
 void CClassView::FillClassView()
 {
-	HTREEITEM hRoot = m_wndClassView.InsertItem(_T("FakeApp classes"), 0, 0);
+	HTREEITEM hRoot = m_wndClassView.InsertItem(_T("MFC_Demos"), 0, 0);
 	m_wndClassView.SetItemState(hRoot, TVIS_BOLD, TVIS_BOLD);
 
-	HTREEITEM hClass = m_wndClassView.InsertItem(_T("CFakeAboutDlg"), 1, 1, hRoot);
+	HTREEITEM hClass = m_wndClassView.InsertItem(_T("SimpleDialogDemos"), 1, 1, hRoot);
 	m_wndClassView.InsertItem(_T("CFakeAboutDlg()"), 3, 3, hClass);
 
 	m_wndClassView.Expand(hRoot, TVE_EXPAND);
@@ -162,25 +157,22 @@ void CClassView::FillClassView()
 
 void CClassView::OnContextMenu(CWnd* pWnd, CPoint point)
 {
-	CTreeCtrl* pWndTree = (CTreeCtrl*)&m_wndClassView;
+	CTreeCtrl* pWndTree = static_cast<CTreeCtrl*>(&m_wndClassView);
 	ASSERT_VALID(pWndTree);
 
-	if (pWnd != pWndTree)
-	{
+	if (pWnd != pWndTree) {
 		CDockablePane::OnContextMenu(pWnd, point);
 		return;
 	}
 
-	if (point != CPoint(-1, -1))
-	{
+	if (point != CPoint(-1, -1)) {
 		// Select clicked item:
 		CPoint ptTree = point;
 		pWndTree->ScreenToClient(&ptTree);
 
 		UINT flags = 0;
 		HTREEITEM hTreeItem = pWndTree->HitTest(ptTree, &flags);
-		if (hTreeItem != nullptr)
-		{
+		if (hTreeItem != nullptr) {
 			pWndTree->SelectItem(hTreeItem);
 		}
 	}
@@ -191,22 +183,20 @@ void CClassView::OnContextMenu(CWnd* pWnd, CPoint point)
 
 	CMenu* pSumMenu = menu.GetSubMenu(0);
 
-	if (AfxGetMainWnd()->IsKindOf(RUNTIME_CLASS(CMDIFrameWndEx)))
-	{
+	if (AfxGetMainWnd()->IsKindOf(RUNTIME_CLASS(CMDIFrameWndEx))) {
 		CMFCPopupMenu* pPopupMenu = new CMFCPopupMenu;
 
 		if (!pPopupMenu->Create(this, point.x, point.y, (HMENU)pSumMenu->m_hMenu, FALSE, TRUE))
 			return;
 
-		((CMDIFrameWndEx*)AfxGetMainWnd())->OnShowPopupMenu(pPopupMenu);
+		static_cast<CMDIFrameWndEx*>(AfxGetMainWnd())->OnShowPopupMenu(pPopupMenu);
 		UpdateDialogControls(this, FALSE);
 	}
 }
 
 void CClassView::AdjustLayout()
 {
-	if (GetSafeHwnd() == nullptr)
-	{
+	if (GetSafeHwnd() == nullptr) {
 		return;
 	}
 
@@ -215,8 +205,10 @@ void CClassView::AdjustLayout()
 
 	int cyTlb = m_wndToolBar.CalcFixedLayout(FALSE, TRUE).cy;
 
-	m_wndToolBar.SetWindowPos(nullptr, rectClient.left, rectClient.top, rectClient.Width(), cyTlb, SWP_NOACTIVATE | SWP_NOZORDER);
-	m_wndClassView.SetWindowPos(nullptr, rectClient.left + 1, rectClient.top + cyTlb + 1, rectClient.Width() - 2, rectClient.Height() - cyTlb - 2, SWP_NOACTIVATE | SWP_NOZORDER);
+	m_wndToolBar.SetWindowPos(nullptr, rectClient.left, rectClient.top, rectClient.Width(), cyTlb,
+		SWP_NOACTIVATE | SWP_NOZORDER);
+	m_wndClassView.SetWindowPos(nullptr, rectClient.left + 1, rectClient.top + cyTlb + 1, rectClient.Width() - 2,
+		rectClient.Height() - cyTlb - 2, SWP_NOACTIVATE | SWP_NOZORDER);
 }
 
 BOOL CClassView::PreTranslateMessage(MSG* pMsg)
@@ -226,17 +218,15 @@ BOOL CClassView::PreTranslateMessage(MSG* pMsg)
 
 void CClassView::OnSort(UINT id)
 {
-	if (m_nCurrSort == id)
-	{
+	if (m_nCurrentSort == id) {
 		return;
 	}
 
-	m_nCurrSort = id;
+	m_nCurrentSort = id;
 
-	CClassViewMenuButton* pButton =  DYNAMIC_DOWNCAST(CClassViewMenuButton, m_wndToolBar.GetButton(0));
+	CClassViewMenuButton* pButton = DYNAMIC_DOWNCAST(CClassViewMenuButton, m_wndToolBar.GetButton(0));
 
-	if (pButton != nullptr)
-	{
+	if (pButton != nullptr) {
 		pButton->SetImage(GetCmdMgr()->GetCmdImage(id));
 		m_wndToolBar.Invalidate();
 		m_wndToolBar.UpdateWindow();
@@ -245,7 +235,7 @@ void CClassView::OnSort(UINT id)
 
 void CClassView::OnUpdateSort(CCmdUI* pCmdUI)
 {
-	pCmdUI->SetCheck(pCmdUI->m_nID == m_nCurrSort);
+	pCmdUI->SetCheck(pCmdUI->m_nID == m_nCurrentSort);
 }
 
 void CClassView::OnClassAddMemberFunction()
@@ -299,8 +289,7 @@ void CClassView::OnChangeVisualStyle()
 	UINT uiBmpId = theApp.m_bHiColorIcons ? IDB_CLASS_VIEW_24 : IDB_CLASS_VIEW;
 
 	CBitmap bmp;
-	if (!bmp.LoadBitmap(uiBmpId))
-	{
+	if (!bmp.LoadBitmap(uiBmpId)) {
 		TRACE(_T("Can't load bitmap: %x\n"), uiBmpId);
 		ASSERT(FALSE);
 		return;
@@ -321,3 +310,5 @@ void CClassView::OnChangeVisualStyle()
 	m_wndToolBar.CleanUpLockedImages();
 	m_wndToolBar.LoadBitmap(theApp.m_bHiColorIcons ? IDB_SORT_24 : IDR_SORT, 0, 0, TRUE /* Locked */);
 }
+
+LRESULT CClassView::OnChangeActiveTab(WPARAM, LPARAM) { return {}; }

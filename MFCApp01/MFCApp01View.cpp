@@ -1,5 +1,4 @@
-
-// MFCApp01View.cpp : implementation of the CApp01View class
+﻿// MFCApp01View.cpp : implementation of the CApp01View class
 //
 
 #include "pch.h"
@@ -23,12 +22,13 @@
 IMPLEMENT_DYNCREATE(CApp01View, CView)
 
 BEGIN_MESSAGE_MAP(CApp01View, CView)
-	// Standard printing commands
-	ON_COMMAND(ID_FILE_PRINT, &CView::OnFilePrint)
-	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
-	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CApp01View::OnFilePrintPreview)
-	ON_WM_CONTEXTMENU()
-	ON_WM_RBUTTONUP()
+		// Standard printing commands
+		ON_COMMAND(ID_FILE_PRINT, &CView::OnFilePrint)
+		ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
+		ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CApp01View::OnFilePrintPreview)
+		ON_WM_CONTEXTMENU()
+		ON_WM_RBUTTONUP()
+		ON_WM_LBUTTONDOWN()
 END_MESSAGE_MAP()
 
 // CApp01View construction/destruction
@@ -36,12 +36,9 @@ END_MESSAGE_MAP()
 CApp01View::CApp01View() noexcept
 {
 	// TODO: add construction code here
-
 }
 
-CApp01View::~CApp01View()
-{
-}
+CApp01View::~CApp01View() {}
 
 BOOL CApp01View::PreCreateWindow(CREATESTRUCT& cs)
 {
@@ -101,6 +98,21 @@ void CApp01View::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 #ifndef SHARED_HANDLERS
 	theApp.GetContextMenuManager()->ShowPopupMenu(IDR_POPUP_EDIT, point.x, point.y, this, TRUE);
 #endif
+}
+
+void CApp01View::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	LONG x = point.x;
+	CString strPoint = _T("Point");
+	strPoint.Format(_T("%s {x%ld, y: %ld}"), strPoint, point.x, point.y);
+	AfxMessageBox(strPoint, MB_OK, 1);
+	CRect rect;
+	GetClientRect(&rect);
+	CClientDC dc(this);
+	dc.MoveTo(rect.left, rect.top);
+	dc.LineTo(rect.right, rect.bottom);
+	dc.MoveTo(rect.right, rect.top);
+	dc.LineTo(rect.left, rect.bottom);
 }
 
 

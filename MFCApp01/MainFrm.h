@@ -1,4 +1,4 @@
-
+﻿
 // MainFrm.h : interface of the CMainFrame class
 //
 
@@ -52,10 +52,19 @@ protected:
 	afx_msg void OnApplicationLook(UINT id);
 	afx_msg void OnUpdateApplicationLook(CCmdUI* pCmdUI);
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
+
 	DECLARE_MESSAGE_MAP()
 
 	BOOL CreateDockingWindows();
 	void SetDockingWindowIcons(BOOL bHiColorIcons);
+public:
+	afx_msg void OnDemosEditControl();
+	afx_msg void OnDemosListbox01();
+	afx_msg void OnDemosComboBox01();
+	afx_msg void OnDemosImageDemo01();
+	afx_msg void OnDemosRadioDemo01();
+	afx_msg void OnDemosScreenCapture01();
+	afx_msg void OnDemosStudentInfo();
 };
 
 
