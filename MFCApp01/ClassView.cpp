@@ -9,15 +9,15 @@ class CClassViewMenuButton : public CMFCToolBarMenuButton
 {
 	friend class CClassView;
 
-	DECLARE_SERIAL(CClassViewMenuButton)
+DECLARE_SERIAL(CClassViewMenuButton)
 
 public:
 	explicit CClassViewMenuButton(HMENU hMenu = nullptr) noexcept : CMFCToolBarMenuButton(
 		static_cast<UINT>(-1), hMenu, -1) { }
 
 	virtual void OnDraw(CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages, BOOL bHorz = TRUE,
-		BOOL bCustomizeMode = FALSE, BOOL bHighlight = FALSE, BOOL bDrawBorder = TRUE,
-		BOOL bGrayDisabledButtons = TRUE)
+	                    BOOL bCustomizeMode = FALSE, BOOL bHighlight = FALSE, BOOL bDrawBorder = TRUE,
+	                    BOOL bGrayDisabledButtons = TRUE)
 	{
 		pImages = CMFCToolBar::GetImages();
 
@@ -25,7 +25,7 @@ public:
 		pImages->PrepareDrawImage(ds);
 
 		CMFCToolBarMenuButton::OnDraw(pDC, rect, pImages, bHorz, bCustomizeMode, bHighlight, bDrawBorder,
-			bGrayDisabledButtons);
+		                              bGrayDisabledButtons);
 
 		pImages->EndDrawImage(ds);
 	}
@@ -41,18 +41,18 @@ CClassView::CClassView() noexcept
 CClassView::~CClassView() {}
 
 BEGIN_MESSAGE_MAP(CClassView, CDockablePane)
-	ON_WM_CREATE()
-	ON_WM_SIZE()
-	ON_WM_CONTEXTMENU()
-	ON_COMMAND(ID_CLASS_ADD_MEMBER_FUNCTION, OnClassAddMemberFunction)
-	ON_COMMAND(ID_CLASS_ADD_MEMBER_VARIABLE, OnClassAddMemberVariable)
-	ON_COMMAND(ID_CLASS_DEFINITION, OnClassDefinition)
-	ON_COMMAND(ID_CLASS_PROPERTIES, OnClassProperties)
-	ON_COMMAND(ID_NEW_FOLDER, OnNewFolder)
-	ON_WM_PAINT()
-	ON_WM_SETFOCUS()
-	ON_COMMAND_RANGE(ID_SORTING_GROUPBYTYPE, ID_SORTING_SORTBYACCESS, OnSort)
-	ON_UPDATE_COMMAND_UI_RANGE(ID_SORTING_GROUPBYTYPE, ID_SORTING_SORTBYACCESS, OnUpdateSort)
+		ON_WM_CREATE()
+		ON_WM_SIZE()
+		ON_WM_CONTEXTMENU()
+		ON_COMMAND(ID_CLASS_ADD_MEMBER_FUNCTION, OnClassAddMemberFunction)
+		ON_COMMAND(ID_CLASS_ADD_MEMBER_VARIABLE, OnClassAddMemberVariable)
+		ON_COMMAND(ID_CLASS_DEFINITION, OnClassDefinition)
+		ON_COMMAND(ID_CLASS_PROPERTIES, OnClassProperties)
+		ON_COMMAND(ID_NEW_FOLDER, OnNewFolder)
+		ON_WM_PAINT()
+		ON_WM_SETFOCUS()
+		ON_COMMAND_RANGE(ID_SORTING_GROUPBYTYPE, ID_SORTING_SORTBYACCESS, OnSort)
+		ON_UPDATE_COMMAND_UI_RANGE(ID_SORTING_GROUPBYTYPE, ID_SORTING_SORTBYACCESS, OnUpdateSort)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -206,9 +206,9 @@ void CClassView::AdjustLayout()
 	int cyTlb = m_wndToolBar.CalcFixedLayout(FALSE, TRUE).cy;
 
 	m_wndToolBar.SetWindowPos(nullptr, rectClient.left, rectClient.top, rectClient.Width(), cyTlb,
-		SWP_NOACTIVATE | SWP_NOZORDER);
+	                          SWP_NOACTIVATE | SWP_NOZORDER);
 	m_wndClassView.SetWindowPos(nullptr, rectClient.left + 1, rectClient.top + cyTlb + 1, rectClient.Width() - 2,
-		rectClient.Height() - cyTlb - 2, SWP_NOACTIVATE | SWP_NOZORDER);
+	                            rectClient.Height() - cyTlb - 2, SWP_NOACTIVATE | SWP_NOZORDER);
 }
 
 BOOL CClassView::PreTranslateMessage(MSG* pMsg)

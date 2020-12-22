@@ -97,3 +97,10 @@ public:
 		++data_;
 	}
 };
+
+int main(int argc, char* argv[])
+{
+	int nPaint = 100 | 1024 | 8;
+	std::cout << "paint: " << nPaint << "\n";
+}
+

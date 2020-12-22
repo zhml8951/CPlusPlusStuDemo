@@ -1,6 +1,8 @@
-﻿#include <string>
+﻿#include <iostream>
 #include <regex>
-#include <iostream>
+#include <string>
+#include <fstream>
+#include <cassert>
 
 /*
  *	C++正则表达式的使用：	{ 规则  ->   匹配    ->   结果 ｝
@@ -32,6 +34,9 @@
  *	    regex_match:  在整个目标序列与正则表达式规则匹配才返回true, 目标序列前后都不能有符加字符: 即完全匹配
  *	    regex_replace:
  *	  四. match_results<string::const_iterator>  => smatch;
+ *	  
+ *	  五. 正则迭代器, 通过迭代器遍历字符串所有目标:
+ *		regex_iterator,   regex_token_iterator; 
  *
  *
  */
@@ -115,6 +120,104 @@ namespace regex_simple_demo
 			std::cout << "Inputted is number: " << flag << "\n";
 		}
 	}
+
+	void SplitString(const std::string file)
+	{
+		std::cout << file << "\n";
+		std::ifstream ifs;
+		ifs.open(file.c_str());
+
+		assert(ifs.is_open());
+
+		if (ifs.fail()) {
+			std::string error = "Unable to read " + file;
+			throw error;
+		}
+
+		std::string line;
+
+		if (ifs) {
+			while (!ifs.eof()) {
+				std::getline(ifs, line);
+				std::regex pattern("[\\S]+");
+				std::sregex_token_iterator end;
+				for (std::sregex_token_iterator i(line.begin(), line.end(), pattern); i != end; ++i) {
+					std::cout << *i << "\n";
+				}
+
+			}
+			ifs.close();
+		}
+		else {
+			std::cout << file << " can not read." << "\n";
+		}
+	}
+
+	void regex_iterator_demo01()
+	{
+		std::string str("This is subject has a submarine as a subSequence.");
+		std::regex rgx("\\b(sub)([^ ]*)");
+		std::regex_token_iterator<std::string::iterator> rend;
+		std::regex_token_iterator<std::string::iterator> it(str.begin(), str.end(), rgx, 0);
+		while (it != rend) {
+			std::cout << it->str() << "\n";
+			++it;
+		}
+		std::regex_iterator<std::string::const_iterator> it_s;
+	}
+
+	void regex_iterator_demo02()
+	{
+		std::string pattern("[^c]ei");
+		pattern = "[[:alpha:]]*" + pattern + "[[:alpha:]]*";
+		std::regex r(pattern, std::regex::icase);
+		std::string str("Ruby CarolineI biubiubiu Weindy SpikeI Winnceiy ");
+		for (std::sregex_iterator it(str.begin(), str.end(), r), end_it; it != end_it; ++it) {
+			std::cout << it->str() << "\n";
+		}
+		std::cout << std::endl;
+
+		std::cout << "str: " << str << "\n";
+		for (std::sregex_iterator it(str.begin(), str.end(), r), end_it; it != end_it; ++it) {
+			auto pos = it->prefix().length();
+			pos = pos > 40 ? pos - 40 : 0;
+			std::cout << it->prefix().str().substr(pos) << "\n\t\t>>>" << it->str() << "<<<\n";
+			std::cout << it->suffix().str().substr(0, 40) << "\n";
+		}
+	}
+
+	// regex iterator 在对于大段文字进行遍历, 选择需要的匹配。 
+
+	// 使用regex_iterator 提取html中的注释
+
+	std::string html_string =
+		"<html><body>Login Successful!</body><!-- EXTRACT-THIS --> \
+		<p>Test</p> <!-- some documents --> <h2>Test2</h2> <!-- about documents --> </html>";
+
+	void regex_iterator_demo03()
+	{
+		std::regex r("(<\\!--[^>]* -->)");
+
+		std::sregex_iterator it(html_string.begin(), html_string.end(), r);
+		std::sregex_iterator end_it;
+		while (it != end_it) {
+			std::smatch rst = *it;
+			std::cout << rst.str() << "\n";
+			++it;
+		}
+	}
+
+	// 使用iterator_iterator 删除html中的注释 
+	void regex_iterator_demo04()
+	{
+		std::regex r("(<\\!--[^>]*-->)");
+		std::sregex_token_iterator it =
+			std::sregex_token_iterator(html_string.begin(), html_string.end(), r, -1);
+		std::sregex_token_iterator end;
+		for (; it != end; ++it) {
+			std::cout << "<TOKEN_ITERATOR>:  " << static_cast<std::string>(*it) << "\n";
+		}
+	}
 }
 
 int main(int argc, char* argv[])
@@ -123,5 +226,17 @@ int main(int argc, char* argv[])
 	//regex_simple_demo::Demo02();
 	//regex_simple_demo::match_email();
 	//regex_simple_demo::regex_iter();
-	regex_simple_demo::JudgeNumber();
+	//regex_simple_demo::JudgeNumber();
+	try {
+		regex_simple_demo::SplitString("d:\\temp\\StudentInfo2.txt");
+		//regex_simple_demo::SplitString("d:\\temp\\Config.ini");
+	}
+	catch (std::string& err) {
+		std::cout << "function exec error: " << err << "\n";
+	}
+
+	//regex_simple_demo::regex_iterator_demo01();
+	//regex_simple_demo::regex_iterator_demo02();
+	regex_simple_demo::regex_iterator_demo03();
+	regex_simple_demo::regex_iterator_demo04();
 }

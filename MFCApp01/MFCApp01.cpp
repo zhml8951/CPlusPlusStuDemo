@@ -137,8 +137,23 @@ int CApp01App::ExitInstance()
 	return CWinAppEx::ExitInstance();
 }
 
-// CAboutDlg dialog used for App About
+// CApp01App customization load/save methods
+void CApp01App::PreLoadState()
+{
+	CString strName;
+	BOOL bNameValid = strName.LoadString(IDS_EDIT_MENU);
+	ASSERT(bNameValid);
+	GetContextMenuManager()->AddMenu(strName, IDR_POPUP_EDIT);
+	bNameValid = strName.LoadString(IDS_EXPLORER);
+	ASSERT(bNameValid);
+	GetContextMenuManager()->AddMenu(strName, IDR_POPUP_EXPLORER);
+}
 
+void CApp01App::LoadCustomState() {}
+
+void CApp01App::SaveCustomState() {}
+
+// CAboutDlg dialog used for App About
 class CAboutDlg : public CDialogEx
 {
 public:
@@ -167,37 +182,13 @@ CAboutDlg::CAboutDlg() noexcept : CDialogEx(IDD_ABOUTBOX) {}
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
-	  DDX_Control(pDX, IDC_MFCMENUBUTTON1, m_mfcMenuBtn);
+	DDX_Control(pDX, IDC_MFCMENUBUTTON1, m_mfcMenuBtn);
 	//  DDX_Control(pDX, IDC_MFCBUTTON1, m_mfcBtn);
 }
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
 	ON_WM_CREATE()
 END_MESSAGE_MAP()
-
-// App command to run the dialog
-void CApp01App::OnAppAbout()
-{
-	CAboutDlg aboutDlg;
-	aboutDlg.DoModal();
-}
-
-// CApp01App customization load/save methods
-
-void CApp01App::PreLoadState()
-{
-	CString strName;
-	BOOL bNameValid = strName.LoadString(IDS_EDIT_MENU);
-	ASSERT(bNameValid);
-	GetContextMenuManager()->AddMenu(strName, IDR_POPUP_EDIT);
-	bNameValid = strName.LoadString(IDS_EXPLORER);
-	ASSERT(bNameValid);
-	GetContextMenuManager()->AddMenu(strName, IDR_POPUP_EXPLORER);
-}
-
-void CApp01App::LoadCustomState() {}
-
-void CApp01App::SaveCustomState() {}
 
 int CAboutDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
@@ -207,11 +198,17 @@ int CAboutDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-
 BOOL CAboutDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
-	return TRUE;  // return TRUE unless you set the focus to a control
-				  // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE; // return TRUE unless you set the focus to a control
+	// EXCEPTION: OCX Property Pages should return FALSE
+}
+
+// App command to run the dialog
+void CApp01App::OnAppAbout()
+{
+	CAboutDlg aboutDlg;
+	aboutDlg.DoModal();
 }

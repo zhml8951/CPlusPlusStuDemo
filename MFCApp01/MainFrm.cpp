@@ -151,7 +151,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT const lpCreateStruct)
 	}
 
 	// enable menu personalization (most-recently used commands)
-	// TODO: define your own basic commands, ensuring that each pulldown menu has at least one basic command.
+	// TODO: define your own basic commands, ensuring that each pull down menu has at least one basic command.
 	CList<UINT, UINT> lstBasicCommands;
 
 	lstBasicCommands.AddTail(ID_FILE_NEW);
@@ -312,7 +312,7 @@ LRESULT CMainFrame::OnToolbarCreateNew(WPARAM wp, LPARAM lp)
 		return 0;
 	}
 
-	CMFCToolBar* pUserToolbar = (CMFCToolBar*)lres;
+	CMFCToolBar* pUserToolbar = reinterpret_cast<CMFCToolBar*>(lres);
 	ASSERT_VALID(pUserToolbar);
 
 	BOOL bNameValid;

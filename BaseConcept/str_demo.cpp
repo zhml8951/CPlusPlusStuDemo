@@ -102,19 +102,19 @@ namespace string_stu
 		std::cout << "str02:  [C_style, char[]] type: \n";
 		// char [] 数组可能通过sizeof得到元素个数，包括结尾'\n'; 而strlen计算到'\n'结束，故char[]字符串长度使用sizeof时要减1；
 		std::cout << "sizeof(str02):  " << sizeof(str02) << "\n";
-		std::cout << "strlen(str02):  " << strlen(str02) << "\n";
+		std::cout << "str_len(str02):  " << strlen(str02) << "\n";
 
 		char* str03 = const_cast<char*>("#");
 		std::cout << "str03: [char* type]:  \n";
 		// char* 指针， sizeof(...) 直接显示指针的字节数。并不能反映字符串大小。
 		std::cout << "sizeof(str03):  " << sizeof(str03) << "\n";
-		std::cout << "strlen(str03):  " << std::strlen(str03) << "\n";
+		std::cout << "str_len(str03):  " << std::strlen(str03) << "\n";
 
 		std::string str04(str02); // = std::string(str02);
 		std::cout << "str04: [string(char*) type]:  \n";
 		// 
 		std::cout << "sizeof(str04):  " << sizeof(str04) << "\n";
-		std::cout << "strlen(str04):  " << strlen(str04.data()) << "\n";
+		std::cout << "str_len(str04):  " << strlen(str04.data()) << "\n";
 	}
 }
 
@@ -129,6 +129,8 @@ int StrDemoMain()
 
 int main(int argc, char* argv[])
 {
-
+	int a = 880;
+	int b = 999;
+	a > b? printf("max: %d", a):printf("max: %d", b);
 	StrDemoMain();
 }

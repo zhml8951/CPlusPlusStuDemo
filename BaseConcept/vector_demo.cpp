@@ -3,6 +3,8 @@
 #include <memory>
 #include <cstring>
 #include <algorithm>
+#include <string>
+
 
 // ReSharper disable CppUseAuto
 
@@ -332,6 +334,57 @@ namespace vec_demo
 			cout << n << "  ";
 		}
 	}
+
+	void find_demo1()
+	{
+		std::vector<std::string> vector_01{"str01", "string02", "string03"};
+		auto ret = std::find(vector_01.cbegin(), vector_01.cend(), "str01");
+		if (ret == vector_01.end()) {
+			std::cout << "Not Found!";
+		}
+		else {
+			std::cout << "Fond: " << *ret << "\n";
+		}
+	}
+
+
+	void find_if_demo()
+	{
+		struct ObjA
+		{
+			std::string str;
+			int id;
+		};
+		auto compare_func = [&](ObjA& a) -> bool {
+			if (a.id > 88) {
+				return true;
+			}
+			return false;
+		};
+
+		std::vector<ObjA> some_obj{{"obj01", 1}, {"obj02", 200}, {"obj03", 300}};
+		auto rst_iter = std::find_if(some_obj.cbegin(), some_obj.cend(), compare_func);
+		if (rst_iter == some_obj.cend()) {
+			printf("Not Found obj");
+		}
+		else {
+			std::cout << "obj.id: " << rst_iter->id << ", obj.str: " << rst_iter->str << "\n";
+		}
+	}
+
+	/*
+	 *	[](cost std::unique_ptr<Student> student) -> bool {};
+	 *	std::find_if(vec.cbegin(), vec.cend(), vec里存储为std::unique_ptr<stu>, 这样不能通过编译. 
+	 *	原因在于unique_ptr不能做为值传递的,相当再个两个变量共享一个unique_ptr. 这不符合unique_ptr属性。
+	 *	可使用传引用。 
+	 */
+	//auto ret_iter = std::find_if(
+	//	vecStudents.cbegin(), vecStudents.cend(), [&](const std::unique_ptr<Student> stu) mutable -> bool {
+	//		if (stu->strID == strID) {
+	//			return true;
+	//		}
+	//		return false;
+	//	});
 }
 
 int main(int argc, char* argv[])

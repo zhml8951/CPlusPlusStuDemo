@@ -46,7 +46,7 @@ DECLARE_DYNAMIC(CListViewDemo)
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 
-	DECLARE_MESSAGE_MAP()
+DECLARE_MESSAGE_MAP()
 
 private:
 	std::unique_ptr<Student> m_ptrStudent;
@@ -61,9 +61,11 @@ private:
 	CEdit m_editVerbal;
 	CEdit m_editMath;
 	size_t m_nCount;
-
-	BOOL CheckScore(CString& strScore);
-	void CheckScore(CString& strScore, CEdit* editScore);
+	CString m_strDBFile;
+	BOOL m_bFileLoaded;
+	static BOOL m_bCompareWithStr;
+	static UINT m_nCompareColumn;
+	static BOOL m_bReverseOrder;
 
 public:
 	afx_msg void OnBnClickedAddInfo();
@@ -74,4 +76,26 @@ public:
 	afx_msg void OnEnKillFocusEditEnglish();
 	//afx_msg void OnEnChangeEditId();
 	afx_msg void OnBnClickedBtnDeleteInfo();
+	afx_msg void OnNMClickListInfo(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnBnClickedBtnClearDb();
+	afx_msg void OnOpImport();
+	afx_msg void OnOpExport();
+	afx_msg void OnBnClickedBtnSelectId();
+	afx_msg void OnSelectedSort(UINT id);
+	afx_msg void OnBnClickedBtnShowChart();
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void OnBnClickedBtnUpdateId();
+
+private:
+	BOOL CheckScore(CString& strScore);
+	void CheckScore(CString& strScore, CEdit* editScore);
+	BOOL OpenFile(CStdioFile& dbFile, UINT nOpenFlag);
+	static int CALLBACK SortCompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+	auto SelectUseID();
+
+public:
+	void menu_operator_demo();
+
+protected:
+	afx_msg LRESULT OnSearchStuId(WPARAM wParam, LPARAM lParam);
 };

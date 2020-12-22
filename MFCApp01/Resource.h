@@ -90,12 +90,15 @@
 #define IDD_DLG_EDIT01                  310
 #define IDD_DLG_LIST01                  314
 #define IDR_HTML1                       319
-#define IDR_TOOLBAR1                    320
 #define IDD_COMBOBOX01                  323
 #define IDD_DLG_IMAGE                   327
 #define IDB_IMAGE_ACUMI                 331
 #define IDD_DLG_LISTVIEW01              332
 #define IDD_DLG_RADIO01                 335
+#define IDR_MENU_STU_INFO               337
+#define IDB_BITMAP1                     338
+#define IDR_TOOLBAR1                    339
+#define IDD_DLG_SHOW_ID                 341
 #define IDC_READ                        1000
 #define IDC_EDIT_INPUT                  1002
 #define IDC_OUTPUT                      1003
@@ -109,11 +112,15 @@
 #define IDC_COMBO_BRUSH_COLOR           1014
 #define IDC_BUTTON1                     1015
 #define IDC_EDIT_VERBAL                 1015
+#define IDC_EDIT_SHOW_NAME              1015
 #define IDC_COMBO2                      1016
 #define IDC_EDIT_MATH                   1016
+#define IDC_EDIT_SHOW_ENGLISH           1016
 #define IDC_COMBO3                      1017
 #define IDC_EDIT_ENGLISH                1017
+#define IDC_EDIT_SHOW_MATH              1017
 #define IDC_EDIT2                       1018
+#define IDC_EDIT_SHOW_VERBAL            1018
 #define IDC_EDIT3                       1019
 #define IDC_MFCBUTTON1                  1020
 #define IDC_COMBO_BASE                  1021
@@ -155,23 +162,37 @@
 #define IDC_BTN_CLEAR                   1061
 #define IDC_COMBO_PEN_COLOR             1062
 #define IDC_STATIC_DRAW                 1063
+#define IDC_TXT_HEAD_SHOW               1065
+#define IDC_EDIT_SHOW_ID                1066
+#define IDOK_SHOW                       1067
+#define ID_CANCEL                       1068
+#define ID_CANCEL_INFO                  1068
 #define ID_DEMOS_EDITCONTROL            32771
-#define ID_BUTTON32772                  32772
 #define ID_DEMOS_LISTBOX01              32773
 #define ID_DEMOS_COMBOBOX01             32774
 #define ID_DEMOS_IMAGEDEMO01            32775
 #define ID_DEMOS_RADIODEMO01            32776
 #define ID_DEMOS_SCREENCAPTURE01        32777
-#define ID_DEMOS_LISTVIEWDEMO01         32778
 #define ID_DEMOS_STUDENT_INFO           32779
+#define ID_OP_EXPORT                    32791
+#define ID_OP_IMPORT                    32796
+#define ID_SORT_ID_ASC                  32798
+#define ID_SORT_ID_DESC                 32799
+#define ID_SORT_VERBAL                  32800
+#define ID_SORT_MATH                    32801
+#define ID_SORT_ENGLISH                 32802
+#define ID_SORT_RANDOM                  32803
+#define ID_ABOUTMFCAPP01_LEGAL          32807
+#define ID_ABOUT_LEGAL                  32808
+#define ID_STU_DLG_QUIT                 32809
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        337
-#define _APS_NEXT_COMMAND_VALUE         32780
-#define _APS_NEXT_CONTROL_VALUE         1064
+#define _APS_NEXT_RESOURCE_VALUE        343
+#define _APS_NEXT_COMMAND_VALUE         32818
+#define _APS_NEXT_CONTROL_VALUE         1069
 #define _APS_NEXT_SYMED_VALUE           310
 #endif
 #endif
